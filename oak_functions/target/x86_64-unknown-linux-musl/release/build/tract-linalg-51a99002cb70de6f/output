@@ -1,0 +1,99 @@
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_64x1.tmpl
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_64x1.tmpl
+cargo:rerun-if-changed=src/frame/mmm/fuse.rs
+cargo:rerun-if-changed=x86_64/fma/dispatcher.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_col.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_row.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_scalar.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i8_8x8.tmpl
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i8_8x8.tmpl
+cargo:rerun-if-changed=src/frame/mmm/fuse.rs
+cargo:rerun-if-changed=x86_64/fma/dispatcher.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_col.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_row.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_scalar.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_sigmoid_f32.tmpl
+cargo:rerun-if-changed=x86_64/fma/fma_sigmoid_f32.tmpl
+cargo:rerun-if-changed=src/frame/mmm/fuse.rs
+cargo:rerun-if-changed=x86_64/fma/dispatcher.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_col.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_row.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_scalar.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_tanh_f32.tmpl
+cargo:rerun-if-changed=x86_64/fma/fma_tanh_f32.tmpl
+cargo:rerun-if-changed=src/frame/mmm/fuse.rs
+cargo:rerun-if-changed=x86_64/fma/dispatcher.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_col.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_row.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_scalar.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_16x6.tmpl
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_16x6.tmpl
+cargo:rerun-if-changed=src/frame/mmm/fuse.rs
+cargo:rerun-if-changed=x86_64/fma/dispatcher.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_scalars.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_col.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_f32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_per_row.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_cols.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_ymm_scalar.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_per_rows.tmpliq
+cargo:rerun-if-changed=x86_64/fma/fma_mmm_i32_scalars.tmpliq
+TARGET = Some("x86_64-unknown-linux-musl")
+OPT_LEVEL = Some("3")
+HOST = Some("x86_64-unknown-linux-gnu")
+CC_x86_64-unknown-linux-musl = None
+CC_x86_64_unknown_linux_musl = None
+TARGET_CC = None
+CC = None
+CROSS_COMPILE = None
+CFLAGS_x86_64-unknown-linux-musl = None
+CFLAGS_x86_64_unknown_linux_musl = None
+TARGET_CFLAGS = None
+CFLAGS = None
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some("false")
+running: "musl-gcc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-static" "-Wall" "-Wextra" "-mfma" "-o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_64x1.o" "-c" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_64x1.S"
+exit status: 0
+running: "musl-gcc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-static" "-Wall" "-Wextra" "-mfma" "-o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_i8_8x8.o" "-c" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_i8_8x8.S"
+exit status: 0
+running: "musl-gcc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-static" "-Wall" "-Wextra" "-mfma" "-o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_sigmoid_f32.o" "-c" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_sigmoid_f32.S"
+exit status: 0
+running: "musl-gcc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-static" "-Wall" "-Wextra" "-mfma" "-o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_tanh_f32.o" "-c" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_tanh_f32.S"
+exit status: 0
+running: "musl-gcc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-static" "-Wall" "-Wextra" "-mfma" "-o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_16x6.o" "-c" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_16x6.S"
+exit status: 0
+AR_x86_64-unknown-linux-musl = None
+AR_x86_64_unknown_linux_musl = None
+TARGET_AR = None
+AR = None
+running: "ar" "cq" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/libx86_64_fma.a" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_64x1.o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_i8_8x8.o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_sigmoid_f32.o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_tanh_f32.o" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/fma_mmm_f32_16x6.o"
+exit status: 0
+running: "ar" "s" "/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out/libx86_64_fma.a"
+exit status: 0
+cargo:rustc-link-lib=static=x86_64_fma
+cargo:rustc-link-search=native=/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/tract-linalg-51a99002cb70de6f/out
