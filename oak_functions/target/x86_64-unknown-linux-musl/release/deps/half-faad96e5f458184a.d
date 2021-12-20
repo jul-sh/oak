@@ -1,0 +1,12 @@
+/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/deps/half-faad96e5f458184a.rmeta: /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/lib.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs
+
+/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/deps/libhalf-faad96e5f458184a.rlib: /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/lib.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs
+
+/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/deps/half-faad96e5f458184a.d: /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/lib.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16/convert.rs /home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs
+
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/lib.rs:
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat.rs:
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/bfloat/convert.rs:
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16.rs:
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/binary16/convert.rs:
+/home/docker/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs:

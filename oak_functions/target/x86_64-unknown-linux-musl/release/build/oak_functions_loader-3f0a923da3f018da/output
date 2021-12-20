@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=../../oak_functions/proto/server.proto
+cargo:rerun-if-changed=../../oak_functions/proto/benchmark.proto

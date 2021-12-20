@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/typenum-266353fc6992da5e/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/workspace/oak_functions/target/x86_64-unknown-linux-musl/release/build/typenum-266353fc6992da5e/out/op.rs
