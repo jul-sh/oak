@@ -1,0 +1,2 @@
+cargo:rustc-cfg=no_unsafe_op_in_unsafe_fn_lint
+cargo:rustc-cfg=no_nonzero_bitscan
