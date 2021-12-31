@@ -265,7 +265,7 @@ dependencies = [
  "num-integer",
  "num-traits",
  "serde",
- "time",
+ "time 0.1.43",
  "winapi",
 ]
 
@@ -920,7 +920,6 @@ dependencies = [
  "tokio",
  "tokio-rustls 0.22.0",
  "webpki 0.21.4",
- "webpki-roots",
 ]
 
 [[package]]
@@ -934,6 +933,7 @@ dependencies = [
  "rustls 0.20.2",
  "tokio",
  "tokio-rustls 0.23.1",
+ "webpki-roots 0.22.2",
 ]
 
 [[package]]
@@ -1032,7 +1032,7 @@ dependencies = [
  "ring",
  "serde",
  "serde_json",
- "simple_asn1",
+ "simple_asn1 0.4.1",
 ]
 
 [[package]]
@@ -1265,7 +1265,7 @@ dependencies = [
  "log",
  "openssl",
  "ring",
- "rustls 0.19.1",
+ "rustls 0.20.2",
  "serde",
  "serde_json",
  "sha2",
@@ -1312,7 +1312,7 @@ dependencies = [
  "oak_sign",
  "openssl",
  "prost",
- "rustls 0.19.1",
+ "rustls 0.20.2",
  "serde",
  "signal-hook",
  "structopt",
@@ -1355,7 +1355,7 @@ dependencies = [
  "hex",
  "http",
  "hyper",
- "hyper-rustls 0.22.1",
+ "hyper-rustls 0.23.0",
  "itertools",
  "jsonwebtoken",
  "lazy_static",
@@ -1374,7 +1374,7 @@ dependencies = [
  "regex",
  "reqwest",
  "roughenough",
- "rustls 0.19.1",
+ "rustls 0.20.2",
  "serde",
  "serde_json",
  "sha2",
@@ -1388,7 +1388,7 @@ dependencies = [
  "tink-proto",
  "tink-signature",
  "tokio",
- "tokio-rustls 0.22.0",
+ "tokio-rustls 0.23.1",
  "tokio-stream",
  "tonic",
  "wasmi",
@@ -1423,7 +1423,7 @@ dependencies = [
  "pem 1.0.0",
  "ring",
  "sha2",
- "simple_asn1",
+ "simple_asn1 0.6.1",
  "structopt",
 ]
 
@@ -1764,6 +1764,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "quickcheck"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
+dependencies = [
+ "rand 0.8.4",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1943,7 +1952,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "webpki-roots",
+ "webpki-roots 0.21.1",
  "winreg",
 ]
 
@@ -2312,6 +2321,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "simple_asn1"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a762b1c38b9b990c694b9c2f8abe3372ce6a9ceaae6bca39cfc46e054f45745"
+dependencies = [
+ "num-bigint 0.4.2",
+ "num-traits",
+ "thiserror",
+ "time 0.3.5",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2474,6 +2495,24 @@ dependencies = [
  "libc",
  "winapi",
 ]
+
+[[package]]
+name = "time"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41effe7cfa8af36f439fac33861b66b049edc6f9a32331e2312660529c1c24ad"
+dependencies = [
+ "itoa",
+ "libc",
+ "quickcheck",
+ "time-macros",
+]
+
+[[package]]
+name = "time-macros"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25eb0ca3468fc0acc11828786797f6ef9aa1555e4a211a60d64cc8e4d1be47d6"
 
 [[package]]
 name = "tink-aead"
@@ -3103,6 +3142,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aabe153544e473b775453675851ecc86863d2a81d786d741f6b76778f2a48940"
 dependencies = [
  "webpki 0.21.4",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "0.22.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "552ceb903e957524388c4d3475725ff2c8b7960922063af6ce53c9a43da07449"
+dependencies = [
+ "webpki 0.22.0",
 ]
 
 [[package]]
