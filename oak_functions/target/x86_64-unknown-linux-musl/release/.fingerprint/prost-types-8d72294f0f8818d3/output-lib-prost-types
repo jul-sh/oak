@@ -1,0 +1,1 @@
+WARN rustc_metadata::locator no metadata found: incompatible metadata version found: '/workspace/oak_functions/target/release/deps/libprost_derive-67c5ab1412bee34c.so'
