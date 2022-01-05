@@ -1,0 +1,3 @@
+cargo:rerun-if-changed=../../oak_functions/proto/abi.proto
+cargo:rerun-if-changed=../../oak_functions/proto/lookup_data.proto
+cargo:rerun-if-changed=../../oak_functions/proto/invocation.proto
