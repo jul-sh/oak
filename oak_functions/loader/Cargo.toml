@@ -1,0 +1,69 @@
+[package]
+name = "oak_functions_loader"
+version = "0.1.0"
+authors = ["Razieh Behjati <razieh@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[features]
+# Feature that allows logging of potentially sensitive content, or using experimental features.
+# Should only be used for debugging purposes or enabling experimental features.
+oak-unsafe = ["oak-tf", "oak-metrics"]
+default = []
+oak-tf = ["tract-tensorflow"]
+oak-metrics = []
+
+[dependencies]
+anyhow = "*"
+async-stream = "*"
+bytes = "*"
+byteorder = { version = "*", default-features = false }
+chrono = "*"
+futures = "*"
+http = "*"
+hyper = { version = "*", features = [
+  "client",
+  "http1",
+  "http2",
+  "runtime",
+  "server"
+] }
+hyper-rustls = { version = "*" }
+humantime-serde = "*"
+# Logging via the log crate is disabled and only available using our own custom logger.
+log = { version = "*", features = ["max_level_off", "release_max_level_off"] }
+oak_functions_abi = { path = "../abi" }
+oak_remote_attestation = { path = "../../remote_attestation/rust/" }
+prost = "*"
+rand = "*"
+serde = "*"
+serde_derive = "*"
+serde_json = "*"
+structopt = "*"
+tokio = { version = "*", features = [
+  "fs",
+  "macros",
+  "sync",
+  "rt-multi-thread"
+] }
+toml = "*"
+tonic = "*"
+tract-tensorflow = { version = "*", optional = true }
+url = "*"
+# Use wasmi in `no_std` mode.
+wasmi = { version = "*", default-features = false, features = ["core"] }
+signal-hook = "*"
+
+[dev-dependencies]
+criterion = "*"
+lookup_data_generator = { path = "../lookup_data_generator" }
+maplit = "*"
+tempfile = "*"
+test_utils = { path = "../sdk/test_utils" }
+
+[build-dependencies]
+oak_utils = { path = "../../oak_utils" }
+
+[[bench]]
+name = "lookup"
+harness = false

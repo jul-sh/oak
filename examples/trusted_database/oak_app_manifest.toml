@@ -1,0 +1,4 @@
+name = "trusted_database"
+
+[modules]
+app = { path = "examples/bin/trusted_database.wasm" }

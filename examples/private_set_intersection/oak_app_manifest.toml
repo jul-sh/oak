@@ -1,0 +1,8 @@
+name = "private_set_intersection"
+signature_manifests = [
+  { path = "examples/private_set_intersection/signatures.toml" },
+]
+
+[modules]
+app = { path = "examples/bin/private_set_intersection.wasm" }
+handler = { path = "examples/bin/private_set_intersection_handler.wasm" }

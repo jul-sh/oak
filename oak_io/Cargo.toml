@@ -1,0 +1,36 @@
+[workspace]
+
+[package]
+name = "oak_io"
+version = "0.1.0"
+authors = ["Conrad Grobler <grobler@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[features]
+# Make handles linear.
+# At the expense of making them non-copy, this causes handles to be
+# automaticaly dropped, so that channels cannot accidentally linger on.
+linear-handles = []
+
+[dependencies]
+hex = "*"
+oak_abi = { path = "../oak_abi" }
+oak_derive = { path = "../oak_derive" }
+prost = "*"
+prost-types = "*"
+either = "*"
+log = "*"
+
+[dev-dependencies]
+assert_matches = "*"
+
+[build-dependencies]
+oak_utils = { path = "../oak_utils" }
+prost-build = { path = "../third_party/prost/prost-build" }
+
+[patch.crates-io]
+prost = { path = "../third_party/prost" }
+prost-build = { path = "../third_party/prost/prost-build" }
+prost-derive = { path = "../third_party/prost/prost-derive" }
+prost-types = { path = "../third_party/prost/prost-types" }

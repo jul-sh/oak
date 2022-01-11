@@ -1,0 +1,24 @@
+[package]
+name = "oak_functions"
+version = "0.1.0"
+authors = ["Razieh Behjati <razieh@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[features]
+default = []
+oak-unsafe = ["oak-tf", "oak-metrics"]
+oak-tf = []
+oak-metrics = []
+
+[dev-dependencies]
+test_utils = { path = "../test_utils" }
+oak_functions_loader = { path = "../../loader" }
+maplit = "*"
+lazy_static = "*"
+tokio = "*"
+
+[dependencies]
+oak_functions_abi = { path = "../../abi" }
+prost = "*"
+maplit = "*"

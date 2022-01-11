@@ -1,0 +1,28 @@
+[package]
+name = "translator"
+version = "0.1.0"
+authors = ["David Drysdale <drysdale@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dev-dependencies]
+assert_matches = "*"
+env_logger = "*"
+log = "*"
+oak_runtime = { version = "=0.1.0", features = ["linear-handles"] }
+oak_tests = "=0.1.0"
+tokio = { version = "*", features = ["macros", "rt-multi-thread"] }
+translator_grpc = "=0.1.0"
+
+[dependencies]
+anyhow = "*"
+log = "*"
+oak = { version = "=0.1.0", features = ["linear-handles"] }
+oak_abi = "=0.1.0"
+oak_io = "=0.1.0"
+oak_services = "=0.1.0"
+prost = "*"
+translator_common = "=0.1.0"

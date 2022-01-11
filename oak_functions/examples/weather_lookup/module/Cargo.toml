@@ -1,0 +1,35 @@
+[package]
+name = "weather_lookup"
+version = "0.1.0"
+authors = ["Razieh Behjati <razieh@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[features]
+large-bench = []
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+location_utils = { path = "../../../location_utils" }
+oak_functions = { path = "../../../sdk/oak_functions" }
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+
+[dev-dependencies]
+http = "*"
+lookup_data_generator = { path = "../../../lookup_data_generator" }
+oak_functions_abi = { path = "../../../abi" }
+oak_functions_loader = { path = "../../../loader" }
+maplit = "*"
+prost = "*"
+rand = "*"
+test_utils = { path = "../../../sdk/test_utils" }
+tokio = { version = "*", features = [
+  "fs",
+  "macros",
+  "sync",
+  "rt-multi-thread"
+] }
+tonic = "*"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+readonly SCRIPTS_DIR="$(dirname "$0")"
+# shellcheck source=scripts/common
+source "$SCRIPTS_DIR/common"
+
+# Check that any generated files match those that are checked in.
+if [[ $(git status --short) ]]; then
+    # One or more files are either modified or newly generated, exit with an error code
+    exit 1
+fi

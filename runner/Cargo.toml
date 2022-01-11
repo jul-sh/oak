@@ -1,0 +1,35 @@
+[workspace]
+
+[package]
+name = "runner"
+version = "0.1.0"
+authors = ["Tiziano Santoro <tzn@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[dependencies]
+async-recursion = "*"
+async-trait = "*"
+cargo_metadata = "*"
+chrono = "*"
+clap = "*"
+colored = "*"
+itertools = "*"
+maplit = "*"
+nix = "*"
+once_cell = "*"
+regex = "*"
+serde = { version = "*", features = ["derive"] }
+serde_yaml = "*"
+structopt = "*"
+tokio = { version = "*", features = [
+  "fs",
+  "io-util",
+  "macros",
+  "process",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+] }
+toml = "*"
+walkdir = "*"

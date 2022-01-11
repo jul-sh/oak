@@ -1,0 +1,44 @@
+[package]
+name = "chat"
+version = "0.1.0"
+authors = ["David Drysdale <drysdale@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "*"
+log = "*"
+oak = { version = "=0.1.0", features = ["linear-handles"] }
+oak_abi = "=0.1.0"
+oak_io = "=0.1.0"
+oak_services = "=0.1.0"
+prost = "*"
+rand_core = "*"
+rand = "*"
+serde = { version = "*", features = ["derive"] }
+
+[dev-dependencies]
+assert_matches = "*"
+base64 = "*"
+chat_grpc = "=0.1.0"
+env_logger = "*"
+log = "*"
+oak_client = "=0.1.0"
+oak_runtime = { version = "=0.1.0", features = ["linear-handles"] }
+oak_sign = "=0.1.0"
+oak_tests = "=0.1.0"
+# Pin version 0.7 to allow using "std" feature of rand_core.
+# TODO(#2006): Unpin once "std" feature is no longer needed.
+rand = "0.7"
+# Pin version 0.5 to allow using "std" feature of rand_core.
+# TODO(#2006): Unpin once "std" feature is no longer needed.
+rand_core = "0.5"
+serial_test = "*"
+tonic = "*"
+tokio = { version = "*", features = ["macros", "rt-multi-thread", "sync"] }
+
+[build-dependencies]
+oak_utils = "*"

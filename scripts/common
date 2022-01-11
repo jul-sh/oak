@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK as this script is `source`d.
+
+set -o errexit
+set -o nounset
+set -o xtrace
+set -o pipefail
+
+# Set the default Rust log level to info if unset.
+# https://docs.rs/env_logger
+export RUST_LOG="${RUST_LOG:-info}"
+
+# See https://pantheon.corp.google.com/gcr/images/oak-ci/GLOBAL/oak
+readonly DOCKER_IMAGE_NAME='gcr.io/oak-ci/oak:latest'
+
+# The difference between Docker image id and image digest is that the image id corresponds to the
+# hash of the contents of the image, while the image digest is a hash of the image and its metadata,
+# and it is assigned by the specific registry after pushing the image there. Therefore, we should
+# mostly rely on the image id locally, though we need to use the image digest when pulling the image
+# from a registry first.
+
+# Do not modify manually. This value is automatically updated by ./scripts/docker_build .
+readonly DOCKER_IMAGE_ID='sha256:846d1de92e393680e6e14b8757a528e874912d5cf81bf3c9e6e1b2c0456d27f5'
+
+# Do not modify manually. This value is automatically updated by ./scripts/docker_push .
+readonly DOCKER_IMAGE_REPO_DIGEST='gcr.io/oak-ci/oak@sha256:f0a8d32d127ebd4b2ca1cec37fa00d6d911723880fb23498233238013fab2386'
+
+readonly SERVER_DOCKER_IMAGE_NAME='gcr.io/oak-ci/oak-server'
+
+readonly CACHE_DIR='bazel-cache'
+readonly SERVER_BIN_DIR="${PWD}/oak_loader/bin"
+
+# List all workspaces and stand-alone crates.
+declare -ar ALL_CRATES=(
+  examples
+  experimental
+  oak_abi
+  oak_client
+  oak_derive
+  oak_functions/loader
+  oak_functions/sdk
+  oak_io
+  oak_loader
+  oak_runtime
+  oak_services
+  oak_sign
+  oak_utils
+  runner
+  sdk
+)
+
+# To set up remote cache write credentials:
+# - navigate to https://pantheon.corp.google.com/iam-admin/serviceaccounts?project=oak-ci
+# - click on "Create Service Account"
+#   + use your @google.com username as the service account name (e.g. "tzn")
+#   + leave the service account ID as is (e.g. "tzn-110")
+#   + leave the service account description empty
+# - grant the "Storage Object Admin" role to the newly created account
+# - click on "Create Key", then select "JSON"
+# - save the generated key as the file referenced below, within the project directory
+#   + make sure to not check it in to git, check your `.gitignore` configuration
+readonly OAK_REMOTE_CACHE_KEY='./.oak_remote_cache_key.json'
+
+(
+  # Disable xtrace to avoid leaking secrets in logs.
+  set +o xtrace;
+  # Do we have a JSON key for the remote cache.
+  # https://docs.bazel.build/versions/master/remote-caching.html#google-cloud-storage
+  if [[ ! -f "$OAK_REMOTE_CACHE_KEY" ]]; then
+    # Check if this exists in the environment and it is not empty.
+    if [[ -n "${BAZEL_GOOGLE_CREDENTIALS:-}" ]]; then
+      echo "$BAZEL_GOOGLE_CREDENTIALS" > "$OAK_REMOTE_CACHE_KEY"
+    fi
+  fi
+)
+
+declare -a bazel_build_flags
+
+# Use the remote cache, assuming it is publicly readable.
+# See https://pantheon.corp.google.com/storage/browser/oak-bazel-cache?project=oak-ci
+bazel_build_flags+=(
+  '--remote_cache=https://storage.googleapis.com/oak-bazel-cache'
+  # Fail immediately if the Bazel server lock cannot be acquired so that we can notice this in CI
+  # and avoid attempting to parallelize steps that are actually serialized by Bazel.
+  '--block_for_lock=false'
+  # Useful to determine how long individual steps are taking in CI.
+  '--show_timestamps'
+)
+
+# If we now have a key file, use it, otherwise disable uploading artifacts to remote cache.
+# Note that this is only needed to write to the cache, not to read from it.
+if [[ -f "$OAK_REMOTE_CACHE_KEY" ]]; then
+  bazel_build_flags+=(
+    "--google_credentials=$OAK_REMOTE_CACHE_KEY"
+  )
+else
+  bazel_build_flags+=(
+    '--remote_upload_local_results=false'
+  )
+fi
+
+declare -a cargo_build_flags
+
+cargo_build_flags+=(
+  '--release'
+)
+
+if [[ "${OSTYPE}" == "darwin"*  ]]; then
+  bazel_build_flags+=( '--config=darwin' )
+else
+  # The -linux-musl target is the officially supported way of producing fully
+  # static binaries from a Rust program.  However, musl is explicitly built
+  # on the Linux syscalll layer, and so is not available on macOS.
+  cargo_build_flags+=(
+    '--target=x86_64-unknown-linux-musl'
+  )
+fi
+
+if [[ "${OSTYPE}" == "darwin"*  ]]; then
+  readonly RUST_HOST_TARGET="${RUST_HOST_TARGET:-x86_64-apple-darwin}"
+else
+  readonly RUST_HOST_TARGET="${RUST_HOST_TARGET:-x86_64-unknown-linux-gnu}"
+fi
+
+# kill_pid tries to kill the given pid(s), first softly then more aggressively.
+kill_pid() {
+  local pids=( "$@" )
+  echo "Killing ${pids[*]}"
+  set +e
+  local count=0
+  while kill -INT "${pids[@]}" > /dev/null 2>&1; do
+    sleep 1
+    ((count++))
+    still_alive=()
+    for pid in "${pids[@]}"; do
+      if ps -p "${pid}" > /dev/null ; then
+        still_alive+=("${pid}")
+      fi
+    done
+    if [[ ${#still_alive[@]} -eq 0 ]]; then
+      break
+    fi
+    if [[ $count -gt 5 ]]; then
+      echo "Now do kill -KILL ${still_alive[*]}"
+      kill -KILL "${still_alive[@]}"
+      break
+    fi
+    pids=("${still_alive[@]}")
+    echo "Retry kill -INT ${pids[*]}"
+  done
+  set -e
+}
+
+declare -a to_kill
+
+# kill_bg_pids will clean up any pids in ${to_kill}.
+kill_bg_pids() {
+  if [[ -n ${to_kill+x} ]]; then
+    kill_pid "${to_kill[@]}"
+    to_kill=()
+  fi
+}
+
+trap kill_bg_pids EXIT

@@ -1,0 +1,19 @@
+[package]
+name = "oak_functions_load_test"
+version = "0.1.0"
+authors = ["Tiziano Santoro <tzn@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[dependencies]
+anyhow = "*"
+bencher = "*"
+oak_functions_client = { path = "../client/rust" }
+oak_functions_abi = { path = "../abi" }
+rand = "*"
+tokio = { version = "*", features = [
+  "fs",
+  "macros",
+  "sync",
+  "rt-multi-thread"
+] }

@@ -1,0 +1,27 @@
+[workspace]
+
+[package]
+name = "oak_utils"
+version = "0.1.0"
+authors = ["Ivan Petrov <ivanpetrov@google.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+[dependencies]
+proc-macro2 = "*"
+prost = { path = "../third_party/prost" }
+prost-build = { path = "../third_party/prost/prost-build" }
+quote = "*"
+tempfile = "*"
+# Disable the `rustfmt` feature, as it requires `rustfmt` which may not be supported for custom
+# toolchains.
+tonic-build = { version = "*", default-features = false, features = [
+  "prost",
+  "transport"
+] }
+
+[patch.crates-io]
+prost = { path = "../third_party/prost" }
+prost-build = { path = "../third_party/prost/prost-build" }
+prost-derive = { path = "../third_party/prost/prost-derive" }
+prost-types = { path = "../third_party/prost/prost-types" }

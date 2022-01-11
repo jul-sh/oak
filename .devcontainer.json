@@ -1,0 +1,27 @@
+// See
+//
+// - https://code.visualstudio.com/docs/remote/containers
+// - https://code.visualstudio.com/docs/remote/devcontainerjson-reference
+{
+  // Do not modify manually. This value is automatically updated by ./scripts/docker_build .
+  "image": "sha256:846d1de92e393680e6e14b8757a528e874912d5cf81bf3c9e6e1b2c0456d27f5",
+  "extensions": [
+    "bazelbuild.vscode-bazel",
+    "bodil.prettier-toml",
+    "bungcip.better-toml",
+    "esbenp.prettier-vscode",
+    "matklad.rust-analyzer",
+    "xaver.clang-format"
+  ],
+  "settings": {
+    // Use the `rust-analyzer` binary installed in the Docker image.
+    "rust-analyzer.serverPath": "rust-analyzer",
+    // Ensure protobuf generated files are loaded correctly.
+    "rust-analyzer.cargo.loadOutDirsFromCheck": true
+  },
+  // Ensure that the workspace is mounted consistently with the `/docker_run` script.
+  // See https://code.visualstudio.com/docs/remote/containers-advanced#_changing-the-default-source-code-mount.
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "containerUser": "docker"
+}
