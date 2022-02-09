@@ -49,14 +49,22 @@ jobs:
       - name: Build Server Provenance
         run: |
           ./scripts/build_provenance \
+          "oak_loader" \
           ./oak_loader/bin/oak_loader \
           ./scripts/runner build-server
 
       - name: Build Functions Provenance
         run: |
           ./scripts/build_provenance \
+          "oak_functions" \
           ./oak_functions/loader/bin/oak_functions_loader \
           ./scripts/runner build-functions-server
+
+      - name: Validate package.json against a local schema
+        uses: cardinalby/schema-validator-action@v1
+        with:
+          file: 'provenance/*.json'
+          schema: 'https://raw.githubusercontent.com/project-oak/transparent-release/main/schema/amber-slsa-buildtype/v1.json'
 
       - name: Move new provenance files to the provenance branch
         run: cp -r ./provenance/. ./provenance-branch/
