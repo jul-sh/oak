@@ -47,7 +47,7 @@ fn create_handshakers() -> (ClientHandshaker, ServerHandshaker) {
         AttestationBehavior::create_bidirectional_attestation(&[], TEE_MEASUREMENT.as_bytes())
             .unwrap();
 
-    let additional_info = br"Additional Info".to_vec();
+    let additional_info = br"Additional Info";
     let server_handshaker = ServerHandshaker::new(bidirectional_attestation, additional_info);
 
     (client_handshaker, server_handshaker)

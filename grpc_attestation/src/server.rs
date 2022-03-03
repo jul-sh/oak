@@ -140,7 +140,6 @@ where
     ) -> Result<Response<Self::StreamStream>, Status> {
         let tee_certificate = self.tee_certificate.clone();
         let request_handler = self.request_handler.clone();
-        let additional_info = self.additional_info.clone();
         let error_logger = self.error_logger.clone();
 
         let response_stream = async_stream::try_stream! {
@@ -152,7 +151,7 @@ where
                         error_logger.log_error(&format!("Couldn't create self attestation behavior: {:?}", error));
                         Status::internal("")
                     })?,
-                    additional_info,
+                    &self.additional_info,
             );
             while !handshaker.is_completed() {
                 let incoming_message = request_stream.next()

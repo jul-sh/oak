@@ -331,13 +331,13 @@ pub struct ServerHandshaker {
     transcript: Transcript,
     /// Additional info about the server, including configuration information and proof of
     /// inclusion in a verifiable log.
-    additional_info: Vec<u8>,
+    additional_info: &[u8],
 }
 
 impl ServerHandshaker {
     /// Creates [`ServerHandshaker`] with `ServerHandshakerState::ExpectingClientIdentity`
     /// state.
-    pub fn new(behavior: AttestationBehavior, additional_info: Vec<u8>) -> Self {
+    pub fn new(behavior: AttestationBehavior, additional_info: &[u8]) -> Self {
         Self {
             behavior,
             state: ServerHandshakerState::ExpectingClientHello,
