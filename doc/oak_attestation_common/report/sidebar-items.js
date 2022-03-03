@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["TEE_EXTENSION_OID",""]],"struct":[["AttestationInfo","Convenience struct for representing X.509 TEE extensions containing TEE reports and TEE provider’s certificates."],["Report","Placeholder implementation of TEE report for remote attestation."]]});
