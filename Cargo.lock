@@ -1109,6 +1109,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "lru",
+ "oak_functions_abi",
  "oak_remote_attestation",
  "oak_utils",
  "prost",
