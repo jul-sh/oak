@@ -37,7 +37,7 @@ struct SessionsTracker {
     tee_certificate: Vec<u8>,
     /// Configuration information to provide to the client for the attestation step.
     additional_info: Vec<u8>,
-    known_sessions: LruCache<SessionId, SessionState>,
+    known_sessions: Mutex<LruCache<SessionId, SessionState>>,
 }
 
 impl SessionsTracker {
@@ -45,7 +45,7 @@ impl SessionsTracker {
         Self {
             tee_certificate,
             additional_info,
-            known_sessions: LruCache::new(10000),
+            known_sessions: Mutex::new(LruCache::new(10000)),
         }
     }
 
@@ -59,7 +59,12 @@ impl SessionsTracker {
     /// to ensure that faulty state that leads to errors when processing
     /// a request is not persistent.
     pub fn pop_session_state(&mut self, session_id: SessionId) -> Result<SessionState, String> {
-        return match self.known_sessions.pop(&session_id) {
+        return match self
+            .known_sessions
+            .lock()
+            .expect("Couldn't lock session_state mutex")
+            .pop(&session_id)
+        {
             None => match AttestationBehavior::create_self_attestation(&self.tee_certificate) {
                 Ok(behavior) => Ok(SessionState::HandshakeInProgress(Box::new(
                     ServerHandshaker::new(behavior, self.additional_info.clone()),
@@ -88,7 +93,10 @@ impl SessionsTracker {
     }
 
     pub fn put_session_state(&mut self, session_id: SessionId, session_state: SessionState) {
-        self.known_sessions.put(session_id, session_state);
+        self.known_sessions
+            .lock()
+            .expect("Couldn't lock session_state mutex")
+            .put(session_id, session_state);
     }
 }
 
@@ -99,7 +107,7 @@ pub struct AttestationServer<F, L: LogError> {
     /// Error logging function that is required for logging attestation protocol errors.
     /// Errors are only logged on server side and are not sent to clients.
     error_logger: L,
-    sessions_tracker: Arc<Mutex<SessionsTracker>>,
+    sessions_tracker: Arc<SessionsTracker>,
 }
 
 impl<F, S, L> AttestationServer<F, L>
@@ -114,10 +122,7 @@ where
         additional_info: Vec<u8>,
         error_logger: L,
     ) -> anyhow::Result<Self> {
-        let sessions_tracker = Arc::new(Mutex::new(SessionsTracker::create(
-            tee_certificate,
-            additional_info,
-        )));
+        let sessions_tracker = Arc::new(SessionsTracker::create(tee_certificate, additional_info));
         Ok(Self {
             request_handler,
             error_logger,
@@ -142,8 +147,6 @@ where
 
         let mut session_state = {
             self.sessions_tracker
-                .lock()
-                .expect("Couldn't lock session_state mutex")
                 .pop_session_state(request_inner.session_id)
                 .map_err(|error| {
                     error_logger.log_error(&error);
@@ -194,8 +197,6 @@ where
         // is effectively erased. This allows the client to negotiate a new
         // handshake.
         self.sessions_tracker
-            .lock()
-            .expect("Couldn't lock session_state mutex")
             .put_session_state(request_inner.session_id, session_state);
         Ok(tonic::Response::new(UnaryResponse {
             body: response_body,
