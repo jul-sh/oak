@@ -1109,6 +1109,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "lru",
+ "oak_functions_abi",
  "oak_remote_attestation",
  "oak_utils",
  "prost",
@@ -1933,7 +1934,7 @@ dependencies = [
  "clap 3.0.14",
  "ecdsa",
  "env_logger 0.9.0",
- "grpc_streaming_attestation",
+ "grpc_unary_attestation",
  "http",
  "log",
  "oak_functions_abi",
