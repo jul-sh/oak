@@ -1,15 +1,16 @@
-import * as proto from "./proto/unary_server_pb.js";
+import { UnaryRequest } from "./proto/unary_server.js";
 
 const URI = "http://127.0.0.1:8080/oak.session.unary.v1.UnarySession/Message";
 
 const CONTENT_TYPE = "application/grpc-web";
 const SESSION_ID_SIZE = 8;
 
-let message = new proto.UnaryRequest();
-message.setBody(new Uint8Array(256));
-message.setSessionId(new Uint8Array(SESSION_ID_SIZE));
+let unaryRequest = new UnaryRequest({
+  session_id: new Uint8Array(SESSION_ID_SIZE),
+  body: new Uint8Array(256),
+});
 
-let body = encodeBody(message.serializeBinary());
+let body = encodeBody(unaryRequest.toBytes());
 
 const response = await fetch(URI, {
   method: "POST",

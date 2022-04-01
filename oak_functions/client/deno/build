@@ -4,6 +4,4 @@
 
 rm -rf oak_functions/client/deno/proto
 mkdir -p oak_functions/client/deno/proto
-protoc --proto_path=oak_functions/proto --js_out=import_style=commonjs,binary:oak_functions/client/deno/proto unary_server.proto
-deno run --allow-read --allow-write https://deno.land/x/deno_google_protobuf/tools/build.ts oak_functions/client/deno/proto
-
+deno run --allow-read --allow-write https://deno.land/x/protod@v0.3.7/protod.ts -- gen ./oak_functions/proto/unary_server.proto > ./oak_functions/client/deno/proto/unary_server.ts
