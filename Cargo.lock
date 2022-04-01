@@ -1011,16 +1011,6 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
-dependencies = [
- "log",
- "regex",
-]
-
-[[package]]
-name = "env_logger"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b2cf0344971ee6c64c31be0d530793fba457d322dfec2810c453d0ef228f9c3"
@@ -1106,7 +1096,7 @@ version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21e16290574b39ee41c71aeb90ae960c504ebaf1e2a1c87bd52aa56ed6e1a02f"
 dependencies = [
- "env_logger 0.9.0",
+ "env_logger",
  "log",
 ]
 
@@ -1884,7 +1874,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "location_utils",
  "log",
  "oak_functions_abi",
@@ -2065,7 +2055,7 @@ name = "mobilenet_client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "env_logger 0.9.0",
+ "env_logger",
  "image",
  "oak_functions_abi",
  "oak_functions_client",
@@ -2294,7 +2284,7 @@ dependencies = [
  "base64",
  "clap 3.0.14",
  "ecdsa",
- "env_logger 0.9.0",
+ "env_logger",
  "grpc_unary_attestation",
  "http",
  "log",
@@ -2466,7 +2456,7 @@ dependencies = [
  "anyhow",
  "async-stream",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures",
  "futures-core",
  "futures-util",
@@ -2495,7 +2485,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures",
  "futures-core",
  "futures-util",
@@ -2514,13 +2504,10 @@ name = "oak_remote_attestation"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "assert_matches",
  "bytes",
  "log",
  "prost",
  "prost-build",
- "quickcheck",
- "quickcheck_macros",
  "ring",
 ]
 
@@ -2531,7 +2518,7 @@ dependencies = [
  "anyhow",
  "async-stream",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures",
  "futures-core",
  "futures-util",
@@ -2959,28 +2946,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6eca0fa5dd7c4c96e184cec588f0b1db1ee3165e678db21c09793105acb17e6f"
 dependencies = [
  "cc",
-]
-
-[[package]]
-name = "quickcheck"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
-dependencies = [
- "env_logger 0.8.4",
- "log",
- "rand 0.8.5",
-]
-
-[[package]]
-name = "quickcheck_macros"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b22a693222d716a9587786f37ac3f6b4faedb5b80c23914e7303ff5a1d8016e9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -3726,7 +3691,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "flate2",
  "hyper",
  "hyper-rustls",
@@ -3749,7 +3714,7 @@ dependencies = [
  "async-stream",
  "bytes",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures",
  "grpc_unary_attestation",
  "http",
@@ -4366,7 +4331,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures-core",
  "futures-util",
  "http",
@@ -4381,7 +4346,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "http",
  "hyper",
  "log",
@@ -4405,7 +4370,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap 3.0.14",
- "env_logger 0.9.0",
+ "env_logger",
  "futures-core",
  "futures-util",
  "http",

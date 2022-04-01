@@ -39,7 +39,10 @@ members = [
   "oak_functions/sdk/oak_functions/tests/metrics_module",
   "oak_functions/sdk/test_utils",
   "oak_functions/util",
-  "remote_attestation/rust",
   "xtask",
 ]
-exclude = ["experimental/uefi", "oak_functions/loader/fuzz"]
+exclude = [
+  "experimental/uefi",
+  "oak_functions/loader/fuzz",
+  "remote_attestation/rust",
+]
