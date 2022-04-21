@@ -63,7 +63,6 @@
 <span id="58">58</span>
 <span id="59">59</span>
 <span id="60">60</span>
-<span id="61">61</span>
 </pre><pre class="rust"><code><span class="comment">//</span>
 <span class="comment">// Copyright 2021 The Project Oak Authors</span>
 <span class="comment">//</span>
@@ -81,7 +80,7 @@
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">proto</span> {
     <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::return_self_not_must_use</span>)]</span>
-    <span class="macro">tonic::include_proto!</span>(<span class="string">&quot;oak.session.stream.v1&quot;</span>);
+    <span class="macro">tonic::include_proto!</span>(<span class="string">&quot;oak.session.unary.v1&quot;</span>);
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">attestation</span>;
@@ -89,7 +88,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::attestation</span>::{<span class="ident">into_server_identity_verifier</span>, <span class="ident">ConfigurationVerifier</span>};
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
-<span class="kw">use</span> <span class="ident">grpc_attestation::client::AttestationClient</span>;
+<span class="kw">use</span> <span class="ident">grpc_unary_attestation::client::AttestationClient</span>;
 <span class="kw">use</span> <span class="ident">oak_functions_abi::proto</span>::{<span class="ident">Request</span>, <span class="ident">Response</span>};
 <span class="kw">use</span> <span class="ident">prost::Message</span>;
 
@@ -114,13 +113,12 @@
         .<span class="ident">context</span>(<span class="string">&quot;Could not create Oak Functions client&quot;</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Client</span> { <span class="ident">inner</span> })
     }
+
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">Request</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">inner</span>
+        <span class="self">self</span>.<span class="ident">inner</span>
             .<span class="ident">send</span>(<span class="ident">request</span>)
             .<span class="kw">await</span>
-            .<span class="ident">context</span>(<span class="string">&quot;Error invoking Oak Functions instance&quot;</span>)<span class="question-mark">?</span>;
-        <span class="ident">response</span>
+            .<span class="ident">context</span>(<span class="string">&quot;Error invoking Oak Functions instance&quot;</span>)<span class="question-mark">?</span>
             .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;Empty response&quot;</span>))
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">rsp</span><span class="op">|</span> <span class="ident">Response::decode</span>(<span class="ident">rsp</span>.<span class="ident">as_ref</span>()).<span class="ident">context</span>(<span class="string">&quot;Could not decode the response&quot;</span>))
     }

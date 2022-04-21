@@ -131,13 +131,6 @@
 <span id="126">126</span>
 <span id="127">127</span>
 <span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
 </pre><pre class="rust"><code><span class="comment">//</span>
 <span class="comment">// Copyright 2021 The Project Oak Authors</span>
 <span class="comment">//</span>
@@ -157,7 +150,8 @@
 <span class="doccomment">//! Type, constant and Wasm host function definitions for the Oak-Functions application</span>
 <span class="doccomment">//! binary interface (ABI).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::proto</span>::{<span class="ident">ChannelHandle</span>, <span class="ident">ChannelStatus</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::proto::ExtensionHandle</span>;
+<span class="kw">use</span> <span class="ident">serde_derive</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">proto</span> {
     <span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/oak.functions.abi.rs&quot;</span>));
@@ -186,19 +180,41 @@
             <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">body</span>.<span class="ident">as_slice</span>()[..<span class="ident">length</span>])
         }
     }
-
-    <span class="comment">// Converts an OakStatus into a ChannelStatus.</span>
-    <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ChannelStatus</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OakStatus</span> {
-        <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">channel_status</span>: <span class="ident">ChannelStatus</span>) -&gt; <span class="self">Self</span> {
-            <span class="kw">match</span> <span class="ident">channel_status</span> {
-                <span class="ident">ChannelStatus::ChannelInvalidArgs</span> =&gt; <span class="ident">OakStatus::ErrInvalidArgs</span>,
-                <span class="kw">_</span> =&gt; <span class="ident">OakStatus::Unspecified</span>,
-            }
-        }
-    }
 }
 
-<span class="comment">// TODO(#1963): Add tests, in an example.</span>
+<span class="doccomment">/// Holds the `label` and the `value` to report a metric.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;oak-metrics&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ReportMetricRequest</span> {
+    <span class="kw">pub</span> <span class="ident">label</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">i64</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;oak-tf&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TfModelInferError</span> {
+    <span class="comment">// Error when running the TensorFlow model, due to bad input tensor.</span>
+    <span class="ident">BadTensorFlowModelInput</span>,
+    <span class="comment">// Error when decoding the inference bytes.</span>
+    <span class="ident">ErrorDecodingInference</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;oak-tf&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TfModelInferResponse</span> {
+    <span class="kw">pub</span> <span class="ident">result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">TfModelInferError</span><span class="op">&gt;</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TestingRequest</span> {
+    <span class="ident">Echo</span>(<span class="ident">String</span>),
+    <span class="ident">Blackhole</span>(<span class="ident">String</span>),
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TestingResponse</span> {
+    <span class="ident">Echo</span>(<span class="ident">String</span>),
+}
 
 <span class="comment">// The Oak-Functions ABI primarily consists of a collection of Wasm host functions in the</span>
 <span class="comment">// &quot;oak_functions&quot; module that are made available to WebAssembly modules running as Oak-Functions</span>
@@ -216,7 +232,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_log_message</span>(<span class="ident">buf_ptr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>, <span class="ident">buf_len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span>;
 
     <span class="doccomment">/// See [`report_metric`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#report_metric).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">report_metric</span>(<span class="ident">buf_ptr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>, <span class="ident">buf_len</span>: <span class="ident">usize</span>, <span class="ident">value</span>: <span class="ident">i64</span>) -&gt; <span class="ident">u32</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">report_metric</span>(<span class="ident">buf_ptr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>, <span class="ident">buf_len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span>;
 
     <span class="doccomment">/// See [`storage_get_item`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#storage_get_item).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">storage_get_item</span>(
@@ -234,44 +250,14 @@
         <span class="ident">inference_len_ptr</span>: <span class="kw-2">*mut</span> <span class="ident">usize</span>,
     ) -&gt; <span class="ident">u32</span>;
 
-    <span class="doccomment">/// Allocates a buffer on the callers memory to write a message from the channel with</span>
-    <span class="doccomment">/// `channel_handle`. After a successful call `dest_buf_ptr_ptr` holds the address of the</span>
-    <span class="doccomment">/// buffer and `dest_buf_len_ptr` holds its length. The caller can then read</span>
-    <span class="doccomment">/// the message from `dest_buf_ptr_ptr`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns a status code to indicate success. In particular, returns immediately</span>
-    <span class="doccomment">/// with an appropriate status code, if no message is available on the channel.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">channel_read</span>(
-        <span class="ident">channel_handle</span>: <span class="ident">ChannelHandle</span>,
-        <span class="ident">dest_buf_ptr_ptr</span>: <span class="kw-2">*mut</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>,
-        <span class="ident">dest_buf_len_ptr</span>: <span class="kw-2">*mut</span> <span class="ident">usize</span>,
-    ) -&gt; <span class="ident">ChannelStatus</span>;
-
-    <span class="doccomment">/// Writes a message, i.e., `src_buf_len` bytes, from `scr_buf_ptr` into the channel with</span>
-    <span class="doccomment">/// `channel_handle`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns a status code to indicate success.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">channel_write</span>(
-        <span class="ident">channel_handle</span>: <span class="ident">ChannelHandle</span>,
-        <span class="ident">src_buf_ptr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>,
-        <span class="ident">src_buf_len</span>: <span class="ident">usize</span>,
-    ) -&gt; <span class="ident">ChannelStatus</span>;
-
-    <span class="doccomment">/// Waits until at least one of the channels from the channel handles in the buffer at</span>
-    <span class="doccomment">/// `channel_handle_buf_ptr` has a message to read, or</span>
-    <span class="doccomment">/// until the `deadline_ms` expires. After a successful call to `channel_wait`, the buffer at</span>
-    <span class="doccomment">/// `ready_channel_handle_buf_ptr` holds the channel handles with at least one message to read.</span>
-    <span class="doccomment">/// Both, `channel_handle_buf_len` and `ready_channel_handle_buf_len` hold the length of the</span>
-    <span class="doccomment">/// respective buffers in bytes.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns a status code to indicate success or deadline expiration.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">channel_wait</span>(
-        <span class="ident">channel_handle_buf_ptr</span>: <span class="kw-2">*const</span> <span class="ident">ChannelHandle</span>,
-        <span class="ident">channel_handle_buf_len</span>: <span class="ident">usize</span>,
-        <span class="ident">ready_channel_handle_buf_ptr</span>: <span class="kw-2">*mut</span> <span class="kw-2">*mut</span> <span class="ident">i32</span>,
-        <span class="ident">ready_channel_handle_buf_len</span>: <span class="kw-2">*mut</span> <span class="ident">usize</span>,
-        <span class="ident">deadline_ms</span>: <span class="ident">u32</span>,
-    ) -&gt; <span class="ident">ChannelStatus</span>;
+    <span class="doccomment">/// See [`invoke`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#invoke).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invoke</span>(
+        <span class="ident">handle</span>: <span class="ident">ExtensionHandle</span>,
+        <span class="ident">request_ptr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>,
+        <span class="ident">request_len</span>: <span class="ident">usize</span>,
+        <span class="ident">response_ptr_ptr</span>: <span class="kw-2">*mut</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>,
+        <span class="ident">response_len_ptr</span>: <span class="kw-2">*mut</span> <span class="ident">usize</span>,
+    ) -&gt; <span class="ident">u32</span>;
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="oak_functions_abi" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (75d9a0ae2 2022-02-16)" ></div>
