@@ -22,9 +22,7 @@ use hyper::{
     Body,
 };
 use log::info;
-use oak_functions_abi::proto::{
-    ConfigurationInfo, PrivateMetricsConfig, Request, Response, ServerPolicy,
-};
+use oak_functions_abi::proto::{ConfigurationInfo, PrivateMetricsConfig, Response, ServerPolicy};
 
 use oak_functions_client::Client;
 use oak_remote_attestation::crypto::get_sha256;
@@ -219,14 +217,10 @@ pub async fn make_request(port: u16, request_body: &[u8]) -> TestResult {
         .await
         .expect("Could not create client");
 
-    let request = Request {
-        body: request_body.to_vec(),
-    };
-
     // Send the request and measure time
     let start = std::time::Instant::now();
     let response = client
-        .invoke(request)
+        .invoke(request_body.to_vec())
         .await
         .expect("Error while awaiting response");
     let elapsed = start.elapsed();

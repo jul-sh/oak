@@ -18,7 +18,6 @@
 
 use anyhow::Context;
 use clap::Parser;
-use oak_functions_abi::proto::Request;
 use oak_functions_client::Client;
 
 #[derive(Parser, Clone)]
@@ -42,12 +41,9 @@ async fn main() -> anyhow::Result<()> {
 
     for i in 0..200 {
         let body = if i % 2 == 0 { b"a" } else { b"b" };
-        let request = Request {
-            body: body.to_vec(),
-        };
 
         client
-            .invoke(request)
+            .invoke(body.to_vec())
             .await
             .context("Could not invoke Oak Functions")?;
     }

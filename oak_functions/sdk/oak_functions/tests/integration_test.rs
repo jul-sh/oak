@@ -16,7 +16,7 @@
 
 use lazy_static::lazy_static;
 use maplit::{btreemap, hashmap};
-use oak_functions_abi::proto::{Request, Response};
+use oak_functions_abi::proto::Response;
 use oak_functions_loader::{logger::Logger, server::WasmHandler};
 use oak_functions_lookup::{LookupDataManager, LookupFactory};
 use oak_functions_metrics::{BucketConfig, PrivateMetricsConfig, PrivateMetricsProxyFactory};
@@ -73,9 +73,7 @@ async fn test_read_write() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"ReadWrite".to_vec(),
-    };
+    let request = b"ReadWrite".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "ReadWriteResponse");
 }
@@ -90,9 +88,7 @@ async fn test_double_read() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"DoubleRead".to_vec(),
-    };
+    let request = b"DoubleRead".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "DoubleReadResponse");
 }
@@ -107,9 +103,7 @@ async fn test_double_write() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"DoubleWrite".to_vec(),
-    };
+    let request = b"DoubleWrite".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "DoubleWriteResponse");
 }
@@ -124,9 +118,7 @@ async fn test_write_log() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"WriteLog".to_vec(),
-    };
+    let request = b"WriteLog".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "WriteLogResponse");
 }
@@ -134,8 +126,7 @@ async fn test_write_log() {
 #[tokio::test]
 async fn test_storage_get_item() {
     let entries = hashmap! {
-       b"StorageGet".to_vec() => b"StorageGetResponse".to_vec(),
-    };
+    b"StorageGet".to_vec() => b"StorageGetResponse".to_vec()    };
 
     let logger = Logger::for_test();
     let lookup_data_manager = Arc::new(LookupDataManager::for_test(entries, logger.clone()));
@@ -145,9 +136,7 @@ async fn test_storage_get_item() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"StorageGet".to_vec(),
-    };
+    let request = b"StorageGet".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "StorageGetResponse");
 }
@@ -165,9 +154,7 @@ async fn test_storage_get_item_not_found() {
     let wasm_handler = WasmHandler::create(&LOOKUP_WASM_MODULE_BYTES, vec![lookup_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"StorageGetItemNotFound".to_vec(),
-    };
+    let request = b"StorageGetItemNotFound".to_vec();
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "No item found");
 }
@@ -185,9 +172,7 @@ async fn test_echo() {
         WasmHandler::create(&TESTING_WASM_MODULE_BYTES, vec![testing_factory], logger)
             .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: message_to_echo.as_bytes().to_vec(),
-    };
+    let request = message_to_echo.as_bytes().to_vec();
 
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, message_to_echo);
@@ -209,9 +194,7 @@ async fn test_blackhole() {
         WasmHandler::create(&TESTING_WASM_MODULE_BYTES, vec![testing_factory], logger)
             .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: message_to_blackhole.as_bytes().to_vec(),
-    };
+    let request = message_to_blackhole.as_bytes().to_vec();
 
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "Blackholed");
@@ -241,9 +224,7 @@ async fn test_report_metric() {
             .expect("Could not instantiate WasmHandler.");
 
     // The request is ignored in the Wasm module.
-    let request = Request {
-        body: b"_".to_vec(),
-    };
+    let request = b"_".to_vec();
 
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     // Keep in sync with
@@ -287,9 +268,7 @@ async fn test_tf_model_infer_bad_input() {
     let wasm_handler = WasmHandler::create(&TF_WASM_MODULE_BYTES, vec![tf_factory], logger)
         .expect("Could not instantiate WasmHandler.");
 
-    let request = Request {
-        body: b"intentionally bad input vector".to_vec(),
-    };
+    let request = b"intentionally bad input vector".to_vec();
 
     let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
     test_utils::assert_response_body(response, "ErrBadTensorFlowModelInput");

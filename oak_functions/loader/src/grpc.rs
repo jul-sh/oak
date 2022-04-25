@@ -23,7 +23,7 @@ use crate::{
 };
 use anyhow::Context;
 use log::Level;
-use oak_functions_abi::proto::{ConfigurationInfo, Request, ServerPolicy};
+use oak_functions_abi::proto::{ConfigurationInfo, ServerPolicy};
 use oak_logger::OakLogger;
 use oak_utils::LogError;
 use prost::Message;
@@ -34,10 +34,7 @@ async fn handle_request(
     policy: ServerPolicy,
     decrypted_request: Vec<u8>,
 ) -> anyhow::Result<Vec<u8>> {
-    let request = Request {
-        body: decrypted_request,
-    };
-    let function = async move || wasm_handler.clone().handle_invoke(request).await;
+    let function = async move || wasm_handler.clone().handle_invoke(decrypted_request).await;
     let policy = policy.clone();
     let response = apply_policy(policy, function)
         .await

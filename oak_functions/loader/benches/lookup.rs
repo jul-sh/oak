@@ -24,7 +24,7 @@ use criterion::{
     BenchmarkId, Criterion, PlotConfiguration,
 };
 use lookup_data_generator::data::generate_and_serialize_random_entries;
-use oak_functions_abi::proto::{Request, StatusCode};
+use oak_functions_abi::proto::StatusCode;
 use oak_functions_loader::{
     logger::Logger, lookup_data::parse_lookup_entries, server::WasmHandler,
 };
@@ -169,10 +169,9 @@ fn run_lookup_iteration(
     benchmark_request: &[u8],
     expected_value: &[u8],
 ) {
-    let request = Request {
-        body: benchmark_request.to_owned(),
-    };
-    let resp = rt.block_on(wasm_handler.handle_invoke(request)).unwrap();
+    let resp = rt
+        .block_on(wasm_handler.handle_invoke(benchmark_request.to_owned()))
+        .unwrap();
     assert_eq!(resp.status, StatusCode::Success as i32);
     assert_eq!(&resp.body, expected_value);
 }

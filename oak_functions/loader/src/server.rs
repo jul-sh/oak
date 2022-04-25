@@ -19,9 +19,7 @@ use anyhow::Context;
 use byteorder::{ByteOrder, LittleEndian};
 use futures::future::FutureExt;
 use log::Level;
-use oak_functions_abi::proto::{
-    ExtensionHandle, OakStatus, Request, Response, ServerPolicy, StatusCode,
-};
+use oak_functions_abi::proto::{ExtensionHandle, OakStatus, Response, ServerPolicy, StatusCode};
 use oak_functions_extension::OakApiNativeExtension;
 use oak_logger::OakLogger;
 use serde::Deserialize;
@@ -696,8 +694,7 @@ impl WasmHandler {
         Ok(wasm_state)
     }
 
-    pub async fn handle_invoke(&self, request: Request) -> anyhow::Result<Response> {
-        let request_bytes = request.body;
+    pub async fn handle_invoke(&self, request_bytes: Vec<u8>) -> anyhow::Result<Response> {
         let mut wasm_state = self.init_wasm_state(request_bytes)?;
 
         wasm_state.invoke();

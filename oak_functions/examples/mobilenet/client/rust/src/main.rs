@@ -17,7 +17,7 @@
 //! Sends an image to the mobilenet application and checks that the response is correct.
 
 use anyhow::Context;
-use oak_functions_abi::proto::{ConfigurationInfo, Request};
+use oak_functions_abi::proto::ConfigurationInfo;
 use oak_functions_client::Client;
 use tract_tensorflow::prelude::*;
 
@@ -70,12 +70,8 @@ async fn main() -> anyhow::Result<()> {
     .into();
     let bytes = unsafe { tensor.as_bytes() };
 
-    let request = Request {
-        body: bytes.to_vec(),
-    };
-
     let response = client
-        .invoke(request)
+        .invoke(bytes.to_vec())
         .await
         .context("Could not invoke Oak Functions")?;
 

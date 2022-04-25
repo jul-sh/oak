@@ -19,7 +19,7 @@
 
 use anyhow::Context;
 use clap::Parser;
-use oak_functions_abi::proto::{ConfigurationInfo, Request};
+use oak_functions_abi::proto::ConfigurationInfo;
 use oak_functions_client::Client;
 use regex::Regex;
 
@@ -59,16 +59,12 @@ async fn main() -> anyhow::Result<()> {
         Ok(())
     };
 
-    let request = Request {
-        body: opt.request.as_bytes().to_vec(),
-    };
-
     let mut client = Client::new(&opt.uri, config_verifier)
         .await
         .context("Could not create Oak Functions client")?;
 
     let response = client
-        .invoke(request)
+        .invoke(opt.request.as_bytes().to_vec())
         .await
         .context("Could not invoke Oak Functions")?;
 

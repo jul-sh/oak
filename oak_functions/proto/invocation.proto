@@ -21,13 +21,6 @@ package oak.functions.invocation;
 option java_multiple_files = true;
 option java_package = "oak.functions.invocation";
 
-// Represents a request sent to an Oak Functions application. It wraps a byte array that the Wasm
-// module can interpret as a request it can handle.
-message Request {
-  // The body of the request.
-  bytes body = 1;
-}
-
 // Represents the response from an Oak Functions application. This is included in the body of the
 // HTTP response sent to the client.
 message Response {

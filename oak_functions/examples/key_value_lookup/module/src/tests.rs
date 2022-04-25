@@ -16,7 +16,7 @@
 extern crate test;
 
 use maplit::hashmap;
-use oak_functions_abi::proto::{Request, ServerPolicy, StatusCode};
+use oak_functions_abi::proto::{ServerPolicy, StatusCode};
 use oak_functions_loader::{
     grpc::{create_and_start_grpc_server, create_wasm_handler},
     logger::Logger,
@@ -149,9 +149,7 @@ fn bench_wasm_handler(bencher: &mut Bencher) {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let summary = bencher.bench(|bencher| {
         bencher.iter(|| {
-            let request = Request {
-                body: br#"key_1"#.to_vec(),
-            };
+            let request = br#"key_1"#.to_vec();
             let resp = rt
                 .block_on(wasm_handler.clone().handle_invoke(request))
                 .unwrap();

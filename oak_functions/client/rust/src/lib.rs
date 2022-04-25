@@ -24,7 +24,7 @@ pub mod rekor;
 use crate::attestation::{into_server_identity_verifier, ConfigurationVerifier};
 use anyhow::Context;
 use grpc_unary_attestation::client::AttestationClient;
-use oak_functions_abi::proto::{Request, Response};
+use oak_functions_abi::proto::Response;
 use prost::Message;
 
 #[cfg(test)]
@@ -49,9 +49,9 @@ impl Client {
         Ok(Client { inner })
     }
 
-    pub async fn invoke(&mut self, request: Request) -> anyhow::Result<Response> {
+    pub async fn invoke(&mut self, payload: Vec<u8>) -> anyhow::Result<Response> {
         self.inner
-            .send(request)
+            .send(payload)
             .await
             .context("Error invoking Oak Functions instance")?
             .ok_or_else(|| anyhow::anyhow!("Empty response"))

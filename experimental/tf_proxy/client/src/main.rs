@@ -22,7 +22,7 @@ use anyhow::Context;
 use clap::Parser;
 use log::{debug, info, trace};
 use maplit::hashmap;
-use oak_functions_abi::proto::{ConfigurationInfo, Request};
+use oak_functions_abi::proto::ConfigurationInfo;
 use oak_functions_client::Client;
 use prost::Message;
 use proto::{
@@ -99,12 +99,9 @@ async fn main() -> anyhow::Result<()> {
             req_msg: predict_request.encode_to_vec(),
             last: true,
         };
-        let request = Request {
-            body: encapsulated_request.encode_to_vec(),
-        };
 
         let response = client
-            .invoke(request)
+            .invoke(encapsulated_request.encode_to_vec())
             .await
             .context("couldn't invoke Tensorflow Proxy")?;
 

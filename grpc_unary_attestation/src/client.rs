@@ -89,13 +89,10 @@ impl AttestationClient {
     }
 
     /// Sends data encrypted by the [`Encryptor`] to the server and decrypts the server responses.
-    pub async fn send(
-        &mut self,
-        request: oak_functions_abi::proto::Request,
-    ) -> anyhow::Result<Option<Vec<u8>>> {
+    pub async fn send(&mut self, payload: Vec<u8>) -> anyhow::Result<Option<Vec<u8>>> {
         let encrypted_request = self
             .encryptor
-            .encrypt(&request.body)
+            .encrypt(&payload)
             .context("Couldn't encrypt request")?;
         let encrypted_response = self
             .client

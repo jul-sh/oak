@@ -23,7 +23,6 @@ use crate::proto::{instruction::InstructionVariant, Instructions};
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 use maplit::{btreemap, hashmap};
-use oak_functions_abi::proto::Request;
 use oak_functions_loader::{
     logger::Logger, server::WasmHandler, OakFunctionsBoxedExtensionFactory,
 };
@@ -102,11 +101,10 @@ fuzz_target!(|instruction_list: Vec<ArbitraryInstruction>| {
     }
     let instructions = Instructions { instructions };
 
-    let mut body = vec![];
+    let mut request = vec![];
     instructions
         .encode(&mut body)
         .expect("Error encoding abi_function");
-    let request = Request { body };
 
     let entries = hashmap! {
         FIXED_KEY.to_vec() => br"value".to_vec(),
