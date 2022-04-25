@@ -74,7 +74,7 @@ async fn test_read_write() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"ReadWrite".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "ReadWriteResponse");
 }
 
@@ -89,7 +89,7 @@ async fn test_double_read() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"DoubleRead".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "DoubleReadResponse");
 }
 
@@ -104,7 +104,7 @@ async fn test_double_write() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"DoubleWrite".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "DoubleWriteResponse");
 }
 
@@ -119,14 +119,15 @@ async fn test_write_log() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"WriteLog".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "WriteLogResponse");
 }
 
 #[tokio::test]
 async fn test_storage_get_item() {
     let entries = hashmap! {
-    b"StorageGet".to_vec() => b"StorageGetResponse".to_vec()    };
+       b"StorageGet".to_vec() => b"StorageGetResponse".to_vec(),
+    };
 
     let logger = Logger::for_test();
     let lookup_data_manager = Arc::new(LookupDataManager::for_test(entries, logger.clone()));
@@ -137,7 +138,7 @@ async fn test_storage_get_item() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"StorageGet".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "StorageGetResponse");
 }
 
@@ -155,7 +156,7 @@ async fn test_storage_get_item_not_found() {
         .expect("Could not instantiate WasmHandler.");
 
     let request = b"StorageGetItemNotFound".to_vec();
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "No item found");
 }
 
@@ -174,7 +175,7 @@ async fn test_echo() {
 
     let request = message_to_echo.as_bytes().to_vec();
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, message_to_echo);
 }
 
@@ -196,7 +197,7 @@ async fn test_blackhole() {
 
     let request = message_to_blackhole.as_bytes().to_vec();
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "Blackholed");
 }
 
@@ -226,7 +227,7 @@ async fn test_report_metric() {
     // The request is ignored in the Wasm module.
     let request = b"_".to_vec();
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     // Keep in sync with
     // `workspace/oak_functions/sdk/oak_functions/tests/metrics_module/src/lib.rs`.
     test_utils::assert_response_body(response, "MetricReported");
@@ -260,7 +261,7 @@ async fn test_tf_model_infer_bad_input() {
 
     let tf_factory = TensorFlowFactory::new_boxed_extension_factory(
         model,
-        tf_model_config.shape.clone(),
+        tf_model_config.shape,
         logger.clone(),
     )
     .expect("Fail to create tf factory.");
@@ -270,6 +271,6 @@ async fn test_tf_model_infer_bad_input() {
 
     let request = b"intentionally bad input vector".to_vec();
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "ErrBadTensorFlowModelInput");
 }

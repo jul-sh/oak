@@ -34,7 +34,7 @@ async fn handle_request(
     policy: ServerPolicy,
     decrypted_request: Vec<u8>,
 ) -> anyhow::Result<Vec<u8>> {
-    let function = async move || wasm_handler.clone().handle_invoke(decrypted_request).await;
+    let function = move || wasm_handler.clone().handle_invoke(decrypted_request);
     let policy = policy.clone();
     let response = apply_policy(policy, function)
         .await
