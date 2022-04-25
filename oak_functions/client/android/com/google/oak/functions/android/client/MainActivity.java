@@ -32,7 +32,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.net.URL;
 import java.time.Duration;
-import oak.functions.invocation.Request;
 import oak.functions.invocation.Response;
 import oak.functions.invocation.StatusCode;
 
@@ -67,8 +66,7 @@ public class MainActivity extends Activity {
     String uri = uriInput.getText().toString();
 
     EditText requestInput = findViewById(R.id.requestInput);
-    byte[] requestBody = requestInput.getText().toString().getBytes(UTF_8);
-    Request request = Request.newBuilder().setBody(ByteString.copyFrom(requestBody)).build();
+    byte[] request = requestInput.getText().toString().getBytes(UTF_8);
 
     TextView resultTextView = findViewById(R.id.resultTextView);
     try {

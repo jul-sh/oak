@@ -207,13 +207,13 @@ public class AttestationClient {
    * @param request contains a request to be sent via the attested gRPC channel.
    */
   @SuppressWarnings("ProtoParseWithRegistry")
-  public Response send(Request request)
+  public Response send(byte[] request)
       throws GeneralSecurityException, IOException, InterruptedException {
     if (channel == null || encryptor == null || sessionId == null || stub == null) {
       throw new IllegalStateException("Session is not available");
     }
 
-    byte[] encryptedData = encryptor.encrypt(request.getBody().toByteArray());
+    byte[] encryptedData = encryptor.encrypt(byte[]);
     UnaryRequest unaryRequest = UnaryRequest.newBuilder()
                                     .setBody(ByteString.copyFrom(encryptedData))
                                     .setSessionId(sessionId)
