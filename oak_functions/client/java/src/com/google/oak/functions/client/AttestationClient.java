@@ -213,7 +213,7 @@ public class AttestationClient {
       throw new IllegalStateException("Session is not available");
     }
 
-    byte[] encryptedData = encryptor.encrypt(byte[]);
+    byte[] encryptedData = encryptor.encrypt(request);
     UnaryRequest unaryRequest = UnaryRequest.newBuilder()
                                     .setBody(ByteString.copyFrom(encryptedData))
                                     .setSessionId(sessionId)
