@@ -25,11 +25,10 @@ use oak_functions_abi::proto::{Request, ServerPolicy, StatusCode};
 use oak_functions_loader::{
     grpc::{create_and_start_grpc_server, create_wasm_handler},
     logger::Logger,
-    lookup::LookupFactory,
     lookup_data::{parse_lookup_entries, LookupDataAuth, LookupDataRefresher, LookupDataSource},
     server::WasmHandler,
 };
-use oak_functions_lookup::LookupDataManager;
+use oak_functions_lookup::{LookupDataManager, LookupFactory};
 use rand::{prelude::StdRng, SeedableRng};
 use std::{
     net::{Ipv6Addr, SocketAddr},
@@ -227,15 +226,12 @@ fn bench_wasm_handler(bencher: &mut Bencher, warmup: bool) {
     let wasm_handler = WasmHandler::create(&wasm_module_bytes, vec![lookup_factory], logger)
         .expect("Couldn't create the server");
 
-    let rt = tokio::runtime::Runtime::new().unwrap();
     let summary = bencher.bench(|bencher| {
         bencher.iter(|| {
             let request = Request {
                 body: br#"{"lat":-60.1,"lng":120.1}"#.to_vec(),
             };
-            let resp = rt
-                .block_on(wasm_handler.clone().handle_invoke(request))
-                .unwrap();
+            let resp = wasm_handler.clone().handle_invoke(request).unwrap();
             assert_eq!(resp.status, StatusCode::Success as i32);
         });
     });

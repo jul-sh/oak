@@ -17,13 +17,12 @@
 use crate::{
     grpc::{create_and_start_grpc_server, create_wasm_handler},
     logger::Logger,
-    lookup::LookupFactory,
     lookup_data::{parse_lookup_entries, LookupDataAuth, LookupDataRefresher, LookupDataSource},
-    server::{apply_policy, format_bytes},
+    server::apply_policy,
 };
 use maplit::hashmap;
 use oak_functions_abi::proto::{Response, ServerPolicy, StatusCode};
-use oak_functions_lookup::LookupDataManager;
+use oak_functions_lookup::{LookupDataManager, LookupFactory};
 use prost::Message;
 use std::{
     io::{Seek, Write},
@@ -427,7 +426,7 @@ async fn test_apply_policy() {
     {
         // Wasm response with small enough body is serialized with padding, and no other change
         let small_success_response = Response::create(StatusCode::Success, vec![b'x'; size]);
-        let function = async move || Ok(small_success_response);
+        let function = move || Ok(small_success_response);
         let res = apply_policy(policy.clone(), function).await;
         assert!(res.is_ok());
         let response = res.unwrap();
@@ -441,7 +440,7 @@ async fn test_apply_policy() {
     {
         // Success Wasm response with a large body is discarded, and replaced with an error response
         let large_success_response = Response::create(StatusCode::Success, vec![b'x'; size + 1]);
-        let function = async move || Ok(large_success_response);
+        let function = || Ok(large_success_response);
         let res = apply_policy(policy.clone(), function).await;
         assert!(res.is_ok());
         let response = res.unwrap();
@@ -451,12 +450,4 @@ async fn test_apply_policy() {
             policy.constant_response_size_bytes as usize
         );
     }
-}
-
-#[test]
-fn test_format_bytes() {
-    // Valid UTF-8 string.
-    assert_eq!("🚀oak⭐", format_bytes("🚀oak⭐".as_bytes()));
-    // Incorrect UTF-8 bytes, as per https://doc.rust-lang.org/std/string/struct.String.html#examples-3.
-    assert_eq!("[0, 159, 146, 150]", format_bytes(&[0, 159, 146, 150]));
 }

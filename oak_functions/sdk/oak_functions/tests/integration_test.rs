@@ -17,16 +17,10 @@
 use lazy_static::lazy_static;
 use maplit::{btreemap, hashmap};
 use oak_functions_abi::proto::{Request, Response};
-use oak_functions_loader::{
-    logger::Logger,
-    lookup::LookupFactory,
-    metrics::PrivateMetricsProxyFactory,
-    server::WasmHandler,
-    tf::{read_model_from_path, TensorFlowFactory},
-};
-use oak_functions_lookup::LookupDataManager;
-use oak_functions_metrics::{BucketConfig, PrivateMetricsConfig};
-use oak_functions_tf_inference::TensorFlowModelConfig;
+use oak_functions_loader::{logger::Logger, server::WasmHandler};
+use oak_functions_lookup::{LookupDataManager, LookupFactory};
+use oak_functions_metrics::{BucketConfig, PrivateMetricsConfig, PrivateMetricsProxyFactory};
+use oak_functions_tf_inference::{read_model_from_path, TensorFlowFactory, TensorFlowModelConfig};
 
 use std::{path::PathBuf, sync::Arc};
 
@@ -82,7 +76,7 @@ async fn test_read_write() {
     let request = Request {
         body: b"ReadWrite".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "ReadWriteResponse");
 }
 
@@ -99,7 +93,7 @@ async fn test_double_read() {
     let request = Request {
         body: b"DoubleRead".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "DoubleReadResponse");
 }
 
@@ -116,7 +110,7 @@ async fn test_double_write() {
     let request = Request {
         body: b"DoubleWrite".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "DoubleWriteResponse");
 }
 
@@ -133,7 +127,7 @@ async fn test_write_log() {
     let request = Request {
         body: b"WriteLog".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "WriteLogResponse");
 }
 
@@ -154,7 +148,7 @@ async fn test_storage_get_item() {
     let request = Request {
         body: b"StorageGet".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "StorageGetResponse");
 }
 
@@ -174,7 +168,7 @@ async fn test_storage_get_item_not_found() {
     let request = Request {
         body: b"StorageGetItemNotFound".to_vec(),
     };
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "No item found");
 }
 
@@ -195,7 +189,7 @@ async fn test_echo() {
         body: message_to_echo.as_bytes().to_vec(),
     };
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, message_to_echo);
 }
 
@@ -219,7 +213,7 @@ async fn test_blackhole() {
         body: message_to_blackhole.as_bytes().to_vec(),
     };
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "Blackholed");
 }
 
@@ -251,7 +245,7 @@ async fn test_report_metric() {
         body: b"_".to_vec(),
     };
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     // Keep in sync with
     // `workspace/oak_functions/sdk/oak_functions/tests/metrics_module/src/lib.rs`.
     test_utils::assert_response_body(response, "MetricReported");
@@ -285,7 +279,7 @@ async fn test_tf_model_infer_bad_input() {
 
     let tf_factory = TensorFlowFactory::new_boxed_extension_factory(
         model,
-        tf_model_config.shape.clone(),
+        tf_model_config.shape,
         logger.clone(),
     )
     .expect("Fail to create tf factory.");
@@ -297,6 +291,6 @@ async fn test_tf_model_infer_bad_input() {
         body: b"intentionally bad input vector".to_vec(),
     };
 
-    let response: Response = wasm_handler.handle_invoke(request).await.unwrap();
+    let response: Response = wasm_handler.handle_invoke(request).unwrap();
     test_utils::assert_response_body(response, "ErrBadTensorFlowModelInput");
 }
