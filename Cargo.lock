@@ -560,9 +560,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.1.10"
+version = "3.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3124f3f75ce09e22d1410043e1e24f2ecc44fad3afe4f08408f1f7663d68da2b"
+checksum = "85a35a599b11c089a7f49105658d089b8f2cf0882993c17daf6de15285c2c35d"
 dependencies = [
  "atty",
  "bitflags",
@@ -581,7 +581,7 @@ version = "3.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1506b87ee866f7a53a5131f7b31fba656170d797e873d0609884cfd56b8bbda8"
 dependencies = [
- "clap 3.1.10",
+ "clap 3.1.15",
 ]
 
 [[package]]
@@ -599,9 +599,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "189ddd3b5d32a70b35e7686054371742a937b0d99128e76dde6340210e966669"
+checksum = "a37c35f1112dad5e6e0b1adaff798507497a18fceeb30cceb3bae7d1427b9213"
 dependencies = [
  "os_str_bytes",
 ]
@@ -2009,7 +2009,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytes",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "location_utils",
  "log",
@@ -2024,7 +2024,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytes",
- "clap 3.1.10",
+ "clap 3.1.15",
  "location_utils",
  "multimap",
  "oak_functions_abi",
@@ -2128,7 +2128,7 @@ name = "metrics_client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "oak_functions_abi",
  "oak_functions_client",
  "tokio",
@@ -2450,7 +2450,7 @@ dependencies = [
  "async-stream",
  "async-trait",
  "base64",
- "clap 3.1.10",
+ "clap 3.1.15",
  "ecdsa",
  "env_logger 0.9.0",
  "grpc_unary_attestation",
@@ -2493,7 +2493,7 @@ dependencies = [
  "byteorder",
  "bytes",
  "chrono",
- "clap 3.1.10",
+ "clap 3.1.15",
  "criterion",
  "futures",
  "grpc_unary_attestation",
@@ -2632,7 +2632,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-stream",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures",
  "futures-core",
@@ -2672,7 +2672,7 @@ name = "oak_proxy_attestation"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures",
  "futures-core",
@@ -2708,7 +2708,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-stream",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures",
  "futures-core",
@@ -3982,7 +3982,7 @@ name = "tensorflow_client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "flate2",
  "hyper",
@@ -4005,7 +4005,7 @@ dependencies = [
  "anyhow",
  "async-stream",
  "bytes",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures",
  "grpc_unary_attestation",
@@ -4570,7 +4570,7 @@ name = "trusted_shuffler_backend"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures-core",
  "futures-util",
@@ -4585,7 +4585,7 @@ name = "trusted_shuffler_client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "http",
  "hyper",
@@ -4609,7 +4609,7 @@ name = "trusted_shuffler_server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "clap 3.1.10",
+ "clap 3.1.15",
  "env_logger 0.9.0",
  "futures-core",
  "futures-util",
@@ -4642,7 +4642,7 @@ checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
 name = "uefi-client"
 version = "0.1.0"
 dependencies = [
- "clap 3.1.10",
+ "clap 3.1.15",
  "oak_utils",
  "prost 0.10.1",
  "tokio",
@@ -4655,7 +4655,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bmrng",
- "clap 3.1.10",
+ "clap 3.1.15",
  "command-fds",
  "env_logger 0.9.0",
  "futures",
@@ -5329,7 +5329,7 @@ dependencies = [
  "async-trait",
  "cargo_metadata",
  "chrono",
- "clap 3.1.10",
+ "clap 3.1.15",
  "clap_complete",
  "colored",
  "itertools",
