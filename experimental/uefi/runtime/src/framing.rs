@@ -14,13 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{remote_attestation::AttestationHandler, Channel, Frame};
+use crate::{remote_attestation::AttestationHandler, Frame};
+use acid_io::{Read, Write};
 use anyhow::Context;
 
 // Processes incoming frames.
 pub fn handle_frames<T>(channel: &mut T) -> anyhow::Result<!>
 where
-    T: Channel,
+    T: Read + Write,
 {
     let wasm_handler = crate::wasm::new_wasm_handler()?;
     let attestation_handler =

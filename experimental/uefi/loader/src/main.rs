@@ -65,12 +65,23 @@ struct CommsChannel {
     inner: UnixStream,
 }
 
-impl Channel for CommsChannel {
-    fn send(&mut self, data: &[u8]) -> anyhow::Result<()> {
-        self.inner.write_all(data).map_err(anyhow::Error::msg)
+impl acid_io::Write for CommsChannel {
+    fn write(&mut self, src: &[u8]) -> acid_io::Result<usize> {
+        self.inner
+            .write(src)
+            .map_err(|_| acid_io::ErrorKind::Other.into())
     }
-    fn recv(&mut self, data: &mut [u8]) -> anyhow::Result<()> {
-        self.inner.read_exact(data).map_err(anyhow::Error::msg)
+
+    fn flush(&mut self) -> acid_io::Result<()> {
+        Ok(())
+    }
+}
+
+impl acid_io::Read for CommsChannel {
+    fn read(&mut self, dst: &mut [u8]) -> Result<usize, acid_io::Error> {
+        self.inner
+            .read(dst)
+            .map_err(|_| acid_io::ErrorKind::Other.into())
     }
 }
 

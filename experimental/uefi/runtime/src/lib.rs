@@ -19,6 +19,7 @@
 
 extern crate alloc;
 
+use acid_io::{Read, Write};
 use alloc::{vec, vec::Vec};
 use anyhow::{bail, Context};
 use oak_remote_attestation_sessions::{SessionId, SESSION_ID_LENGTH};
@@ -45,19 +46,21 @@ pub struct Frame {
 impl Frame {
     pub fn read_from_channel<T>(channel: &mut T) -> anyhow::Result<Self>
     where
-        T: Channel,
+        T: Read,
     {
         let mut length_buf = [0; FRAME_LENGTH_ENCODED_SIZE];
-        channel.recv(&mut length_buf)?;
+        channel
+            .read_exact(&mut length_buf)
+            .map_err(anyhow::Error::msg)?;
         let length = FrameLength::from_be_bytes(length_buf);
         let mut body: Vec<u8> = vec![0; length.into()];
-        channel.recv(&mut body)?;
+        channel.read_exact(&mut body).map_err(anyhow::Error::msg)?;
         Ok(Frame { body })
     }
 
     pub fn write_to_channel<T>(self, channel: &mut T) -> anyhow::Result<()>
     where
-        T: Channel,
+        T: Write,
     {
         let length: FrameLength = FrameLength::try_from(self.body.len())
             .map_err(anyhow::Error::msg)
@@ -66,7 +69,9 @@ impl Frame {
         let mut encoded_frame: Vec<u8> = Vec::with_capacity(encoded_length.len() + self.body.len());
         encoded_frame.extend(encoded_length);
         encoded_frame.extend(self.body);
-        channel.send(&encoded_frame)?;
+        channel
+            .write_all(&encoded_frame)
+            .map_err(anyhow::Error::msg)?;
         Ok(())
     }
 }

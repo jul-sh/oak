@@ -15,6 +15,7 @@ oak_remote_attestation = { path = "../../../remote_attestation/rust" }
 runtime = { path = "../runtime" }
 uefi = { version = "*", features = ["exts"] }
 uefi-services = "*"
+acid_io = { features = ["byteorder", "alloc"] }
 
 [dev-dependencies]
 uefi-services = { version = "*", features = ["qemu"] }
