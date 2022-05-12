@@ -38,7 +38,28 @@ pub trait Channel {
 pub type FrameLength = u32;
 const FRAME_LENGTH_ENCODED_SIZE: usize = 4;
 
+/// Links multiple frames that make up a single message. Also links request
+/// messages with response messages.
+pub type InvocationId = u16;
+const INVOCATION_ID_ENCODED_SIZE: usize = 2;
+
+/// 0x1 indicates the start of a stream of frames that constitute a message.
+/// 0x2 indicates its end.
+/// 0x3 - 0x8 must be unset and ignored.
+pub type Flags = u8;
+const FLAGS_ENCODED_SIZE: usize = 1;
+
+type MethodStatus = u8;
+const METHOD_STATUS_ENCODED_SIZE: usize = 1;
+
+/// Encoded the FrameHeader is 8 bytes.
+pub const FRAME_HEADER_SIZE: usize = 8;
+
 pub struct Frame {
+    pub length: FrameLength,
+    pub invocation_id: InvocationId,
+    pub flags: Flags,
+    pub method_status: MethodStatus,
     pub body: Vec<u8>,
 }
 
@@ -52,17 +73,42 @@ impl<T: Channel> Framed<T> {
     }
 
     pub fn read_frame(&mut self) -> anyhow::Result<Frame> {
-        let mut length_buf = [0; FRAME_LENGTH_ENCODED_SIZE];
-        self.inner.recv(&mut length_buf)?;
-        let length = FrameLength::from_be_bytes(length_buf);
+        let length = {
+            let mut length_bytes = [0; FRAME_LENGTH_ENCODED_SIZE];
+            self.inner.recv(&mut length_bytes)?;
+            FrameLength::from_le_bytes(length_bytes)
+        };
+        let invocation_id = {
+            let mut invocation_bytes = [0; INVOCATION_ID_ENCODED_SIZE];
+            self.inner.recv(&mut invocation_bytes)?;
+            InvocationId::from_le_bytes(invocation_bytes)
+        };
+        let flags = {
+            let mut flags_bytes = [0; FLAGS_ENCODED_SIZE];
+            self.inner.recv(&mut flags_bytes)?;
+            Flags::from_le_bytes(flags_bytes)
+        };
+        let method_status = {
+            let mut method_bytes = [0; METHOD_STATUS_ENCODED_SIZE];
+            self.inner.recv(&mut method_bytes)?;
+            MethodStatus::from_le_bytes(method_bytes)
+        };
+
+        let body_length: u32 = length - FRAME_HEADER_SIZE as u32;
         let mut body: Vec<u8> = vec![
             0;
-            usize::try_from(length).expect(
+            usize::try_from(body_length).expect(
                 "the supported pointer size is smaller than the frame length"
             )
         ];
         self.inner.recv(&mut body)?;
-        Ok(Frame { body })
+        Ok(Frame {
+            length,
+            invocation_id,
+            flags,
+            method_status,
+            body,
+        })
     }
 
     pub fn write_frame(&mut self, frame: Frame) -> anyhow::Result<()> {
@@ -70,11 +116,10 @@ impl<T: Channel> Framed<T> {
             .map_err(anyhow::Error::msg)
             .context("the frame body is too large")?;
         let encoded_length = length.to_be_bytes();
-        let mut encoded_frame: Vec<u8> =
-            Vec::with_capacity(encoded_length.len() + frame.body.len());
-        encoded_frame.extend(encoded_length);
-        encoded_frame.extend(frame.body);
-        self.inner.send(&encoded_frame)?;
+        self.inner.send(&encoded_length)?;
+        self.inner
+            .send(&[0; FRAME_HEADER_SIZE - FRAME_LENGTH_ENCODED_SIZE])?;
+        self.inner.send(&frame.body)?;
         Ok(())
     }
 }
