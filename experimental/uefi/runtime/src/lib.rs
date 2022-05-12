@@ -34,9 +34,9 @@ pub trait Channel {
     fn recv(&mut self, data: &mut [u8]) -> anyhow::Result<()>;
 }
 
-pub type FrameLength = u16;
-// The frame length is a u16, which is two bytes encoded.
-pub const FRAME_LENGTH_ENCODED_SIZE: usize = 2;
+/// Length of the entire frame, including the header.
+pub type FrameLength = u32;
+const FRAME_LENGTH_ENCODED_SIZE: usize = 4;
 
 pub struct Frame {
     pub body: Vec<u8>,
@@ -55,7 +55,12 @@ impl<T: Channel> Framed<T> {
         let mut length_buf = [0; FRAME_LENGTH_ENCODED_SIZE];
         self.inner.recv(&mut length_buf)?;
         let length = FrameLength::from_be_bytes(length_buf);
-        let mut body: Vec<u8> = vec![0; length.into()];
+        let mut body: Vec<u8> = vec![
+            0;
+            usize::try_from(length).expect(
+                "the supported pointer size is smaller than the frame length"
+            )
+        ];
         self.inner.recv(&mut body)?;
         Ok(Frame { body })
     }
