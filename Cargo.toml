@@ -63,5 +63,6 @@ exclude = [
   "oak_functions/loader/fuzz",
   "third_party/ring",
   "third_party/curve25519-dalek",
-  "third_party/x25519-dalek"
+  "third_party/x25519-dalek",
+  "wasm_pack"
 ]
