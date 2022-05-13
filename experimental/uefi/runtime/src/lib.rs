@@ -29,11 +29,31 @@ mod logger;
 mod remote_attestation;
 mod wasm;
 
+/// Encoded the FrameHeader is 8 bytes.
+pub const FRAME_HEADER_SIZE: usize = 8;
+
 /// Length of the entire frame, including the header.
 pub type FrameLength = u32;
-const FRAME_BYTES_SIZE: usize = 4;
+const FRAME_LENGTH_SIZE: usize = 4;
+
+/// Links multiple frames that make up a single message. Also links request
+/// messages with response messages.
+pub type InvocationId = u16;
+const INVOCATION_ID_SIZE: usize = 2;
+
+/// 0x1 indicates the start of a stream of frames that constitute a message.
+/// 0x2 indicates its end.
+/// 0x3 - 0x8 must be unset and ignored.
+pub type Flags = u8;
+const FLAGS_SIZE: usize = 1;
+
+type MethodStatus = u8;
+const METHOD_STATUS_SIZE: usize = 1;
 
 pub struct Frame {
+    pub invocation_id: InvocationId,
+    pub flags: Flags,
+    pub method_status: MethodStatus,
     pub body: Vec<u8>,
 }
 
@@ -51,13 +71,28 @@ where
 
     pub fn read_frame(&mut self) -> anyhow::Result<Frame> {
         let length = {
-            let mut length_bytes = [0; FRAME_BYTES_SIZE];
+            let mut length_bytes = [0; FRAME_LENGTH_SIZE];
             self.inner.read_exact(&mut length_bytes)?;
             FrameLength::from_le_bytes(length_bytes)
         };
+        let invocation_id = {
+            let mut invocation_bytes = [0; INVOCATION_ID_SIZE];
+            self.inner.read_exact(&mut invocation_bytes)?;
+            InvocationId::from_le_bytes(invocation_bytes)
+        };
+        let flags = {
+            let mut flags_bytes = [0; FLAGS_SIZE];
+            self.inner.read_exact(&mut flags_bytes)?;
+            Flags::from_le_bytes(flags_bytes)
+        };
+        let method_status = {
+            let mut method_bytes = [0; METHOD_STATUS_SIZE];
+            self.inner.read_exact(&mut method_bytes)?;
+            MethodStatus::from_le_bytes(method_bytes)
+        };
 
         let body = {
-            let body_length: u32 = length - FRAME_BYTES_SIZE as u32;
+            let body_length: u32 = length - FRAME_HEADER_SIZE as u32;
             let mut body: Vec<u8> = vec![
                 0;
                 usize::try_from(body_length).expect(
@@ -68,17 +103,27 @@ where
             body
         };
 
-        Ok(Frame { body })
+        Ok(Frame {
+            invocation_id,
+            flags,
+            method_status,
+            body,
+        })
     }
 
     pub fn write_frame(&mut self, frame: Frame) -> anyhow::Result<()> {
-        let length_bytes = {
-            let length = FrameLength::try_from(FRAME_BYTES_SIZE + frame.body.len())
-                .map_err(anyhow::Error::msg)
-                .context("the frame is too large")?;
-            length.to_le_bytes()
-        };
-        self.inner.write_all(&length_bytes)?;
+        {
+            let length_bytes = {
+                let length = FrameLength::try_from(FRAME_HEADER_SIZE + frame.body.len())
+                    .map_err(anyhow::Error::msg)
+                    .context("the frame is too large")?;
+                length.to_le_bytes()
+            };
+            self.inner.write_all(&length_bytes)?;
+        }
+        self.inner.write_all(&frame.invocation_id.to_le_bytes())?;
+        self.inner.write_all(&frame.flags.to_le_bytes())?;
+        self.inner.write_all(&frame.method_status.to_le_bytes())?;
         self.inner.write_all(&frame.body)?;
         Ok(())
     }

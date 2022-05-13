@@ -137,7 +137,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let comms_channel = CommsChannel { inner: comms };
         let mut framed = Framed::new(comms_channel);
         fn respond(framed: &mut Framed<CommsChannel>, input: Vec<u8>) -> anyhow::Result<Vec<u8>> {
-            framed.write_frame(Frame { body: input })?;
+            framed.write_frame(Frame {
+                invocation_id: 0,
+                flags: 0,
+                method_status: 0,
+                body: input,
+            })?;
             let response_frame = framed.read_frame()?;
             Ok(response_frame.body)
         }
