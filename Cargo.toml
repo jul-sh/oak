@@ -56,12 +56,12 @@ members = [
   "remote_attestation_sessions",
   "third_party/rust-hypervisor-firmware-subset",
   "xtask",
+  "experimental/uefi/baremetal",
+  "experimental/uefi/app",
 ]
 exclude = [
-  "experimental/uefi/app",
-  "experimental/uefi/baremetal",
   "oak_functions/loader/fuzz",
   "third_party/ring",
   "third_party/curve25519-dalek",
-  "third_party/x25519-dalek"
+  "third_party/x25519-dalek",
 ]
