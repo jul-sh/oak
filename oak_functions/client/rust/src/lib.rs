@@ -23,7 +23,11 @@ pub mod rekor;
 
 use crate::attestation::{into_server_identity_verifier, ConfigurationVerifier};
 use anyhow::Context;
-use grpc_unary_attestation::client::AttestationClient;
+use core::future::Future;
+use grpc_unary_attestation::{
+    client::AttestationClient,
+    proto::{UnaryRequest, UnaryResponse},
+};
 use oak_functions_abi::proto::{Request, Response};
 use prost::Message;
 
@@ -33,11 +37,19 @@ mod tests;
 // TODO(#1867): Add remote attestation support.
 const TEE_MEASUREMENT: &[u8] = br"Test TEE measurement";
 
-pub struct Client {
-    inner: AttestationClient,
+pub struct Client<F, Fut>
+where
+    F: Fn(UnaryRequest) -> Fut,
+    Fut: Future<Output = anyhow::Result<UnaryResponse>>,
+{
+    inner: AttestationClient<F, Fut>,
 }
 
-impl Client {
+impl<F, Fut> Client<F, Fut>
+where
+    F: Fn(UnaryRequest) -> Fut,
+    Fut: Future<Output = anyhow::Result<UnaryResponse>>,
+{
     pub async fn new(uri: &str, verifier: ConfigurationVerifier) -> anyhow::Result<Self> {
         let inner = AttestationClient::create(
             uri,

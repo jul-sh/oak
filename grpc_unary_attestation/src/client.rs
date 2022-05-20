@@ -14,33 +14,36 @@
 // limitations under the License.
 //
 
-use crate::proto::{unary_session_client::UnarySessionClient, UnaryRequest};
+use crate::proto::{unary_session_client::UnarySessionClient, UnaryRequest, UnaryResponse};
 use anyhow::Context;
+use core::future::Future;
 use oak_remote_attestation::handshaker::{
     AttestationBehavior, ClientHandshaker, Encryptor, ServerIdentityVerifier,
 };
 use oak_remote_attestation_sessions::SessionId;
-use tonic::transport::Channel;
 
 /// gRPC Attestation Service client implementation.
-pub struct AttestationClient {
+pub struct AttestationClient<F, Fut>
+where
+    F: Fn(UnaryRequest) -> Fut,
+    Fut: Future<Output = anyhow::Result<UnaryResponse>>,
+{
     session_id: SessionId,
     encryptor: Encryptor,
-    client: UnarySessionClient<Channel>,
+    client: F,
 }
 
-impl AttestationClient {
+impl<F, Fut> AttestationClient<F, Fut>
+where
+    F: Fn(UnaryRequest) -> Fut,
+    Fut: Future<Output = anyhow::Result<UnaryResponse>>,
+{
     pub async fn create(
-        uri: &str,
+        client: F,
         expected_tee_measurement: &[u8],
         server_verifier: ServerIdentityVerifier,
     ) -> anyhow::Result<Self> {
         let session_id: SessionId = rand::random();
-        let channel = Channel::from_shared(uri.to_string())
-            .context("Couldn't create gRPC channel")?
-            .connect()
-            .await?;
-        let mut client = UnarySessionClient::new(channel);
 
         let mut handshaker = ClientHandshaker::new(
             AttestationBehavior::create_peer_attestation(expected_tee_measurement),
@@ -50,14 +53,12 @@ impl AttestationClient {
             .create_client_hello()
             .context("Couldn't create client hello message")?;
 
-        let mut response = client
-            .message(UnaryRequest {
-                body: client_hello,
-                session_id: session_id.to_vec(),
-            })
-            .await
-            .context("Couldn't send client hello message")?
-            .into_inner();
+        let mut response = client(UnaryRequest {
+            body: client_hello,
+            session_id: session_id.to_vec(),
+        })
+        .await
+        .context("Couldn't send client hello message")?;
 
         while !handshaker.is_completed() {
             let request = handshaker
@@ -65,14 +66,12 @@ impl AttestationClient {
                 .context("Couldn't process handshake message")?;
 
             if let Some(request) = request {
-                response = client
-                    .message(UnaryRequest {
-                        body: request,
-                        session_id: session_id.to_vec(),
-                    })
-                    .await
-                    .context("Couldn't send client hello message")?
-                    .into_inner();
+                response = client(UnaryRequest {
+                    body: request,
+                    session_id: session_id.to_vec(),
+                })
+                .await
+                .context("Couldn't send client hello message")?;
             }
         }
 
@@ -93,15 +92,12 @@ impl AttestationClient {
             .encryptor
             .encrypt(&payload)
             .context("Couldn't encrypt request")?;
-        let encrypted_response = self
-            .client
-            .message(UnaryRequest {
-                session_id: self.session_id.to_vec(),
-                body: encrypted_request,
-            })
-            .await
-            .context("Couldn't send encrypted data request")?
-            .into_inner();
+        let encrypted_response = (self.client)(UnaryRequest {
+            session_id: self.session_id.to_vec(),
+            body: encrypted_request,
+        })
+        .await
+        .context("Couldn't send encrypted data request")?;
 
         let encoded_response = self
             .encryptor
