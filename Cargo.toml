@@ -64,5 +64,6 @@ exclude = [
   "third_party/ring",
   "third_party/curve25519-dalek",
   "third_party/x25519-dalek",
-  "wasm_pack"
+  "wasm_pack",
+  "experimental/web_client",
 ]
