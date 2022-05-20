@@ -17,6 +17,7 @@
 use anyhow::Context;
 use grpc_unary_attestation::client::AttestationClient;
 use std::io::{stdin, BufRead};
+use tonic::transport::Channel;
 
 use clap::Parser;
 
@@ -51,8 +52,13 @@ async fn chat(client: &mut AttestationClient, message: String) -> anyhow::Result
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Args::parse();
 
+    let channel = Channel::from_shared(cli.server)
+        .context("Couldn't create gRPC channel")?
+        .connect()
+        .await?;
+
     let mut client =
-        AttestationClient::create(&cli.server, TEE_MEASUREMENT, Box::new(|_config| Ok(())))
+        AttestationClient::create(channel, TEE_MEASUREMENT, Box::new(|_config| Ok(())))
             .await
             .context("Could not create client")?;
 

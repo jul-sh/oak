@@ -31,15 +31,11 @@ pub struct AttestationClient {
 
 impl AttestationClient {
     pub async fn create(
-        uri: &str,
+        channel: tonic::transport::channel::Channel,
         expected_tee_measurement: &[u8],
         server_verifier: ServerIdentityVerifier,
     ) -> anyhow::Result<Self> {
         let session_id: SessionId = rand::random();
-        let channel = Channel::from_shared(uri.to_string())
-            .context("Couldn't create gRPC channel")?
-            .connect()
-            .await?;
         let mut client = UnarySessionClient::new(channel);
 
         let mut handshaker = ClientHandshaker::new(

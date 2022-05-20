@@ -26,6 +26,7 @@ use anyhow::Context;
 use grpc_unary_attestation::client::AttestationClient;
 use oak_functions_abi::proto::{Request, Response};
 use prost::Message;
+use tonic::transport::Channel;
 
 #[cfg(test)]
 mod tests;
@@ -39,8 +40,12 @@ pub struct Client {
 
 impl Client {
     pub async fn new(uri: &str, verifier: ConfigurationVerifier) -> anyhow::Result<Self> {
+        let channel = Channel::from_shared(uri.to_string())
+            .context("Couldn't create gRPC channel")?
+            .connect()
+            .await?;
         let inner = AttestationClient::create(
-            uri,
+            channel,
             TEE_MEASUREMENT,
             into_server_identity_verifier(verifier),
         )
