@@ -18,6 +18,7 @@ members = [
   "experimental/uefi/client",
   "experimental/uefi/loader",
   "experimental/uefi/runtime",
+  "experimental/web_client",
   "oak_functions/abi",
   "oak_functions/client/rust",
   "oak_functions/examples/benchmark/module",
@@ -65,5 +66,4 @@ exclude = [
   "third_party/curve25519-dalek",
   "third_party/x25519-dalek",
   "wasm_pack",
-  "experimental/web_client",
 ]
