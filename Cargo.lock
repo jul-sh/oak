@@ -3161,6 +3161,7 @@ dependencies = [
  "anyhow",
  "lru",
  "oak_remote_attestation",
+ "rand 0.4.6",
 ]
 
 [[package]]

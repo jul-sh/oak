@@ -16,6 +16,8 @@
 
 //! Remote Attestation handshake protocol implemened using bidirectional streaming gRPC.
 
+#![feature(async_closure)]
+
 pub mod proto {
     #![allow(clippy::return_self_not_must_use)]
     tonic::include_proto!("oak.session.unary.v1");

@@ -18,6 +18,8 @@
 
 #![no_std]
 
+pub mod client;
+
 extern crate alloc;
 
 use alloc::{boxed::Box, sync::Arc, vec::Vec};
