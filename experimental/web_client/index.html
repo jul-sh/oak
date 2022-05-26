@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+  </head>
 
-<head>
-  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-</head>
-
-<body>
-  <script type="module">
-    import * as wasm from "./pkg/oak_functions_web_client.js";
-    window.wasm = wasm;
-    await wasm.default();
-    console.log('wasm ready')
-    wasm.set_hook();
-  </script>
-  Hi! Open console pls.
-</body>
-
+  <body>
+    <script type="module">
+      import * as wasm from './pkg/oak_functions_web_client.js';
+      window.wasm = wasm;
+      await wasm.default();
+      console.log('wasm ready');
+      wasm.set_hook();
+    </script>
+    Hi! Open console pls.
+  </body>
 </html>
