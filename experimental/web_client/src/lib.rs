@@ -18,13 +18,13 @@ mod utils;
 
 extern crate web_sys;
 
+use crate::proto::UnaryRequest;
 use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use oak_functions_abi::proto::Response;
-use oak_remote_attestation::handshaker::{
-    AttestationBehavior, ClientHandshaker, Encryptor, ServerIdentityVerifier,
-};
 use oak_remote_attestation_sessions::SessionId;
+use oak_remote_attestation_sessions_client::{GenericAttestationClient, UnaryClient};
 use prost::Message;
 use wasm_bindgen::prelude::*;
 
@@ -41,90 +41,32 @@ pub fn set_hook() {
 // TODO(#1867): Add remote attestation support.
 const TEE_MEASUREMENT: &[u8] = br"Test TEE measurement";
 
-/// gRPC Attestation Service client implementation.
-pub struct AttestationClient {
-    session_id: SessionId,
-    encryptor: Encryptor,
-}
+struct GrpcWebClient {}
 
-impl AttestationClient {
-    pub async fn create(
-        expected_tee_measurement: &[u8],
-        server_verifier: ServerIdentityVerifier,
-    ) -> anyhow::Result<Self> {
-        let session_id: SessionId = rand::random();
-
-        let mut handshaker = ClientHandshaker::new(
-            AttestationBehavior::create_peer_attestation(expected_tee_measurement),
-            server_verifier,
-        );
-        let client_hello = handshaker
-            .create_client_hello()
-            .context("Couldn't create client hello message")?;
-
-        let mut response = message(proto::UnaryRequest {
-            body: client_hello,
+#[async_trait(? Send)]
+impl UnaryClient for GrpcWebClient {
+    async fn message(&mut self, session_id: SessionId, body: Vec<u8>) -> anyhow::Result<Vec<u8>> {
+        let request_bytes = encode_body(UnaryRequest {
             session_id: session_id.to_vec(),
-        })
-        .await
-        .context("Couldn't send client hello message")?;
-
-        while !handshaker.is_completed() {
-            let request = handshaker
-                .next_step(&response.body)
-                .context("Couldn't process handshake message")?;
-
-            if let Some(request) = request {
-                response = message(proto::UnaryRequest {
-                    body: request,
-                    session_id: session_id.to_vec(),
-                })
-                .await
-                .context("Couldn't send client hello message")?;
-            }
-        }
-
-        let encryptor = handshaker
-            .get_encryptor()
-            .context("Couldn't get encryptor")?;
-
-        Ok(Self {
-            session_id,
-            encryptor,
-        })
-    }
-
-    /// Sends data encrypted by the [`Encryptor`] to the server and decrypts the server responses.
-    pub async fn send(&mut self, payload: Vec<u8>) -> anyhow::Result<Option<Vec<u8>>> {
-        let encrypted_request = self
-            .encryptor
-            .encrypt(&payload)
-            .context("Couldn't encrypt request")?;
-        let encrypted_response = message(proto::UnaryRequest {
-            session_id: self.session_id.to_vec(),
-            body: encrypted_request,
-        })
-        .await
-        .context("Couldn't send encrypted data request")?;
-
-        let encoded_response = self
-            .encryptor
-            .decrypt(&encrypted_response.body)
-            .context("Couldn't decrypt response")?;
-
-        Ok(Some(encoded_response))
+            body,
+        });
+        let response_bytes = send(request_bytes).await?;
+        let reply = decode_body::<proto::UnaryResponse>(response_bytes).await;
+        Ok(reply.body)
     }
 }
 
 #[wasm_bindgen]
 pub struct MyClient {
-    inner: AttestationClient,
+    inner: GenericAttestationClient<GrpcWebClient>,
 }
 
 #[wasm_bindgen]
 impl MyClient {
     pub async fn new() -> MyClient {
-        let inner = AttestationClient::create(
+        let grpc_web_client = GrpcWebClient {};
+        let inner = GenericAttestationClient::create(
+            grpc_web_client,
             TEE_MEASUREMENT,
             Box::new(|server_identity| {
                 if !server_identity.additional_info.is_empty() {
