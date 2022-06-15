@@ -18,7 +18,7 @@ use crate::{
     remote_attestation::{AttestationHandler, AttestationSessionHandler},
     wasm,
 };
-use alloc::boxed::Box;
+use alloc::{boxed::Box, vec::Vec};
 use anyhow::Context;
 use ciborium_io::{Read, Write};
 use oak_baremetal_communication_channel::{schema, schema::TrustedRuntime, InvocationChannel};
@@ -28,27 +28,54 @@ use oak_remote_attestation::handshaker::{
 };
 use oak_remote_attestation_sessions::SessionId;
 
-enum InitializationState<G, V>
-where
-    G: AttestationGenerator,
-    V: AttestationVerifier,
-{
+enum InitializationState<G: 'static + AttestationGenerator, V: 'static + AttestationVerifier> {
     Uninitialized(Option<AttestationBehavior<G, V>>),
     Initialized(Box<dyn AttestationHandler>),
 }
 
-struct InvocationHandler<G, V>
-where
-    G: AttestationGenerator,
-    V: AttestationVerifier,
+impl<G: 'static + AttestationGenerator, V: 'static + AttestationVerifier>
+    InitializationState<G, V>
 {
+    fn is_initialized(&self) -> bool {
+        match self {
+            InitializationState::Initialized(_attestation_handler) => true,
+            InitializationState::Uninitialized(_attestation_behavior) => false,
+        }
+    }
+    fn uninitialized(attestation_behavior: AttestationBehavior<G, V>) -> Self {
+        InitializationState::Uninitialized(Some(attestation_behavior))
+    }
+    fn initialize(
+        &mut self,
+        wasm_handler: oak_functions_wasm::WasmHandler<crate::logger::StandaloneLogger>,
+    ) -> Result<Self, oak_idl::Status> {
+        let attestation_behavior = match self {
+            InitializationState::Initialized(_attestation_handler) => {
+                return Err(oak_idl::Status::new(
+                    oak_idl::StatusCode::FailedPrecondition,
+                ));
+            }
+            InitializationState::Uninitialized(attestation_behavior) => {
+                attestation_behavior
+                .take()
+                .expect("The attestation_behavior should always be present. It is wrapped in an option purely so it can be taken without cloning.")
+            }
+        };
+
+        let attestation_handler = Box::new(AttestationSessionHandler::create(
+            move |v| wasm_handler.handle_raw_invoke(v),
+            attestation_behavior,
+        ));
+        Ok(InitializationState::Initialized(attestation_handler))
+    }
+}
+
+struct InvocationHandler<G: 'static + AttestationGenerator, V: 'static + AttestationVerifier> {
     initialization_state: InitializationState<G, V>,
 }
 
-impl<G: 'static, V: 'static> schema::TrustedRuntime for InvocationHandler<G, V>
-where
-    G: AttestationGenerator,
-    V: AttestationVerifier,
+impl<G: 'static + AttestationGenerator, V: 'static + AttestationVerifier> schema::TrustedRuntime
+    for InvocationHandler<G, V>
 {
     fn initialize(
         &mut self,
@@ -57,35 +84,25 @@ where
         oak_idl::utils::Message<oak_baremetal_communication_channel::schema::Empty>,
         oak_idl::Status,
     > {
-        match &mut self.initialization_state {
-            InitializationState::Initialized(_attestation_handler) => Err(oak_idl::Status::new(
+        if self.initialization_state.is_initialized() {
+            return Err(oak_idl::Status::new(
                 oak_idl::StatusCode::FailedPrecondition,
-            )),
-            InitializationState::Uninitialized(attestation_behavior) => {
-                let attestation_behavior = attestation_behavior
-                    .take()
-                    .expect("The attestation_behavior should always be present. It is wrapped in an option purely so it can be taken without cloning.");
-                let wasm_module_bytes: &[u8] = initialization
-                    .wasm_module()
-                    .ok_or_else(|| oak_idl::Status::new(oak_idl::StatusCode::InvalidArgument))?;
-                let wasm_handler = wasm::new_wasm_handler(wasm_module_bytes)
-                    .map_err(|_err| oak_idl::Status::new(oak_idl::StatusCode::Internal))?;
-                let attestation_handler = Box::new(AttestationSessionHandler::create(
-                    move |v| wasm_handler.handle_raw_invoke(v),
-                    attestation_behavior,
-                ));
-                self.initialization_state = InitializationState::Initialized(attestation_handler);
-                let response_message = {
-                    let mut builder = oak_idl::utils::MessageBuilder::default();
-                    let user_request_response =
-                        schema::Empty::create(&mut builder, &schema::EmptyArgs {});
-                    builder
-                        .finish(user_request_response)
-                        .map_err(|_err| oak_idl::Status::new(oak_idl::StatusCode::Internal))?
-                };
-                Ok(response_message)
-            }
+            ));
         }
+        let wasm_module_bytes: &[u8] = initialization
+            .wasm_module()
+            .ok_or_else(|| oak_idl::Status::new(oak_idl::StatusCode::InvalidArgument))?;
+        let wasm_handler = wasm::new_wasm_handler(wasm_module_bytes)
+            .map_err(|_err| oak_idl::Status::new(oak_idl::StatusCode::Internal))?;
+        self.initialization_state.initialize(wasm_handler)?;
+        let response_message = {
+            let mut builder = oak_idl::utils::MessageBuilder::default();
+            let user_request_response = schema::Empty::create(&mut builder, &schema::EmptyArgs {});
+            builder
+                .finish(user_request_response)
+                .map_err(|_err| oak_idl::Status::new(oak_idl::StatusCode::Internal))?
+        };
+        Ok(response_message)
     }
 
     fn handle_user_request(
@@ -136,7 +153,7 @@ where
     T: Read<Error = anyhow::Error> + Write<Error = anyhow::Error>,
 {
     let mut invocation_handler = InvocationHandler {
-        initialization_state: InitializationState::Uninitialized(Some(attestation_behavior)),
+        initialization_state: InitializationState::uninitialized(attestation_behavior),
     }
     .serve();
     let invocation_channel = &mut InvocationChannel::new(channel);
