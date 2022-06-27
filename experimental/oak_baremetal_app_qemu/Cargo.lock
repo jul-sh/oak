@@ -809,6 +809,8 @@ dependencies = [
  "prost",
  "prost-build",
  "serde",
+ "static_assertions",
+ "strum",
 ]
 
 [[package]]
