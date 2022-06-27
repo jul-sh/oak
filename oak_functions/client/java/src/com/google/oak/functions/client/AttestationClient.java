@@ -52,6 +52,49 @@ import oak.session.unary.v1.UnaryRequest;
 import oak.session.unary.v1.UnaryResponse;
 import oak.session.unary.v1.UnarySessionGrpc;
 
+public class Request {
+  public long decodeLength(byte[] lengthBytes) {
+    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    buffer.put(lengthBytes);
+    return buffer.getLong();
+  }
+}
+
+public enum StatusCode {
+  UNSPECIFIED(0),
+  // Indicates success of the operation. Similar to HTTP 200 status code.
+  SUCCESS(1),
+  // Indicates a problem with the request. Similar to HTTP 400 status code.
+  BAD_REQUEST(2),
+  // Indicates violation of the response size limit specified in the security policy.
+  POLICY_SIZE_VIOLATION(3),
+  // Indicates violation of the response processing-time limit specified in the security policy.
+  POLICY_TIME_VIOLATION(4),
+  // Indicates other internal errors at the server. Similar to HTTP 500 status code.
+  INTERNAL_SERVER_ERROR(5)
+
+  private final int value;
+  private StatusCode(int value) { this.value = value; }
+
+  private static final Map<Integer, StatusCode> map;
+  static {
+    map = Arrays.stream(values())
+        .collect(Collectors.toMap(e -> e.value, e -> e));
+  }
+
+  public static Optional<StatusCode> fromInt(int value) {
+    return Optional.ofNullable(map.get(value));
+  }
+
+  public static Optional<StatusCode> fromBytes(byte[] bytes) {
+    ByteBuffer buffer = ByteBuffer.allocate(Int.BYTES);
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    buffer.put(bytes);
+    return fromInt(buffer.getInt());
+  }
+}
+
 /**
  * Client with remote attestation support for sending requests to an Oak Functions application.
  */
