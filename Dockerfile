@@ -353,10 +353,21 @@ ENV CARGO_INCREMENTAL false
 # We use the `docker` user in order to maintain library paths on different
 # machines and to make Wasm modules reproducible.
 #
-# We do not set this as the default user in the Docker image, because we expect its uid not to match
-# uid of the host, therefore we need to first fix the uid before actually using the user. This is
-# done by /scripts/fix_docker_user_and_run .
+# We initially enable this user to use sudo group. However super user
+# priviledges are only used in the `ENTRYPOINT` script, which dynamically sets
+# groups and permissions of the docker user based on the host enviroment.
+# It then removes the user from the root group. This means that commands
+# passed to the container are not run as root.
 RUN useradd --shell=/bin/bash --create-home --user-group docker
+RUN apt-get --yes update \
+  && apt-get install --no-install-recommends --yes --option Acquire::http::Dl-Limit=500 \
+  sudo \
+  && apt-get clean \
+  && rm --recursive --force /var/lib/apt/lists/*
+RUN adduser docker sudo
+RUN echo "docker ALL=(ALL:ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/docker
+USER docker
+ENTRYPOINT ["sudo", "--preserve-env", "/workspace/scripts/docker_entrypoint"]
 
 # To make the scripts available to call from everywhere.
 ENV PATH "/workspace/scripts:${PATH}"

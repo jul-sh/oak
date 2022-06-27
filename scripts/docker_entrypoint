@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# This script is meant to be invoked **inside** the Docker container. It is set
+# as the `ENTRYPOINT` in our docker file, meaning it that it receives any
+# commands that should be executed in the container.
+# Ref: https://docs.docker.com/engine/reference/builder/#entrypoint
+#
+# It expects to be executed with root priviledges.
+# It sets relevant permissions and then de-priviledges the "docker" user before
+# switching to it, and executing any supplied commands.
+set -o errexit
+set -o nounset
+set -o xtrace
+set -o pipefail
+
+# Remove sudo priviledges from the docker user.
+sudo deluser docker sudo
+
+sudo groupmod --gid="${HOST_GID}" docker
+sudo usermod --uid="${HOST_UID}" --gid="${HOST_GID}" docker
+
+if [[ -n "${HOST_KVM_GID+x}" ]]; then
+  sudo groupadd --gid="${HOST_KVM_GID}" kvm
+  sudo usermod --groups="${HOST_KVM_GID}" docker
+fi
+
+sudo chown --recursive "${HOST_UID}":"${HOST_GID}" "/home/docker"
+
+# Switch back to the docker user and run any supplied commands.
+su docker --session-command="$*"
