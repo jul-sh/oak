@@ -172,6 +172,8 @@ sequenceDiagram
   TEE Platform -->> TEE Platform: Store a measurement of the Trusted Runtime
   TEE Platform ->> Trusted Runtime: Start the Trusted Runtime in a secure VM
 
+  activate Trusted Runtime
+
   Trusted Runtime-->>Trusted Runtime: Generate a Signing key pair
   Trusted Runtime-->>Trusted Runtime: Put Signing public key hash in the AttestationReport request
   Trusted Runtime->>TEE Platform: AttestationReport request
