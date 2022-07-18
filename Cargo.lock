@@ -795,16 +795,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "console_error_panic_hook"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
-dependencies = [
- "cfg-if",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "const-oid"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2690,9 +2680,9 @@ dependencies = [
 
 [[package]]
 name = "nix"
-version = "0.24.1"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f17df307904acd05aa8e32e97bb20f2a0df1728bbc2d771ae8f9a90463441e9"
+checksum = "195cdbc1741b8134346d515b3a56a1c94b0912758009cfd53f99ea0f57b065fc"
 dependencies = [
  "bitflags",
  "cfg-if",
@@ -3139,26 +3129,6 @@ dependencies = [
  "oak_logger",
  "test_utils",
  "wasmi",
-]
-
-[[package]]
-name = "oak_functions_web_client"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytes",
- "console_error_panic_hook",
- "js-sys",
- "oak_functions_abi",
- "oak_remote_attestation",
- "oak_remote_attestation_sessions",
- "prost 0.10.3",
- "prost-build 0.10.3",
- "rand 0.8.5",
- "reqwest",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
@@ -6518,7 +6488,7 @@ dependencies = [
  "colored",
  "itertools",
  "maplit",
- "nix 0.24.1",
+ "nix 0.24.2",
  "once_cell",
  "regex",
  "serde",
