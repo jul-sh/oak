@@ -19,7 +19,7 @@
 extern crate alloc;
 
 use crate::alloc::string::ToString;
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{string::String, vec::Vec};
 use core::fmt::Debug;
 
 pub mod utils;
@@ -169,5 +169,5 @@ pub trait Handler {
 #[cfg(feature = "async-clients")]
 #[async_trait::async_trait]
 pub trait AsyncHandler {
-    async fn invoke(&self, request: Request) -> Result<Vec<u8>, Status>;
+    async fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
 }
