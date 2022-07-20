@@ -215,7 +215,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .expect("errored when creating lookup data update message")
         };
 
-        if let Err(err) = client.update_lookup_data(lookup_data.buf()) {
+        if let Err(err) = client.update_lookup_data(lookup_data.into_vec()) {
             panic!("failed to send lookup data: {:?}", err)
         }
 
@@ -236,13 +236,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .finish(message)
                 .expect("errored when creating initialization message")
         };
-        if let Err(err) = client.initialize(initialization_message.buf()) {
+        if let Err(err) = client.initialize(initialization_message.into_vec()) {
             panic!("failed to initialize the runtime: {:?}", err)
         }
 
         while let Ok((encoded_request, response_dispatcher)) = request_receiver.recv().await {
             let response = client
-                .handle_user_request(&encoded_request)
+                .handle_user_request(encoded_request)
                 .map(|oak_idl_message| oak_idl_message.into_vec());
             response_dispatcher.respond(response).unwrap();
         }
