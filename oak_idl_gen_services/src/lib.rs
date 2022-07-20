@@ -36,7 +36,55 @@ mod reflection_generated {
     include!(concat!(env!("OUT_DIR"), "/reflection_generated.rs"));
 }
 
-/// Compile services from the provided flatbuffer file using the `flatc` binary installed on the
+/// Compile Rust server code from the services in the provided flatbuffer file using the `flatc`
+/// binary installed on the system.
+///
+/// For a service called `TestName`, `compile_services` generates the following objects:
+///
+/// - a struct named `TestNameServer`, which implements the `oak_idl::InvocationHandler` trait,
+///   dispatching each request to the appropriate method on the underlying service implementation.
+/// - a trait named `TestName`, with a method for each method defined in the macro, and an
+///   additional default method named `serve` which returns an instance of `TestNameServer`; the
+///   developer of a service would usually define a concrete struct and manually implement this
+///   trait for it.
+///
+/// For an input flatbuffer file with name `test_file.fbs`, the generated Rust file will be located
+/// at `${OUT_DIR}/test_file_services_servers.rs`.
+pub fn compile_services_servers(filename: &str) {
+    let schema = FlatbufferSchema::from_file(filename).unwrap();
+    let generated_rust_services = generate_from_bytes(&schema.bytes, &generate_service).unwrap();
+    let out_file = format!(
+        "{}/{}_services_servers.rs",
+        std::env::var("OUT_DIR").unwrap(),
+        schema.file_prefix
+    );
+    std::fs::write(&out_file, generated_rust_services).unwrap();
+}
+
+/// Compile Rust client code from the services in the provided flatbuffer file using the `flatc`
+/// binary installed on the system.
+///
+/// For a service called `TestName`, `compile_services_clients` generates the following objects:
+///
+/// - a struct named `TestNameClient`, exposing a method for each method defined in the service.
+///   This may be used to directly invoke the underlying handler in order to indirectly invoke
+///   methods on the corresponding `Server` object on the other side of the handler.
+///
+/// For an input flatbuffer file with name `test_file.fbs`, the generated Rust file will be located
+/// at `${OUT_DIR}/test_file_services_clients.rs`.
+pub fn compile_services_clients(filename: &str) {
+    let schema = FlatbufferSchema::from_file(filename).unwrap();
+    let generated_rust_services_clients =
+        generate_from_bytes(&schema.bytes, &generate_service_client).unwrap();
+    let out_file = format!(
+        "{}/{}_services_clients.rs",
+        std::env::var("OUT_DIR").unwrap(),
+        schema.file_prefix
+    );
+    std::fs::write(&out_file, generated_rust_services_clients).unwrap();
+}
+
+/// Representation of a schema generated with the using the `flatc` binary installed on the
 /// system.
 ///
 /// For a service called `TestName`, `compile_services` generates the following objects:
