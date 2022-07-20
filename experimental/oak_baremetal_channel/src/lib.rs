@@ -27,6 +27,7 @@ pub mod schema {
 
     include!(concat!(env!("OUT_DIR"), "/schema_generated.rs"));
     include!(concat!(env!("OUT_DIR"), "/schema_services.rs"));
+    include!(concat!(env!("OUT_DIR"), "/schema_services_clients.rs"));
 }
 
 mod frame;

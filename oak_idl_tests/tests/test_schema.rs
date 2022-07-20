@@ -22,6 +22,7 @@ mod test_schema {
 
     include!(concat!(env!("OUT_DIR"), "/test_schema_generated.rs"));
     include!(concat!(env!("OUT_DIR"), "/test_schema_services.rs"));
+    include!(concat!(env!("OUT_DIR"), "/test_schema_services_clients.rs"));
 }
 
 struct TestServiceImpl;

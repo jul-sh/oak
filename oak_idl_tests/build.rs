@@ -17,4 +17,5 @@
 fn main() {
     oak_idl_gen_structs::compile_structs("test_schema.fbs");
     oak_idl_gen_services::compile_services("test_schema.fbs");
+    oak_idl_gen_services::compile_services_clients("test_schema.fbs");
 }
