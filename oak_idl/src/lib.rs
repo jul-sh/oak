@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
 
 use crate::alloc::string::ToString;
-use alloc::{string::String, vec::Vec};
+use alloc::{boxed::Box, string::String, vec::Vec};
 use core::fmt::Debug;
 
 pub mod utils;
@@ -163,4 +163,11 @@ pub struct Request<'a> {
 /// output.
 pub trait Handler {
     fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
+}
+
+/// Async version of [`Handler`] to support async clients.
+#[cfg(feature = "async-clients")]
+#[async_trait::async_trait]
+pub trait AsyncHandler {
+    async fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
 }

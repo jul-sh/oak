@@ -13,7 +13,11 @@
 // limitations under the License.
 //
 
-const OUTPUTS: [&str; 2] = ["test_schema_services.rs", "test_schema_services_clients.rs"];
+const OUTPUTS: [&str; 2] = [
+    "test_schema_services.rs",
+    "test_schema_services_clients.rs",
+    "test_schema_services_async_clients.rs",
+];
 
 #[test]
 fn generate() {

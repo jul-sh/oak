@@ -16,6 +16,10 @@
 //! This crate contains tests for the `oak_idl_gen_structs` and `oak_idl_gen_services` crates. It
 //! needs to be separate from them in order to be able to invoke them at build time.
 
+extern crate alloc;
+
+use oak_idl::Handler;
+
 mod test_schema {
     #![allow(clippy::derivable_impls, clippy::needless_borrow)]
     #![allow(dead_code, unused_imports)]
@@ -23,6 +27,10 @@ mod test_schema {
     include!(concat!(env!("OUT_DIR"), "/test_schema_generated.rs"));
     include!(concat!(env!("OUT_DIR"), "/test_schema_services.rs"));
     include!(concat!(env!("OUT_DIR"), "/test_schema_services_clients.rs"));
+    include!(concat!(
+        env!("OUT_DIR"),
+        "/test_schema_services_async_clients.rs"
+    ));
 }
 
 struct TestServiceImpl;
@@ -76,6 +84,57 @@ fn test_lookup_data() {
     use test_schema::TestService;
     let handler = service.serve();
     let mut client = test_schema::TestServiceClient::new(handler);
+    {
+        let mut builder = oak_idl::utils::MessageBuilder::default();
+        let key = builder.create_vector::<u8>(&[14, 12]);
+        let request = test_schema::LookupDataRequest::create(
+            &mut builder,
+            &test_schema::LookupDataRequestArgs { key: Some(key) },
+        );
+        let message = builder.finish(request).unwrap();
+        let response = client.lookup_data(message.buf()).unwrap();
+        assert_eq!(Some([19, 88].as_ref()), response.get().value());
+    }
+    {
+        let mut builder = oak_idl::utils::MessageBuilder::default();
+        let key = builder.create_vector::<u8>(&[10, 00]);
+        let request = test_schema::LookupDataRequest::create(
+            &mut builder,
+            &test_schema::LookupDataRequestArgs { key: Some(key) },
+        );
+        let message = builder.finish(request).unwrap();
+        let response = client.lookup_data(message.buf()).unwrap();
+        assert_eq!(None, response.get().value());
+    }
+}
+
+/// Simple async wrapper around the synchronous server.
+/// Used to test async clients that expect an async handler.
+pub struct AsyncTestServiceServer<S: test_schema::TestService> {
+    inner: test_schema::TestServiceServer<S>,
+}
+
+#[async_trait::async_trait]
+impl<S: test_schema::TestService + std::marker::Send> oak_idl::AsyncHandler
+    for AsyncTestServiceServer<S>
+{
+    async fn invoke(
+        &mut self,
+        request: oak_idl::Request,
+    ) -> Result<alloc::vec::Vec<u8>, oak_idl::Status> {
+        self.inner.invoke(request)
+    }
+}
+
+#[test]
+fn test_async_lookup_data() {
+    let service = TestServiceImpl;
+    use test_schema::TestService;
+    let service_impl = service.serve();
+    let async_handler = AsyncTestServiceServer {
+        inner: service_impl,
+    };
+    let mut client = test_schema::TestServiceAsyncClient::new(async_handler);
     {
         let mut builder = oak_idl::utils::MessageBuilder::default();
         let key = builder.create_vector::<u8>(&[14, 12]);
