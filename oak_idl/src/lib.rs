@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
 
@@ -144,12 +144,12 @@ type MethodId = u32;
 
 /// A request message representing an invocation of the method identified by `method_id` with the
 /// argument serialized as `body`.
-pub struct Request<'a> {
+pub struct Request {
     /// Identifies the method to be invoked, as defined by the IDL.
     pub method_id: MethodId,
     /// The serialized request payload, corresponding to the argument of the method identified by
     /// `method_id`.
-    pub body: &'a [u8],
+    pub body: Vec<u8>,
 }
 
 /// A message-oriented handler that allows performing invocations.
@@ -163,4 +163,11 @@ pub struct Request<'a> {
 /// output.
 pub trait Handler {
     fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
+}
+
+/// Async version of [`Handler`] to support async clients.
+#[cfg(feature = "async-clients")]
+#[async_trait::async_trait]
+pub trait AsyncHandler {
+    async fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
 }

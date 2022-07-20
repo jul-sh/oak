@@ -3278,6 +3278,7 @@ dependencies = [
 name = "oak_idl"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "flatbuffers",
 ]
 
@@ -3299,11 +3300,13 @@ version = "0.1.0"
 name = "oak_idl_tests"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "flatbuffers",
  "maplit",
  "oak_idl",
  "oak_idl_gen_services",
  "oak_idl_gen_structs",
+ "tokio",
 ]
 
 [[package]]
