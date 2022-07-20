@@ -118,8 +118,9 @@ impl ClientHandler {
     }
 }
 
-impl oak_idl::Handler for ClientHandler {
-    fn invoke(&mut self, request: oak_idl::Request) -> Result<Vec<u8>, oak_idl::Status> {
+#[async_trait::async_trait]
+impl oak_idl::AsyncHandler for ClientHandler {
+    async fn invoke(&mut self, request: oak_idl::Request) -> Result<Vec<u8>, oak_idl::Status> {
         let request_message = self.request_encoder.encode_request(request);
         let request_message_invocation_id = request_message.invocation_id;
         self.inner
@@ -190,7 +191,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut client = {
             let comms_channel = Box::new(CommsChannel { inner: comms });
             let client_handler = ClientHandler::new(comms_channel);
-            schema::TrustedRuntimeClient::new(client_handler)
+            schema::TrustedRuntimeAsyncClient::new(client_handler)
         };
 
         let lookup_data = {
@@ -215,7 +216,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .expect("errored when creating lookup data update message")
         };
 
-        if let Err(err) = client.update_lookup_data(lookup_data.into_vec()) {
+        if let Err(err) = client.update_lookup_data(lookup_data.into_vec()).await {
             panic!("failed to send lookup data: {:?}", err)
         }
 
@@ -236,13 +237,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .finish(message)
                 .expect("errored when creating initialization message")
         };
-        if let Err(err) = client.initialize(initialization_message.into_vec()) {
+        if let Err(err) = client.initialize(initialization_message.into_vec()).await {
             panic!("failed to initialize the runtime: {:?}", err)
         }
 
         while let Ok((encoded_request, response_dispatcher)) = request_receiver.recv().await {
             let response = client
                 .handle_user_request(encoded_request)
+                .await
                 .map(|oak_idl_message| oak_idl_message.into_vec());
             response_dispatcher.respond(response).unwrap();
         }
