@@ -115,19 +115,19 @@ pub struct AsyncTestServiceServer<S: test_schema::TestService> {
 }
 
 #[async_trait::async_trait]
-impl<S: test_schema::TestService + std::marker::Send> oak_idl::AsyncHandler
+impl<S: test_schema::TestService + std::marker::Send + std::marker::Sync> oak_idl::AsyncHandler
     for AsyncTestServiceServer<S>
 {
     async fn invoke(
-        &mut self,
+        &self,
         request: oak_idl::Request,
     ) -> Result<alloc::vec::Vec<u8>, oak_idl::Status> {
         self.inner.invoke(request)
     }
 }
 
-#[test]
-fn test_async_lookup_data() {
+#[tokio::test]
+async fn test_async_lookup_data() {
     let service = TestServiceImpl;
     use test_schema::TestService;
     let service_impl = service.serve();
@@ -143,7 +143,7 @@ fn test_async_lookup_data() {
             &test_schema::LookupDataRequestArgs { key: Some(key) },
         );
         let message = builder.finish(request).unwrap();
-        let response = client.lookup_data(message.buf()).unwrap();
+        let response = client.lookup_data(message.into_vec()).await.unwrap();
         assert_eq!(Some([19, 88].as_ref()), response.get().value());
     }
     {
@@ -154,7 +154,7 @@ fn test_async_lookup_data() {
             &test_schema::LookupDataRequestArgs { key: Some(key) },
         );
         let message = builder.finish(request).unwrap();
-        let response = client.lookup_data(message.buf()).unwrap();
+        let response = client.lookup_data(message.into_vec()).await.unwrap();
         assert_eq!(None, response.get().value());
     }
 }

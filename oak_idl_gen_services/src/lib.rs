@@ -370,7 +370,7 @@ fn generate_client_method(rpc_call: &RPCCall, asynchronous: bool) -> anyhow::Res
         format!("            method_id: {},", method_id(rpc_call)?),
         format!("            body: request_body,"),
         format!("        }};"),
-        format!("        let response_body = {} self.handler.invoke(request)?;", if asynchronous {"await"} else {""}),
+        format!("        let response_body = self.handler.invoke(request){}?;", if asynchronous {".await"} else {""}),
         format!("        oak_idl::utils::Message::from_vec(response_body).map_err(|err| oak_idl::Status::new_with_message(oak_idl::StatusCode::Internal, format!(\"Client failed to deserialize the response: {{:?}}\", err)))"),
         format!("    }}"),
     ])
