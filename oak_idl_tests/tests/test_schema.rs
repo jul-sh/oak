@@ -119,7 +119,7 @@ impl<S: test_schema::TestService + std::marker::Send + std::marker::Sync> oak_id
     for AsyncTestServiceServer<S>
 {
     async fn invoke(
-        &mut self,
+        &self,
         request: oak_idl::Request,
     ) -> Result<alloc::vec::Vec<u8>, oak_idl::Status> {
         self.inner.invoke(request)

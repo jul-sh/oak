@@ -162,12 +162,12 @@ pub struct Request {
 /// This is conceptually similar to a method that takes `&[u8]` as input but returns `Vec<u8>` as
 /// output.
 pub trait Handler {
-    fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
+    fn invoke(&self, request: Request) -> Result<Vec<u8>, Status>;
 }
 
 /// Async version of [`Handler`] to support async clients.
 #[cfg(feature = "async-clients")]
 #[async_trait::async_trait]
 pub trait AsyncHandler {
-    async fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
+    async fn invoke(&self, request: Request) -> Result<Vec<u8>, Status>;
 }
