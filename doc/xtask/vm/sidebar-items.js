@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Variant",""]],"fn":[["build_binary",""],["run_client",""],["run_loader",""],["run_variant",""],["run_vm_test",""]],"struct":[["VariantIter","An iterator over the variants of [Self]"]]});

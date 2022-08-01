@@ -142,6 +142,40 @@
 <span id="137">137</span>
 <span id="138">138</span>
 <span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
 </pre><pre class="rust"><code><span class="comment">//</span>
 <span class="comment">// Copyright 2022 The Project Oak Authors</span>
 <span class="comment">//</span>
@@ -158,128 +192,162 @@
 <span class="comment">// limitations under the License.</span>
 <span class="comment">//</span>
 
-<span class="attribute">#![<span class="ident">no_std</span>]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>;
 
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::alloc::string::ToString</span>;
+<span class="kw">use</span> <span class="ident">alloc</span>::{<span class="ident">string::String</span>, <span class="ident">vec::Vec</span>};
 <span class="kw">use</span> <span class="ident">core::fmt::Debug</span>;
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">utils</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ClientError</span> {
-    <span class="ident">InvalidRequest</span>,
-    <span class="ident">InvalidResponse</span>,
-    <span class="ident">TransportError</span>(<span class="ident">TransportError</span>),
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Status</span> {
+    <span class="kw">pub</span> <span class="ident">code</span>: <span class="ident">StatusCode</span>,
+    <span class="doccomment">/// English message that helps developers understand and resolve the error.</span>
+    <span class="kw">pub</span> <span class="ident">message</span>: <span class="ident">String</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">TransportError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ClientError</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">TransportError</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">ClientError::TransportError</span>(<span class="ident">e</span>)
+<span class="kw">impl</span> <span class="ident">Status</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">code</span>: <span class="ident">StatusCode</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">code</span>,
+            <span class="ident">message</span>: <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_message</span>(<span class="ident">code</span>: <span class="ident">StatusCode</span>, <span class="ident">message</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">code</span>,
+            <span class="ident">message</span>: <span class="ident">message</span>.<span class="ident">into</span>(),
+        }
     }
 }
 
+<span class="doccomment">/// gRPC status codes used by [`Status`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// These variants match the [gRPC status codes].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [gRPC status codes]: https://github.com/grpc/grpc/blob/master/doc/statuscodes.md#status-codes-and-their-use-in-grpc</span>
+<span class="comment">// Based on tonic&#39;s status code struct: https://github.com/hyperium/tonic/blob/91b73f9fc3c1bc281e85177808721b3efe37ece0/tonic/src/status.rs</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TransportError</span> {
-    <span class="ident">InvalidMessage</span>,
-    <span class="ident">InvalidTransactionId</span>,
-    <span class="ident">InvalidMethodId</span>,
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">StatusCode</span> {
+    <span class="doccomment">/// The operation completed successfully.</span>
+    <span class="prelude-val">Ok</span> <span class="op">=</span> <span class="number">0</span>,
+
+    <span class="doccomment">/// The operation was cancelled.</span>
+    <span class="ident">Cancelled</span> <span class="op">=</span> <span class="number">1</span>,
+
+    <span class="doccomment">/// Unknown error.</span>
+    <span class="ident">Unknown</span> <span class="op">=</span> <span class="number">2</span>,
+
+    <span class="doccomment">/// Client specified an invalid argument.</span>
+    <span class="ident">InvalidArgument</span> <span class="op">=</span> <span class="number">3</span>,
+
+    <span class="doccomment">/// Deadline expired before operation could complete.</span>
+    <span class="ident">DeadlineExceeded</span> <span class="op">=</span> <span class="number">4</span>,
+
+    <span class="doccomment">/// Some requested entity was not found.</span>
+    <span class="ident">NotFound</span> <span class="op">=</span> <span class="number">5</span>,
+
+    <span class="doccomment">/// Some entity that we attempted to create already exists.</span>
+    <span class="ident">AlreadyExists</span> <span class="op">=</span> <span class="number">6</span>,
+
+    <span class="doccomment">/// The caller does not have permission to execute the specified operation.</span>
+    <span class="ident">PermissionDenied</span> <span class="op">=</span> <span class="number">7</span>,
+
+    <span class="doccomment">/// Some resource has been exhausted.</span>
+    <span class="ident">ResourceExhausted</span> <span class="op">=</span> <span class="number">8</span>,
+
+    <span class="doccomment">/// The system is not in a state required for the operation&#39;s execution.</span>
+    <span class="ident">FailedPrecondition</span> <span class="op">=</span> <span class="number">9</span>,
+
+    <span class="doccomment">/// The operation was aborted.</span>
+    <span class="ident">Aborted</span> <span class="op">=</span> <span class="number">10</span>,
+
+    <span class="doccomment">/// Operation was attempted past the valid range.</span>
+    <span class="ident">OutOfRange</span> <span class="op">=</span> <span class="number">11</span>,
+
+    <span class="doccomment">/// Operation is not implemented or not supported.</span>
+    <span class="ident">Unimplemented</span> <span class="op">=</span> <span class="number">12</span>,
+
+    <span class="doccomment">/// Internal error.</span>
+    <span class="ident">Internal</span> <span class="op">=</span> <span class="number">13</span>,
+
+    <span class="doccomment">/// The service is currently unavailable.</span>
+    <span class="ident">Unavailable</span> <span class="op">=</span> <span class="number">14</span>,
+
+    <span class="doccomment">/// Unrecoverable data loss or corruption.</span>
+    <span class="ident">DataLoss</span> <span class="op">=</span> <span class="number">15</span>,
+
+    <span class="doccomment">/// The request does not have valid authentication credentials</span>
+    <span class="ident">Unauthenticated</span> <span class="op">=</span> <span class="number">16</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StatusCode</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">i</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">match</span> <span class="ident">i</span> {
+            <span class="number">0</span> =&gt; <span class="ident">StatusCode::Ok</span>,
+            <span class="number">1</span> =&gt; <span class="ident">StatusCode::Cancelled</span>,
+            <span class="number">2</span> =&gt; <span class="ident">StatusCode::Unknown</span>,
+            <span class="number">3</span> =&gt; <span class="ident">StatusCode::InvalidArgument</span>,
+            <span class="number">4</span> =&gt; <span class="ident">StatusCode::DeadlineExceeded</span>,
+            <span class="number">5</span> =&gt; <span class="ident">StatusCode::NotFound</span>,
+            <span class="number">6</span> =&gt; <span class="ident">StatusCode::AlreadyExists</span>,
+            <span class="number">7</span> =&gt; <span class="ident">StatusCode::PermissionDenied</span>,
+            <span class="number">8</span> =&gt; <span class="ident">StatusCode::ResourceExhausted</span>,
+            <span class="number">9</span> =&gt; <span class="ident">StatusCode::FailedPrecondition</span>,
+            <span class="number">10</span> =&gt; <span class="ident">StatusCode::Aborted</span>,
+            <span class="number">11</span> =&gt; <span class="ident">StatusCode::OutOfRange</span>,
+            <span class="number">12</span> =&gt; <span class="ident">StatusCode::Unimplemented</span>,
+            <span class="number">13</span> =&gt; <span class="ident">StatusCode::Internal</span>,
+            <span class="number">14</span> =&gt; <span class="ident">StatusCode::Unavailable</span>,
+            <span class="number">15</span> =&gt; <span class="ident">StatusCode::DataLoss</span>,
+            <span class="number">16</span> =&gt; <span class="ident">StatusCode::Unauthenticated</span>,
+
+            <span class="kw">_</span> =&gt; <span class="ident">StatusCode::Unknown</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">StatusCode</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">code</span>: <span class="ident">StatusCode</span>) -&gt; <span class="ident">u32</span> {
+        <span class="ident">code</span> <span class="kw">as</span> <span class="ident">u32</span>
+    }
 }
 
 <span class="doccomment">/// Unique identifier of a method within a service.</span>
 <span class="kw">type</span> <span class="ident">MethodId</span> <span class="op">=</span> <span class="ident">u32</span>;
 
-<span class="doccomment">/// Header of a transactional message.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See &lt;https://fuchsia.dev/fuchsia-src/reference/fidl/language/wire-format#transactional-messages&gt;</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Header</span> {
-    <span class="doccomment">/// Identifies the transaction over the underlying transport. Each transaction (a.k.a. call or</span>
-    <span class="doccomment">/// invocation) over the same transport must have a unique transaction id (regardless of the</span>
-    <span class="doccomment">/// method_id value).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The client picks a unique transaction id to put in the request header, and when the server</span>
-    <span class="doccomment">/// replies to that message, it also uses the same transaction id in the response message.</span>
-    <span class="kw">pub</span> <span class="ident">transaction_id</span>: <span class="ident">u32</span>,
-
+<span class="doccomment">/// A request message representing an invocation of the method identified by `method_id` with the</span>
+<span class="doccomment">/// argument serialized as `body`.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Request</span> {
     <span class="doccomment">/// Identifies the method to be invoked, as defined by the IDL.</span>
     <span class="kw">pub</span> <span class="ident">method_id</span>: <span class="ident">MethodId</span>,
-}
-
-<span class="doccomment">/// A transactional message.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The body field contains the serialized payload of the request or response.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note that the serialization of the body does not have to match the serialization of the Message</span>
-<span class="doccomment">/// itself. For instance, the Message may be serialized via bincode, but the payload may be</span>
-<span class="doccomment">/// serialized via protobuf.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TransportMessage</span> {
-    <span class="kw">pub</span> <span class="ident">header</span>: <span class="ident">Header</span>,
+    <span class="doccomment">/// The serialized request payload, corresponding to the argument of the method identified by</span>
+    <span class="doccomment">/// `method_id`.</span>
     <span class="kw">pub</span> <span class="ident">body</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// A message-oriented transport that allows performing invocations.</span>
+<span class="doccomment">/// A message-oriented handler that allows performing invocations.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Implementations of this trait are responsible for assigning a unique transaction id for each</span>
-<span class="doccomment">/// invocation request, and checking whether the transaction id on the response matches that of the</span>
-<span class="doccomment">/// request.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Transport</span> {
-    <span class="kw">fn</span> <span class="ident">invoke</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">request_message</span>: <span class="ident">TransportMessage</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TransportMessage</span>, <span class="ident">TransportError</span><span class="op">&gt;</span>;
+<span class="doccomment">/// The asymmetry between the request and response types is due to the fact that a [`Request`]</span>
+<span class="doccomment">/// instance contains a reference to the request body buffer, and also contains the method id of the</span>
+<span class="doccomment">/// invocation, while the return value is a `Vec&lt;u8&gt;` since it is allocated and owned by the</span>
+<span class="doccomment">/// invocation handler.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is conceptually similar to a method that takes `&amp;[u8]` as input but returns `Vec&lt;u8&gt;` as</span>
+<span class="doccomment">/// output.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Handler</span> {
+    <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">Request</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Status</span><span class="op">&gt;</span>;
 }
 
-<span class="doccomment">/// A wrapper for a message-oriented channel handle, which implements the [`Transport`] trait.</span>
-<span class="kw">struct</span> <span class="ident">Channel</span> {
-    <span class="ident">handle</span>: <span class="ident">u32</span>,
-    <span class="ident">next_transaction_id</span>: <span class="ident">u32</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Channel</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">handle</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">handle</span>,
-            <span class="ident">next_transaction_id</span>: <span class="number">0</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Transport</span> <span class="kw">for</span> <span class="ident">Channel</span> {
-    <span class="kw">fn</span> <span class="ident">invoke</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">request_message</span>: <span class="ident">TransportMessage</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TransportMessage</span>, <span class="ident">TransportError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">transaction_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_transaction_id</span>;
-        <span class="self">self</span>.<span class="ident">next_transaction_id</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">request_message</span> <span class="op">=</span> <span class="ident">request_message</span>;
-        <span class="ident">request_message</span>.<span class="ident">header</span>.<span class="ident">transaction_id</span> <span class="op">=</span> <span class="ident">transaction_id</span>;
-        <span class="comment">// The serialization of the outer message is fixed by the transport, since the header needs</span>
-        <span class="comment">// to be deserializable by the other end of the transport, but the body of the</span>
-        <span class="comment">// request / response is serialized at a higher level, and in potentially different format,</span>
-        <span class="comment">// since that&#39;s handled by the application (client and server).</span>
-        <span class="kw">let</span> <span class="ident">request_bytes</span> <span class="op">=</span>
-            <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">request_message</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TransportError::InvalidMessage</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">response_bytes</span> <span class="op">=</span> <span class="ident">invoke</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="ident">request_bytes</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">response_message</span>: <span class="ident">TransportMessage</span> <span class="op">=</span>
-            <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">response_bytes</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TransportError::InvalidMessage</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">if</span> <span class="ident">response_message</span>.<span class="ident">header</span>.<span class="ident">transaction_id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">transaction_id</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TransportError::InvalidTransactionId</span>);
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="ident">response_message</span>)
-    }
-}
-
-<span class="doccomment">/// A low-level message-oriented transport over channels. This is meant to emulate the low-level</span>
-<span class="doccomment">/// Wasm ABI in Oak, and will eventually be replaced by that.</span>
-<span class="kw">fn</span> <span class="ident">invoke</span>(<span class="ident">_channel_handle</span>: <span class="ident">u32</span>, <span class="ident">_request</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">TransportError</span><span class="op">&gt;</span> {
-    <span class="macro">unimplemented!</span>()
+<span class="doccomment">/// Async version of [`Handler`] to support async clients.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;async-clients&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">async_trait::async_trait</span>]</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsyncHandler</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">invoke</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">Request</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Status</span><span class="op">&gt;</span>;
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="oak_idl" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.0-nightly (de1bc0008 2022-04-21)" ></div>
