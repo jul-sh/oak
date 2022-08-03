@@ -112,7 +112,7 @@ fn test_lookup_data() {
 /// Simple async wrapper around the synchronous server.
 /// Used to test async clients that expect an async handler.
 pub struct AsyncTestServiceServer<S: test_schema::TestService> {
-    inner: test_schema::TestServiceServer<S>,
+    inner: std::sync::Arc<std::sync::Mutex<test_schema::TestServiceServer<S>>>,
 }
 
 #[async_trait::async_trait]
@@ -120,10 +120,10 @@ impl<S: test_schema::TestService + std::marker::Send + std::marker::Sync> oak_id
     for AsyncTestServiceServer<S>
 {
     async fn invoke(
-        &mut self,
+        &self,
         request: oak_idl::Request,
     ) -> Result<alloc::vec::Vec<u8>, oak_idl::Status> {
-        self.inner.invoke(request)
+        self.inner.lock().unwrap().invoke(request)
     }
 }
 
@@ -133,7 +133,7 @@ async fn test_async_lookup_data() {
     use test_schema::TestService;
     let service_impl = service.serve();
     let async_handler = AsyncTestServiceServer {
-        inner: service_impl,
+        inner: std::sync::Arc::new(std::sync::Mutex::new(service_impl)),
     };
     let mut client = test_schema::TestServiceAsyncClient::new(async_handler);
     {

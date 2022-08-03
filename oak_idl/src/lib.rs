@@ -169,5 +169,5 @@ pub trait Handler {
 #[cfg(feature = "async-clients")]
 #[async_trait::async_trait]
 pub trait AsyncHandler {
-    async fn invoke(&mut self, request: Request) -> Result<Vec<u8>, Status>;
+    async fn invoke(&self, request: Request) -> Result<Vec<u8>, Status>;
 }
