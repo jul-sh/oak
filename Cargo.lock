@@ -2851,8 +2851,6 @@ dependencies = [
  "bitflags",
  "flatbuffers",
  "oak_idl",
- "oak_idl_gen_services",
- "oak_idl_gen_structs",
  "static_assertions",
 ]
 
@@ -2898,12 +2896,15 @@ dependencies = [
  "oak_baremetal_communication_channel",
  "oak_functions_loader",
  "oak_idl",
+ "oak_idl_gen_services",
+ "oak_idl_gen_structs",
  "oak_remote_attestation_sessions",
  "oak_utils",
  "prost 0.10.4",
  "serde",
  "tokio",
  "tonic",
+ "tonic-web",
  "vsock",
 ]
 
@@ -2921,6 +2922,8 @@ dependencies = [
  "oak_functions_wasm",
  "oak_functions_workload_logging",
  "oak_idl",
+ "oak_idl_gen_services",
+ "oak_idl_gen_structs",
  "oak_logger",
  "oak_remote_attestation",
  "oak_remote_attestation_sessions",
@@ -3080,6 +3083,19 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml",
+]
+
+[[package]]
+name = "oak_functions_loader_linux_native"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap 3.2.10",
+ "log",
+ "oak_baremetal_communication_channel",
+ "oak_baremetal_runtime",
+ "oak_remote_attestation",
+ "oak_remote_attestation_amd",
 ]
 
 [[package]]
@@ -4360,7 +4376,6 @@ dependencies = [
 name = "rust-hypervisor-firmware-boot"
 version = "0.1.0"
 dependencies = [
- "bitflags",
  "log",
  "x86_64",
 ]
@@ -4594,9 +4609,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc855a42c7967b7c369eb5860f7164ef1f6f81c20c7cc1141f2a604e18723b03"
+checksum = "7af873f2c95b99fcb0bd0fe622a43e29514658873c8ceba88c4cb88833a22500"
 dependencies = [
  "serde_derive",
 ]
@@ -4613,9 +4628,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f2122636b9fe3b81f1cb25099fcf2d3f542cdb1d45940d56c713158884a05da"
+checksum = "75743a150d003dd863b51dc809bcad0d73f2102c53632f1e954e738192a3413f"
 dependencies = [
  "proc-macro2",
  "quote",
