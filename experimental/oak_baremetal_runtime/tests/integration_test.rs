@@ -15,7 +15,9 @@
 //
 
 use oak_baremetal_runtime::schema::TrustedRuntime;
-use oak_remote_attestation::handshaker::{AttestationBehavior, EmptyAttestationVerifier};
+use oak_remote_attestation::handshaker::{
+    AttestationBehavior, ClientHandshaker, EmptyAttestationVerifier,
+};
 use oak_remote_attestation_amd::PlaceholderAmdAttestationGenerator;
 
 mod schema {
@@ -32,13 +34,19 @@ const MOCK_SESSION_ID: &[u8; 8] = &[0, 0, 0, 0, 0, 0, 0, 0];
 fn it_should_not_handle_user_requests_before_initialization() {
     let attestation_behavior =
         AttestationBehavior::create(PlaceholderAmdAttestationGenerator, EmptyAttestationVerifier);
-    let runtime = oak_baremetal_runtime::RuntimeImplementation::new(attestation_behavior);
+    let runtime = oak_baremetal_runtime::RuntimeImplementation::new(attestation_behavior.clone());
     let mut client = schema::TrustedRuntimeClient::new(TrustedRuntime::serve(runtime));
+
+    let mut handshaker =
+        ClientHandshaker::new(attestation_behavior).expect("could not create client handshaker");
+    let client_hello = handshaker
+        .create_client_hello()
+        .expect("Couldn't create client hello message");
 
     let owned_request_flatbuffer = {
         let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
         let session_id = &schema::SessionId::new(MOCK_SESSION_ID);
-        let body = builder.create_vector::<u8>(&[]);
+        let body = builder.create_vector::<u8>(&client_hello);
         let flatbuffer = schema::UserRequest::create(
             &mut builder,
             &schema::UserRequestArgs {
