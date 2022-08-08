@@ -16,14 +16,18 @@
 
 extern crate alloc;
 
+use alloc::rc::Rc;
+use core::cell::RefCell;
 use oak_baremetal_runtime::{
     schema::{TrustedRuntime, TrustedRuntimeServer},
     RuntimeImplementation,
 };
 use oak_remote_attestation::handshaker::{
-    AttestationBehavior, ClientHandshaker, EmptyAttestationVerifier,
+    AttestationBehavior, ClientHandshaker, EmptyAttestationGenerator, EmptyAttestationVerifier,
 };
-use oak_remote_attestation_amd::PlaceholderAmdAttestationGenerator;
+use oak_remote_attestation_amd::{
+    PlaceholderAmdAttestationGenerator, PlaceholderAmdAttestationVerifier,
+};
 use oak_remote_attestation_sessions_client::{GenericAttestationClient, UnaryClient};
 
 mod schema {
@@ -37,6 +41,7 @@ mod schema {
 const MOCK_SESSION_ID: &[u8; 8] = &[0, 0, 0, 0, 0, 0, 0, 0];
 const MOCK_CONSTANT_RESPONSE_SIZE: u32 = 1024;
 const ECHO_WASM_BYTES: &[u8] = include_bytes!("echo.wasm");
+const LOOKUP_WASM_BYTES: &[u8] = include_bytes!("key_value_lookup.wasm");
 
 // The type of the client used to interact with the runtime in integration tests
 type RuntimeClient = schema::TrustedRuntimeClient<
@@ -45,11 +50,10 @@ type RuntimeClient = schema::TrustedRuntimeClient<
     >,
 >;
 
-/// Simple test client to perform handshakes with the runtime over several user requests. Allows
-/// the subsequent exchange of user data, and testing of the Wasm business logic running in the
-/// runtime.
+/// Simple test client to perform handshakes with the runtime, which is a prerequisite
+/// for interacting with the business logic running in the runtime.
 struct TestUserClient {
-    inner: alloc::rc::Rc<core::cell::RefCell<RuntimeClient>>,
+    inner: Rc<RefCell<RuntimeClient>>,
 }
 
 #[async_trait::async_trait(?Send)]
@@ -184,4 +188,69 @@ fn it_should_handle_user_requests_after_initialization() {
     let result = client.handle_user_request(owned_request_flatbuffer.into_vec());
 
     result.unwrap();
+}
+
+#[tokio::test]
+async fn it_should_support_lookup_data() {
+    let attestation_behavior =
+        AttestationBehavior::create(PlaceholderAmdAttestationGenerator, EmptyAttestationVerifier);
+    let runtime = RuntimeImplementation::new(attestation_behavior);
+    let mut client = schema::TrustedRuntimeClient::new(TrustedRuntime::serve(runtime));
+
+    let owned_initialization_flatbuffer = {
+        let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
+        let wasm_module = builder.create_vector::<u8>(LOOKUP_WASM_BYTES);
+        let initialization_flatbuffer = schema::Initialization::create(
+            &mut builder,
+            &schema::InitializationArgs {
+                wasm_module: Some(wasm_module),
+                constant_response_size: MOCK_CONSTANT_RESPONSE_SIZE,
+            },
+        );
+
+        builder
+            .finish(initialization_flatbuffer)
+            .expect("errored when creating initialization message")
+    };
+
+    let lookup_data = {
+        let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
+        let key = builder.create_vector::<u8>(b"test_key");
+        let value = builder.create_vector::<u8>(b"test_value");
+        let entry = schema::LookupDataEntry::create(
+            &mut builder,
+            &schema::LookupDataEntryArgs {
+                key: Some(key),
+                value: Some(value),
+            },
+        );
+
+        let items = builder.create_vector(&[entry]);
+        let message = schema::LookupData::create(
+            &mut builder,
+            &schema::LookupDataArgs { items: Some(items) },
+        );
+        builder
+            .finish(message)
+            .expect("errored when creating lookup data update message")
+    };
+
+    client.update_lookup_data(lookup_data.into_vec()).unwrap();
+
+    client
+        .initialize(owned_initialization_flatbuffer.into_vec())
+        .unwrap();
+
+    let mut user_client = GenericAttestationClient::create(
+        TestUserClient {
+            inner: Rc::new(RefCell::new(client)),
+        },
+        AttestationBehavior::create(EmptyAttestationGenerator, PlaceholderAmdAttestationVerifier),
+    )
+    .await
+    .expect("failed to perform handshake");
+
+    let lookup_result = user_client.message(b"test_key").await;
+
+    assert_eq!(lookup_result.unwrap(), b"test_value")
 }
