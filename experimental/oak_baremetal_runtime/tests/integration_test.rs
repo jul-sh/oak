@@ -16,6 +16,8 @@
 
 extern crate alloc;
 
+use alloc::rc::Rc;
+use core::cell::RefCell;
 use oak_baremetal_runtime::{
     schema::{TrustedRuntime, TrustedRuntimeServer},
     RuntimeImplementation,
@@ -42,6 +44,7 @@ const ECHO_WASM_BYTES: &[u8] = include_bytes!("echo.wasm");
 const LOOKUP_WASM_BYTES: &[u8] = include_bytes!("key_value_lookup.wasm");
 const LOOKUP_TEST_KEY: &[u8] = b"test_key";
 const LOOKUP_TEST_VALUE: &[u8] = b"test_value";
+const LOOKUP_UPDATED_TEST_VALUE: &[u8] = b"updated_test_value";
 
 // The type of the client used to interact with the runtime in integration tests
 type RuntimeClient = schema::TrustedRuntimeClient<
@@ -53,7 +56,7 @@ type RuntimeClient = schema::TrustedRuntimeClient<
 /// Simple test client to perform handshakes with the runtime, which is a prerequisite
 /// for interacting with the business logic running in the runtime.
 struct TestUserClient {
-    inner: RuntimeClient,
+    inner: Rc<RefCell<RuntimeClient>>,
 }
 
 #[async_trait::async_trait(?Send)]
@@ -84,8 +87,8 @@ impl UnaryClient for TestUserClient {
                 })
                 .unwrap()
         };
-        let response_flatbuffer = self
-            .inner
+        let mut mutinner = self.inner.borrow_mut();
+        let response_flatbuffer = mutinner
             .handle_user_request(owned_request_flatbuffer.into_vec())
             .unwrap();
 
@@ -230,7 +233,8 @@ async fn it_should_support_lookup_data() {
     let attestation_behavior =
         AttestationBehavior::create(PlaceholderAmdAttestationGenerator, EmptyAttestationVerifier);
     let runtime = RuntimeImplementation::new(attestation_behavior);
-    let mut client = schema::TrustedRuntimeClient::new(TrustedRuntime::serve(runtime));
+    let client = schema::TrustedRuntimeClient::new(TrustedRuntime::serve(runtime));
+    let shared_client = Rc::new(RefCell::new(client));
 
     let owned_initialization_flatbuffer = {
         let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
@@ -270,14 +274,18 @@ async fn it_should_support_lookup_data() {
             .expect("errored when creating lookup data update message")
     };
 
-    client.update_lookup_data(lookup_data.into_vec()).unwrap();
+    (*shared_client.borrow_mut())
+        .update_lookup_data(lookup_data.into_vec())
+        .unwrap();
 
-    client
+    (*shared_client.borrow_mut())
         .initialize(owned_initialization_flatbuffer.into_vec())
         .unwrap();
 
     let mut user_client = GenericAttestationClient::create(
-        TestUserClient { inner: client },
+        TestUserClient {
+            inner: shared_client.clone(),
+        },
         AttestationBehavior::create(EmptyAttestationGenerator, PlaceholderAmdAttestationVerifier),
     )
     .await
@@ -298,5 +306,48 @@ async fn it_should_support_lookup_data() {
     // Get the response body, stripping any fixed response size padding,
     // assuming that no errors occur here.
     let response_body = lookup_response.body().unwrap();
-    assert_eq!(response_body, LOOKUP_TEST_VALUE)
+    assert_eq!(response_body, LOOKUP_TEST_VALUE);
+
+    let updated_lookup_data = {
+        let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
+        let key = builder.create_vector::<u8>(LOOKUP_TEST_KEY);
+        let value = builder.create_vector::<u8>(LOOKUP_UPDATED_TEST_VALUE);
+        let entry = schema::LookupDataEntry::create(
+            &mut builder,
+            &schema::LookupDataEntryArgs {
+                key: Some(key),
+                value: Some(value),
+            },
+        );
+
+        let items = builder.create_vector(&[entry]);
+        let message = schema::LookupData::create(
+            &mut builder,
+            &schema::LookupDataArgs { items: Some(items) },
+        );
+        builder
+            .finish(message)
+            .expect("errored when creating lookup data update message")
+    };
+
+    (*shared_client.borrow_mut())
+        .update_lookup_data(updated_lookup_data.into_vec())
+        .unwrap();
+
+    let lookup_response = {
+        // Get the response from the runtime, and unwrap the result that handles
+        // any errors that might (but shouldn't) have occured on the Oak IDL layer.
+        let lookup_result = user_client.message(LOOKUP_TEST_KEY).await.unwrap();
+        // Now parse the result with the Oak ABI response proto
+        oak_functions_abi::Response::decode(&lookup_result).unwrap()
+    };
+
+    assert_eq!(
+        lookup_response.status,
+        oak_functions_abi::StatusCode::Success
+    );
+    // Get the response body, stripping any fixed response size padding,
+    // assuming that no errors occur here.
+    let response_body = lookup_response.body().unwrap();
+    assert_eq!(response_body, LOOKUP_UPDATED_TEST_VALUE);
 }
