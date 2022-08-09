@@ -21,9 +21,11 @@ use oak_baremetal_runtime::{
     RuntimeImplementation,
 };
 use oak_remote_attestation::handshaker::{
-    AttestationBehavior, ClientHandshaker, EmptyAttestationVerifier,
+    AttestationBehavior, ClientHandshaker, EmptyAttestationGenerator, EmptyAttestationVerifier,
 };
-use oak_remote_attestation_amd::PlaceholderAmdAttestationGenerator;
+use oak_remote_attestation_amd::{
+    PlaceholderAmdAttestationGenerator, PlaceholderAmdAttestationVerifier,
+};
 use oak_remote_attestation_sessions_client::{GenericAttestationClient, UnaryClient};
 
 mod schema {
@@ -37,6 +39,9 @@ mod schema {
 const MOCK_SESSION_ID: &[u8; 8] = &[0, 0, 0, 0, 0, 0, 0, 0];
 const MOCK_CONSTANT_RESPONSE_SIZE: u32 = 1024;
 const ECHO_WASM_BYTES: &[u8] = include_bytes!("echo.wasm");
+const LOOKUP_WASM_BYTES: &[u8] = include_bytes!("key_value_lookup.wasm");
+const LOOKUP_TEST_KEY: &[u8] = b"test_key";
+const LOOKUP_TEST_VALUE: &[u8] = b"test_value";
 
 // The type of the client used to interact with the runtime in integration tests
 type RuntimeClient = schema::TrustedRuntimeClient<
@@ -45,11 +50,10 @@ type RuntimeClient = schema::TrustedRuntimeClient<
     >,
 >;
 
-/// Simple test client to perform handshakes with the runtime over several user requests. Allows
-/// the subsequent exchange of user data, and testing of the Wasm business logic running in the
-/// runtime.
+/// Simple test client to perform handshakes with the runtime, which is a prerequisite
+/// for interacting with the business logic running in the runtime.
 struct TestUserClient {
-    inner: alloc::rc::Rc<core::cell::RefCell<RuntimeClient>>,
+    inner: RuntimeClient,
 }
 
 #[async_trait::async_trait(?Send)]
@@ -80,8 +84,8 @@ impl UnaryClient for TestUserClient {
                 })
                 .unwrap()
         };
-        let mut mutinner = self.inner.borrow_mut();
-        let response_flatbuffer = mutinner
+        let response_flatbuffer = self
+            .inner
             .handle_user_request(owned_request_flatbuffer.into_vec())
             .unwrap();
 
@@ -219,4 +223,80 @@ fn it_should_only_initialize_once() {
         result.unwrap_err(),
         oak_idl::Status::new(oak_idl::StatusCode::FailedPrecondition)
     );
+}
+
+#[tokio::test]
+async fn it_should_support_lookup_data() {
+    let attestation_behavior =
+        AttestationBehavior::create(PlaceholderAmdAttestationGenerator, EmptyAttestationVerifier);
+    let runtime = RuntimeImplementation::new(attestation_behavior);
+    let mut client = schema::TrustedRuntimeClient::new(TrustedRuntime::serve(runtime));
+
+    let owned_initialization_flatbuffer = {
+        let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
+        let wasm_module = builder.create_vector::<u8>(LOOKUP_WASM_BYTES);
+        let initialization_flatbuffer = schema::Initialization::create(
+            &mut builder,
+            &schema::InitializationArgs {
+                wasm_module: Some(wasm_module),
+                constant_response_size: MOCK_CONSTANT_RESPONSE_SIZE,
+            },
+        );
+
+        builder
+            .finish(initialization_flatbuffer)
+            .expect("errored when creating initialization message")
+    };
+
+    let lookup_data = {
+        let mut builder = oak_idl::utils::OwnedFlatbufferBuilder::default();
+        let key = builder.create_vector::<u8>(LOOKUP_TEST_KEY);
+        let value = builder.create_vector::<u8>(LOOKUP_TEST_VALUE);
+        let entry = schema::LookupDataEntry::create(
+            &mut builder,
+            &schema::LookupDataEntryArgs {
+                key: Some(key),
+                value: Some(value),
+            },
+        );
+
+        let items = builder.create_vector(&[entry]);
+        let message = schema::LookupData::create(
+            &mut builder,
+            &schema::LookupDataArgs { items: Some(items) },
+        );
+        builder
+            .finish(message)
+            .expect("errored when creating lookup data update message")
+    };
+
+    client.update_lookup_data(lookup_data.into_vec()).unwrap();
+
+    client
+        .initialize(owned_initialization_flatbuffer.into_vec())
+        .unwrap();
+
+    let mut user_client = GenericAttestationClient::create(
+        TestUserClient { inner: client },
+        AttestationBehavior::create(EmptyAttestationGenerator, PlaceholderAmdAttestationVerifier),
+    )
+    .await
+    .expect("failed to perform handshake");
+
+    let lookup_response = {
+        // Get the response from the runtime, and unwrap the result that handles
+        // any errors that might (but shouldn't) have occured on the Oak IDL layer.
+        let lookup_result = user_client.message(LOOKUP_TEST_KEY).await.unwrap();
+        // Now parse the result with the Oak ABI response proto
+        oak_functions_abi::Response::decode(&lookup_result).unwrap()
+    };
+
+    assert_eq!(
+        lookup_response.status,
+        oak_functions_abi::StatusCode::Success
+    );
+    // Get the response body, stripping any fixed response size padding,
+    // assuming that no errors occur here.
+    let response_body = lookup_response.body().unwrap();
+    assert_eq!(response_body, LOOKUP_TEST_VALUE)
 }
