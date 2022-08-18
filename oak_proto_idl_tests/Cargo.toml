@@ -1,0 +1,18 @@
+[package]
+name = "oak_proto_idl_tests"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+
+[dev-dependencies]
+flatbuffers = "*"
+maplit = "*"
+oak_idl = { path = "../oak_idl", features = ["async-clients"] }
+async-trait = "*"
+tokio = { version = "*", features = ["macros", "rt-multi-thread"] }
+
+[build-dependencies]
+oak_proto_idl_gen_services = { path = "../oak_idl_gen_services" }
+oak_proto_idl_gen_structs = { path = "../oak_idl_gen_structs" }

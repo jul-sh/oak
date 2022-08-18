@@ -3383,6 +3383,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "oak_proto_idl"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "flatbuffers",
+]
+
+[[package]]
+name = "oak_proto_idl_gen_services"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "convert_case",
+ "flatbuffers",
+ "oak_idl_gen_structs",
+]
+
+[[package]]
+name = "oak_proto_idl_gen_structs"
+version = "0.1.0"
+
+[[package]]
+name = "oak_proto_idl_tests"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "flatbuffers",
+ "maplit",
+ "oak_idl",
+ "oak_idl_gen_services",
+ "oak_idl_gen_structs",
+ "tokio",
+]
+
+[[package]]
 name = "oak_proxy_attestation"
 version = "0.1.0"
 dependencies = [
