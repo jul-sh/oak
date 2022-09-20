@@ -32,7 +32,7 @@ pub mod proto {
 use crate::grpc::handle_request;
 use anyhow::Context;
 use clap::Parser;
-use grpc_unary_attestation::{
+use grpc_attestation::{
     proto::unary_session_server::UnarySessionServer, server::AttestationServer,
 };
 use log::warn;

@@ -21,7 +21,7 @@ const RUNTIME_INTERFACE_SCHEMA: &str = "../../experimental/oak_baremetal_runtime
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     generate_grpc_code(
         "../../",
-        &["grpc_unary_attestation/proto/server.proto"],
+        &["grpc_attestation/proto/server.proto"],
         CodegenOptions {
             build_client: false,
             build_server: true,
