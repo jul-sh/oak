@@ -17,9 +17,11 @@
 //! Server-side implementation of the bidirectional gRPC remote attestation handshake
 //! protocol.
 
-use crate::proto::{
-    unary_session_server::UnarySession, AttestationRequest, AttestationResponse, PublicKeyInfo,
-};
+#[cfg(feature = "streaming-session")]
+use crate::proto::streaming_session_server::StreamingSession;
+#[cfg(feature = "unary-session")]
+use crate::proto::unary_session_server::UnarySession;
+use crate::proto::{AttestationRequest, AttestationResponse, PublicKeyInfo};
 use anyhow::Context;
 use oak_remote_attestation::{
     crypto::Signer,
@@ -82,6 +84,7 @@ where
     }
 }
 
+#[cfg(feature = "unary-session")]
 #[tonic::async_trait]
 impl<F, S, L, A> UnarySession for AttestationServer<F, L, A>
 where
@@ -171,5 +174,29 @@ where
             public_key: self.signing_public_key.clone(),
             attestation: self.attestation.clone(),
         }))
+    }
+}
+
+#[cfg(feature = "streaming-session")]
+#[tonic::async_trait]
+impl<F, S, L, A> StreamingSession for AttestationServer<F, L, A>
+where
+    F: 'static + Send + Sync + Clone + FnOnce(Vec<u8>) -> S,
+    S: std::future::Future<Output = anyhow::Result<Vec<u8>>> + Send + Sync + 'static,
+    L: Send + Sync + Clone + LogError + 'static,
+    A: AttestationGenerator + 'static,
+{
+    type MessageStream = std::pin::Pin<
+        Box<
+            dyn futures::Stream<Item = Result<AttestationResponse, tonic::Status>> + Send + 'static,
+        >,
+    >;
+
+    async fn message(
+        &self,
+        _request: tonic::Request<tonic::Streaming<AttestationRequest>>,
+    ) -> Result<tonic::Response<Self::MessageStream>, tonic::Status> {
+        // TODO(#3191): Implement streaming attestation.
+        std::unimplemented!("streaming attestation server support not yet implemented");
     }
 }

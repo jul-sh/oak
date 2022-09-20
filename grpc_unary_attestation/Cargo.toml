@@ -5,7 +5,14 @@ authors = ["Juliette Pretot <julsh@google.com>"]
 edition = "2018"
 license = "Apache-2.0"
 
+[features]
+default = ["unary-session"]
+unary-session = []
+streaming-session = ["futures", "async-stream"]
+
 [dependencies]
+futures = { version = "*", optional = true }
+async-stream = { version = "*", optional = true }
 oak_remote_attestation = { path = "../remote_attestation/rust" }
 oak_remote_attestation_sessions = { path = "../remote_attestation_sessions" }
 oak_remote_attestation_sessions_client = { path = "../remote_attestation_sessions_client" }
