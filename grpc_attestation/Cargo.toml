@@ -6,7 +6,7 @@ edition = "2018"
 license = "Apache-2.0"
 
 [features]
-default = ["unary-session"]
+default = ["unary-session", "streaming-session"]
 unary-session = []
 streaming-session = ["futures", "async-stream"]
 

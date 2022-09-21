@@ -52,10 +52,10 @@ pub struct AttestationServer<F, L: LogError, A: AttestationGenerator> {
 
 impl<F, S, L, A> AttestationServer<F, L, A>
 where
-    F: Send + Sync + Clone + FnOnce(Vec<u8>) -> S,
+    F: 'static + Send + Sync + Clone + FnOnce(Vec<u8>) -> S,
     S: std::future::Future<Output = anyhow::Result<Vec<u8>>> + Send + Sync,
-    L: Send + Sync + Clone + LogError,
-    A: AttestationGenerator,
+    L: Send + Sync + Clone + LogError + 'static,
+    A: AttestationGenerator + 'static,
 {
     pub fn create(
         request_handler: F,
@@ -82,24 +82,14 @@ where
             attestation,
         })
     }
-}
 
-#[cfg(feature = "unary-session")]
-#[tonic::async_trait]
-impl<F, S, L, A> UnarySession for AttestationServer<F, L, A>
-where
-    F: 'static + Send + Sync + Clone + FnOnce(Vec<u8>) -> S,
-    S: std::future::Future<Output = anyhow::Result<Vec<u8>>> + Send + Sync,
-    L: Send + Sync + Clone + LogError + 'static,
-    A: AttestationGenerator + 'static,
-{
-    async fn message(
+    async fn handle_request(
         &self,
-        request: tonic::Request<AttestationRequest>,
-    ) -> anyhow::Result<tonic::Response<AttestationResponse>, tonic::Status> {
+        request: AttestationRequest,
+    ) -> anyhow::Result<AttestationResponse, tonic::Status> {
         let error_logger = self.error_logger.clone();
-        let request_inner = request.into_inner();
-        let session_id: SessionId = request_inner.session_id.try_into().map_err(|error| {
+
+        let session_id: SessionId = request.session_id.try_into().map_err(|error| {
             error_logger.log_error(&format!("Received malformed session_id: {:?}", error));
             tonic::Status::invalid_argument("")
         })?;
@@ -118,7 +108,7 @@ where
         let response_body = match session_state {
             SessionState::HandshakeInProgress(ref mut handshaker) => {
                 handshaker
-                    .next_step(&request_inner.body)
+                    .next_step(&request.body)
                     .map_err(|error| {
                         error_logger
                             .log_error(&format!("Couldn't process handshake message: {:?}", error));
@@ -133,11 +123,10 @@ where
                     .unwrap_or_default()
             }
             SessionState::EncryptedMessageExchange(ref mut encryptor) => {
-                let decrypted_request =
-                    encryptor.decrypt(&request_inner.body).map_err(|error| {
-                        error_logger.log_error(&format!("Couldn't decrypt request: {:?}", error));
-                        tonic::Status::aborted("")
-                    })?;
+                let decrypted_request = encryptor.decrypt(&request.body).map_err(|error| {
+                    error_logger.log_error(&format!("Couldn't decrypt request: {:?}", error));
+                    tonic::Status::aborted("")
+                })?;
 
                 let response = (self.request_handler.clone())(decrypted_request)
                     .await
@@ -161,9 +150,30 @@ where
             .lock()
             .expect("Couldn't lock session_state mutex")
             .put_session_state(session_id, session_state);
-        Ok(tonic::Response::new(AttestationResponse {
+
+        Ok(AttestationResponse {
             body: response_body,
-        }))
+        })
+    }
+}
+
+#[cfg(feature = "unary-session")]
+#[tonic::async_trait]
+impl<F, S, L, A> UnarySession for AttestationServer<F, L, A>
+where
+    F: 'static + Send + Sync + Clone + FnOnce(Vec<u8>) -> S,
+    S: std::future::Future<Output = anyhow::Result<Vec<u8>>> + Send + Sync,
+    L: Send + Sync + Clone + LogError + 'static,
+    A: AttestationGenerator + 'static,
+{
+    async fn message(
+        &self,
+        request: tonic::Request<AttestationRequest>,
+    ) -> anyhow::Result<tonic::Response<AttestationResponse>, tonic::Status> {
+        let attestation_request = request.into_inner();
+        let attestation_response = self.handle_request(attestation_request).await?;
+
+        Ok(tonic::Response::new(attestation_response))
     }
 
     async fn get_public_key_info(
@@ -194,9 +204,22 @@ where
 
     async fn message(
         &self,
-        _request: tonic::Request<tonic::Streaming<AttestationRequest>>,
+        request_stream: tonic::Request<tonic::Streaming<AttestationRequest>>,
     ) -> Result<tonic::Response<Self::MessageStream>, tonic::Status> {
-        // TODO(#3191): Implement streaming attestation.
-        std::unimplemented!("streaming attestation server support not yet implemented");
+        let error_logger = self.error_logger.clone();
+
+        let response_stream = async_stream::try_stream! {
+            let mut request_stream = request_stream.into_inner();
+
+            while let Some(attestation_request) = request_stream.message().await.map_err(|error| {
+                error_logger.log_error(&format!("Couldn't get next message: {:?}", error));
+                tonic::Status::internal("")
+            })? {
+                let attestation_response = self.handle_request(attestation_request).await?;
+                yield attestation_response;
+            }
+        };
+
+        Ok(tonic::Response::new(Box::pin(response_stream)))
     }
 }
