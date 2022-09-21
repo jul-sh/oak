@@ -25,8 +25,8 @@ pub mod proto {
 }
 
 use proto::{
-    unary_session_server::{UnarySession, UnarySessionServer},
-    AttestationRequest, AttestationResponse, PublicKeyInfo,
+    streaming_session_server::{StreamingSession, StreamingSessionServer},
+    AttestationRequest, AttestationResponse,
 };
 
 fn encode_request(unary_request: AttestationRequest) -> Result<Vec<u8>, oak_idl::Status> {
@@ -86,34 +86,37 @@ pub struct SessionProxy {
 }
 
 #[tonic::async_trait]
-impl UnarySession for SessionProxy {
+impl StreamingSession for SessionProxy {
+    type MessageStream = std::pin::Pin<
+        Box<dyn futures::Stream<Item = Result<AttestationResponse, tonic::Status>> + Send>,
+    >;
+
     async fn message(
         &self,
-        request: Request<AttestationRequest>,
-    ) -> Result<Response<AttestationResponse>, tonic::Status> {
-        let request = request.into_inner();
-        let encoded_request = encode_request(request)
-            .map_err(|err| tonic::Status::invalid_argument(format!("{:?}", err)))?;
+        request_stream: tonic::Request<tonic::Streaming<AttestationRequest>>,
+    ) -> Result<tonic::Response<Self::MessageStream>, tonic::Status> {
+        let response_stream = async_stream::try_stream! {
+            let mut request_stream = request_stream.into_inner();
 
-        let mut client = schema::TrustedRuntimeAsyncClient::new(self.connector_handle.clone());
+            while let Some(attestation_request) = request_stream.message().await.map_err(|error| {
+                tonic::Status::internal(&format!("Couldn't get next message: {:?}", error))
+            })? {
+                let encoded_request = encode_request(attestation_request)
+                .map_err(|err| tonic::Status::invalid_argument(format!("{:?}", err)))?;
 
-        let encoded_response = client
-            .handle_user_request(encoded_request)
-            .await
-            .map_err(|err| tonic::Status::internal(format!("{:?}", err)))?;
-        let response = decode_response(encoded_response.into_vec())?;
+            let mut client = schema::TrustedRuntimeAsyncClient::new(self.connector_handle.clone());
 
-        Ok(Response::new(response))
-    }
+            let encoded_response = client
+                .handle_user_request(encoded_request)
+                .await
+                .map_err(|err| tonic::Status::internal(format!("{:?}", err)))?;
+            let attestation_response = decode_response(encoded_response.into_vec())?;
 
-    async fn get_public_key_info(
-        &self,
-        _request: Request<()>,
-    ) -> Result<Response<PublicKeyInfo>, tonic::Status> {
-        Ok(Response::new(PublicKeyInfo {
-            public_key: self.signing_public_key.clone(),
-            attestation: self.attestation.clone(),
-        }))
+                yield attestation_response;
+            }
+        };
+
+        Ok(tonic::Response::new(Box::pin(response_stream)))
     }
 }
 
@@ -129,13 +132,7 @@ pub fn server(
         attestation,
     };
 
-    #[cfg(feature = "grpc-web")]
-    return Server::builder()
-        .add_service(tonic_web::enable(UnarySessionServer::new(server_impl)))
-        .serve(addr);
-
-    #[cfg(not(feature = "grpc-web"))]
-    return Server::builder()
-        .add_service(UnarySessionServer::new(server_impl))
-        .serve(addr);
+    Server::builder()
+        .add_service(StreamingSessionServer::new(server_impl))
+        .serve(addr)
 }

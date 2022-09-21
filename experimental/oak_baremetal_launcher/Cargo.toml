@@ -11,6 +11,7 @@ grpc-web = ["tonic-web"]
 [dependencies]
 anyhow = "*"
 async-trait = "*"
+async-stream = "*"
 bmrng = "*"
 clap = { version = "*", features = ["derive"] }
 command-fds = { version = "*", features = ["tokio"] }

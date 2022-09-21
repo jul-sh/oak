@@ -2920,6 +2920,7 @@ name = "oak_baremetal_launcher"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-stream",
  "async-trait",
  "bmrng",
  "clap 3.2.10",
