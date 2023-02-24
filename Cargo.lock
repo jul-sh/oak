@@ -1808,7 +1808,7 @@ dependencies = [
  "oak_remote_attestation_sessions_client",
  "oak_utils",
  "prost 0.10.4",
- "prost-types 0.10.1",
+ "prost-types 0.9.0",
  "serde",
  "tokio",
  "tonic",
@@ -3925,6 +3925,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prost"
+version = "0.11.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3933d3ac2717077b3d5f42b40f59edfb1fb6a8c14e1c7de0f38075c4bac8e314"
+dependencies = [
+ "bytes",
+ "prost-derive 0.11.7",
+]
+
+[[package]]
 name = "prost-build"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3993,6 +4003,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "prost-derive"
+version = "0.11.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e9935362e8369bc3acd874caeeae814295c504c2bdbcde5c024089cf8b4dc12"
+dependencies = [
+ "anyhow",
+ "itertools",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "prost-types"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4010,6 +4033,15 @@ checksum = "2d0a014229361011dc8e69c8a1ec6c2e8d0f2af7c91e3ea3f5b2170298461e68"
 dependencies = [
  "bytes",
  "prost 0.10.4",
+]
+
+[[package]]
+name = "prost-types"
+version = "0.11.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7de56acd5cc9642cac2a9518d4c8c53818905398fe42d33235859e0d542a7695"
+dependencies = [
+ "prost 0.11.7",
 ]
 
 [[package]]
@@ -4981,7 +5013,7 @@ dependencies = [
  "oak_functions_client",
  "oak_utils",
  "prost 0.10.4",
- "prost-types 0.10.1",
+ "prost-types 0.11.7",
  "tokio",
  "tonic",
 ]
@@ -5004,7 +5036,7 @@ dependencies = [
  "oak_utils",
  "pin-project-lite",
  "prost 0.10.4",
- "prost-types 0.10.1",
+ "prost-types 0.11.7",
  "sync_wrapper",
  "tokio",
  "tonic",
