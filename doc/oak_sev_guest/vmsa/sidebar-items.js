@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["VMSA_PAGE_SIZE","VMSA_SIZE"],"fn":["calculate_rdx_from_fms"],"struct":["SegmentRegister","Vmsa","VmsaPage"]};

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["message_from_response_and_id",""]],"struct":[["ServerChannelHandle",""]]});

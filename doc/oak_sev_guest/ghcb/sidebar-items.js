@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["GHCB_PAGE_SIZE","GHCB_PROTOCOL_VERSION"],"struct":["Ghcb","GhcbProtocol","ValidBitmap"]};

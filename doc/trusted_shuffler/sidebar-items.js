@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["TrustedShuffler",""],["TrustedShufflerRequest",""],["TrustedShufflerResponse",""]],"trait":[["RequestHandler",""]]});

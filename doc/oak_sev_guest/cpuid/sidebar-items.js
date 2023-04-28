@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CPUID_COUNT_MAX","CPUID_PAGE_SIZE"],"struct":["CpuidFunction","CpuidInput","CpuidOutput","CpuidPage"]};
