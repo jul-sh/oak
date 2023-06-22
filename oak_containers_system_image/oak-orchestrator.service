@@ -1,0 +1,12 @@
+[Unit]
+Description=Oak Containers Orchestrator
+After=docker.socket
+Requires=docker.socket
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/bin/oak_containers_orchestrator --launcher-vsock-cid="2" --launcher-vsock-port="8080"
+
+[Install]
+WantedBy=multi-user.target
