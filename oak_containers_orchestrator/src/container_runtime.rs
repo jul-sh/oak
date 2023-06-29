@@ -64,28 +64,28 @@ pub async fn run(container_bundle: &[u8]) -> Result<(), anyhow::Error> {
         serde_json::from_str(&oci_filesystem_bundle_config_file)?
     };
 
-    // mount host devices inside the container directory to allow the
+    // mount host vsock device inside the container directory to allow the
     // trusted application to communicate with the outside
     {
         run_command_and_log_output(
             tokio::process::Command::new("rm")
                 .current_dir(CONTAINER_DIR)
                 .arg("-rf")
-                .arg("dev"),
+                .arg("dev/vsock"),
         )
         .await?;
         run_command_and_log_output(
             tokio::process::Command::new("mkdir")
                 .current_dir(CONTAINER_DIR)
-                .arg("dev"),
+                .arg("dev/vsock"),
         )
         .await?;
         run_command_and_log_output(
             tokio::process::Command::new("mount")
                 .current_dir(CONTAINER_DIR)
                 .arg("--rbind")
-                .arg("/dev")
-                .arg("dev/"),
+                .arg("/dev/vsock")
+                .arg("dev/vsock/"),
         )
         .await?;
     }
