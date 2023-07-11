@@ -33,7 +33,7 @@ async fn main() -> Result<(), anyhow::Error> {
     .map_err(|error| anyhow::anyhow!("couldn't create trusted app client: {}", error))?;
 
     let greeting = trusted_app_client
-        .hello("Untrusted App")
+        .echo("Untrusted App")
         .await
         .map_err(|error| anyhow::anyhow!("couldn't invoke trusted app: {}", error))?;
 

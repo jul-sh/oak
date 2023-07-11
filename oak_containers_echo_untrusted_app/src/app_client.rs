@@ -26,7 +26,7 @@ mod proto {
 use anyhow::Context;
 use proto::oak::containers::example::{
     trusted_application_client::TrustedApplicationClient as GrpcTrustedApplicationClient,
-    HelloRequest,
+    EchoRequest,
 };
 use tonic::transport::{Endpoint, Uri};
 use tower::service_fn;
@@ -76,11 +76,11 @@ impl TrustedApplicationClient {
         Ok(Self { inner })
     }
 
-    pub async fn hello(&mut self, name: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn echo(&mut self, message: &str) -> Result<String, Box<dyn std::error::Error>> {
         let greeting = self
             .inner
-            .hello(HelloRequest {
-                name: name.to_string(),
+            .echo(EchoRequest {
+                message: message.to_string(),
             })
             .await?
             .into_inner()

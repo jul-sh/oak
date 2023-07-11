@@ -16,16 +16,20 @@
 
 syntax = "proto3";
 
-package oak.containers.example;
+package knowledge.cerebra.oak.oak_containers.example.proto;
 
-message HelloRequest {
-  string name = 1;
-}
-
-message HelloResponse {
-  string greeting = 1;
-}
-
+// Example service definitions.
 service TrustedApplication {
-  rpc Hello(HelloRequest) returns (HelloResponse) {}
+  // Echoes a message once.
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
+}
+
+// The request contains the message to echo.
+message EchoRequest {
+  string message = 1;
+}
+
+// The response echoing the original alongside a greeting.
+message EchoResponse {
+  string answer = 1;
 }

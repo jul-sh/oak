@@ -6,7 +6,7 @@
 			"gid": 0
 		},
 		"args": [
-			"/bin/oak_containers_hello_world_trusted_app"
+			"/bin/oak_containers_echo_trusted_app"
 		],
 		"cwd": "/bin"
 	},

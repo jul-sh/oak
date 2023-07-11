@@ -36,7 +36,7 @@ image_tar:
     env --chdir=oak_containers_system_image DOCKER_BUILDKIT=0 bash build.sh
 
 hello_world_container_bundle_tar:
-    env --chdir=oak_containers_hello_world_container DOCKER_BUILDKIT=0 bash build_container_bundle
+    env --chdir=oak_containers_echo_container DOCKER_BUILDKIT=0 bash build_container_bundle
 
 # Top level target to build all enclave apps and the kernel, and run tests.
 #

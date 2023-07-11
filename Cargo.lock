@@ -1784,7 +1784,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oak_containers_hello_world_trusted_app"
+name = "oak_containers_echo_trusted_app"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1802,7 +1802,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oak_containers_hello_world_untrusted_app"
+name = "oak_containers_echo_untrusted_app"
 version = "0.1.0"
 dependencies = [
  "anyhow",

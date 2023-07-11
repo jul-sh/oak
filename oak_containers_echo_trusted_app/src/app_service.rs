@@ -25,7 +25,7 @@ mod proto {
 
 use self::proto::oak::containers::example::{
     trusted_application_server::{TrustedApplication, TrustedApplicationServer},
-    HelloRequest, HelloResponse,
+    EchoRequest, EchoResponse,
 };
 use anyhow::anyhow;
 use tokio_stream::{self as stream};
@@ -37,13 +37,13 @@ struct TrustedApplicationImplementation {
 
 #[tonic::async_trait]
 impl TrustedApplication for TrustedApplicationImplementation {
-    async fn hello(
+    async fn echo(
         &self,
-        request: tonic::Request<HelloRequest>,
-    ) -> Result<tonic::Response<HelloResponse>, tonic::Status> {
-        let name = request.into_inner().name;
-        let greeting: String = format!("Hello from the trusted side, {}! Btw, the Trusted App has a config with a length of {} bytes.", name, self.application_config.len());
-        let response = tonic::Response::new(HelloResponse { greeting });
+        request: tonic::Request<EchoRequest>,
+    ) -> Result<tonic::Response<EchoResponse>, tonic::Status> {
+        let message = request.into_inner().message;
+        let answer: String = format!("Hello from the trusted side! Your message was: \"{}\". Btw, the Trusted App has a config with a length of {} bytes.", message, self.application_config.len());
+        let response = tonic::Response::new(EchoResponse { answer });
         Ok(response)
     }
 }
