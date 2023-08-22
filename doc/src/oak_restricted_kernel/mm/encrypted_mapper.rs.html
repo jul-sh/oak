@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_restricted_kernel/src/mm/encrypted_mapper.rs`."><title>encrypted_mapper.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-0ef3deca4ed45ad8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-f501212b8b071243.css"><link rel="stylesheet" disabled href="../../../static.files/dark-e92fc12c34ff89d3.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-a0090c8b1ced384f.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-bfa4087bf2db080e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../oak_restricted_kernel/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_restricted_kernel/src/mm/encrypted_mapper.rs`."><title>encrypted_mapper.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-a23c9d150ad85d8b.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="oak_restricted_kernel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0-nightly (839e9a6e1 2023-07-02)" data-channel="nightly" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../../static.files/source-script-106908c7a7964ba4.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../oak_restricted_kernel/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -697,67 +697,7 @@
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
 <a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
-<a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a>
-<a href="#740" id="740">740</a>
-<a href="#741" id="741">741</a>
-<a href="#742" id="742">742</a>
-<a href="#743" id="743">743</a>
-<a href="#744" id="744">744</a>
-<a href="#745" id="745">745</a>
-<a href="#746" id="746">746</a>
-<a href="#747" id="747">747</a>
-<a href="#748" id="748">748</a>
-<a href="#749" id="749">749</a>
-<a href="#750" id="750">750</a>
-<a href="#751" id="751">751</a>
-<a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a>
-<a href="#754" id="754">754</a>
-<a href="#755" id="755">755</a>
-<a href="#756" id="756">756</a>
-<a href="#757" id="757">757</a>
-<a href="#758" id="758">758</a>
-<a href="#759" id="759">759</a>
-</pre><pre class="rust"><code><span class="comment">//
+</pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2022 The Project Oak Authors
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -777,13 +717,13 @@
 
 <span class="kw">use super</span>::{Mapper, PageTableFlags, Translator};
 <span class="kw">use </span>core::ops::DerefMut;
+<span class="kw">use </span>spinning_top::Spinlock;
 <span class="kw">use </span>x86_64::{
     structures::paging::{
         mapper::{
             FlagUpdateError, MapToError, MapperAllSizes, MapperFlush, PageTableFrameMapping,
             UnmapError,
         },
-        page::PageRange,
         FrameAllocator, FrameDeallocator, MappedPageTable, Mapper <span class="kw">as </span>BaseMapper, Page, PageSize,
         PageTable, PhysFrame, Size4KiB, Translate <span class="kw">as </span>BaseTranslate,
     },
@@ -889,7 +829,7 @@
 <span class="kw">pub struct </span>EncryptedPageTable&lt;N: MapperAllSizes&gt; {
     encryption: MemoryEncryption,
     offset: VirtAddr,
-    inner: N,
+    inner: Spinlock&lt;N&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; EncryptedPageTable&lt;MappedPageTable&lt;<span class="lifetime">&#39;a</span>, PhysOffset&gt;&gt; {
@@ -897,73 +837,16 @@
         <span class="self">Self </span>{
             encryption,
             offset,
-            inner: <span class="kw">unsafe </span>{ MappedPageTable::new(pml4, PhysOffset { offset, encryption }) },
+            inner: Spinlock::new(<span class="kw">unsafe </span>{
+                MappedPageTable::new(pml4, PhysOffset { offset, encryption })
+            }),
         }
     }
-
-    <span class="doccomment">/// Checks wheter all the pages in the range are unallocated.
-    ///
-    /// Even though the pages may be of arbitrary size, we check all 4KiB-aligned addresses in the
-    /// range, as the mappings may be done with a smaller page size.
-    ///
-    /// If we find an address with a valid mapping, we return the page which contains a valid
-    /// mapping.
-    </span><span class="kw">pub fn </span>is_unallocated&lt;S: PageSize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, range: PageRange&lt;S&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Page&lt;S&gt;&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(item) = Page::&lt;Size4KiB&gt;::range(
-            Page::containing_address(range.start.start_address()),
-            Page::containing_address(range.end.start_address()),
-        )
-        .find(|page| <span class="self">self</span>.translate_virtual(page.start_address()).is_some())
-        {
-            <span class="comment">// We found a page that had a valid mapping in that range, bail out.
-            </span><span class="prelude-val">Err</span>(Page::&lt;S&gt;::containing_address(item.start_address()))
-        } <span class="kw">else </span>{
-            <span class="comment">// No valid mappings found, the whole range is unmapped!
-            </span><span class="prelude-val">Ok</span>(())
-        }
-    }
-
-    <span class="doccomment">/// Finds a range of unallocated pages of the requested size.
-    ///
-    /// Args:
-    ///   - start: the pages must start at, or after, `start`
-    ///   - count: number of pages to allocate
-    ///
-    /// Returns:
-    /// The range of unallocated pages, if there was a big enough unallocated gap in the virtual
-    /// address space. The range may start at exactly `start`.
-    </span><span class="kw">pub fn </span>find_unallocated_pages&lt;S: PageSize&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="kw-2">mut </span>start: Page&lt;S&gt;,
-        count: usize,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;PageRange&lt;S&gt;&gt; {
-        <span class="comment">// This is highly inefficient, but it should be called rarely enough that it doesn&#39;t matter
-        // (famous last words...)
-        // We assume virtual addresses are 48 bits, with the gap in the middle.
-        </span><span class="kw">let </span>limit = Page::containing_address(<span class="kw">if </span>start.start_address().as_u64() &lt; u64::pow(<span class="number">2</span>, <span class="number">47</span>) {
-            VirtAddr::new(u64::pow(<span class="number">2</span>, <span class="number">47</span>) - <span class="number">1</span>)
-        } <span class="kw">else </span>{
-            VirtAddr::new(<span class="number">0xFFFF_FFFF_FFFF_FFFF </span>- <span class="number">1</span>)
-        });
-        <span class="kw">while </span>start &lt; limit {
-            <span class="kw">let </span>range = Page::range(start, start + count <span class="kw">as </span>u64);
-
-            <span class="comment">// If it turns out something in that range was allocated, we move forward to the page
-            // after that and try again.
-            </span><span class="kw">match </span><span class="self">self</span>.is_unallocated(range) {
-                <span class="prelude-val">Ok</span>(()) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(range),
-                <span class="prelude-val">Err</span>(page) =&gt; start = page + <span class="number">1</span>,
-            }
-        }
-
-        <span class="comment">// given the size of the 64-bit address space, this should never happen
-        </span><span class="prelude-val">None
-    </span>}
 }
 
 <span class="kw">impl</span>&lt;S: PageSize, N: MapperAllSizes + BaseMapper&lt;S&gt;&gt; Mapper&lt;S&gt; <span class="kw">for </span>EncryptedPageTable&lt;N&gt; {
     <span class="kw">unsafe fn </span>map_to_with_table_flags(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         page: Page&lt;S&gt;,
         frame: PhysFrame&lt;S&gt;,
         flags: PageTableFlags,
@@ -976,7 +859,7 @@
             frame
         };
 
-        <span class="self">self</span>.inner.map_to_with_table_flags(
+        <span class="self">self</span>.inner.lock().map_to_with_table_flags(
             page,
             frame,
             flags.into(),
@@ -985,11 +868,8 @@
         )
     }
 
-    <span class="kw">unsafe fn </span>unmap(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        page: Page&lt;S&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(PhysFrame&lt;S&gt;, MapperFlush&lt;S&gt;), UnmapError&gt; {
-        <span class="kw">let </span>(frame, flush) = <span class="self">self</span>.inner.unmap(page)<span class="question-mark">?</span>;
+    <span class="kw">unsafe fn </span>unmap(<span class="kw-2">&amp;</span><span class="self">self</span>, page: Page&lt;S&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(PhysFrame&lt;S&gt;, MapperFlush&lt;S&gt;), UnmapError&gt; {
+        <span class="kw">let </span>(frame, flush) = <span class="self">self</span>.inner.lock().unmap(page)<span class="question-mark">?</span>;
         <span class="comment">// if the frame had the encrypted bit set, strip it
         </span><span class="kw">let </span>frame = PhysFrame::from_start_address(PhysAddr::new(
             frame.start_address().as_u64() &amp; !<span class="self">self</span>.encryption.bit(),
@@ -999,7 +879,7 @@
     }
 
     <span class="kw">unsafe fn </span>update_flags(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         page: Page&lt;S&gt;,
         flags: PageTableFlags,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MapperFlush&lt;S&gt;, FlagUpdateError&gt; {
@@ -1032,7 +912,7 @@
 <span class="kw">impl</span>&lt;N: MapperAllSizes + BaseTranslate&gt; Translator <span class="kw">for </span>EncryptedPageTable&lt;N&gt; {
     <span class="kw">fn </span>translate_virtual(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: VirtAddr) -&gt; <span class="prelude-ty">Option</span>&lt;PhysAddr&gt; {
         <span class="prelude-val">Some</span>(PhysAddr::new(
-            <span class="self">self</span>.inner.translate_addr(addr)<span class="question-mark">?</span>.as_u64() &amp; !<span class="self">self</span>.encryption.bit(),
+            <span class="self">self</span>.inner.lock().translate_addr(addr)<span class="question-mark">?</span>.as_u64() &amp; !<span class="self">self</span>.encryption.bit(),
         ))
     }
 
@@ -1385,13 +1265,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>mapper_unencrypted() {
-        <span class="kw">let </span><span class="kw-2">mut </span>mapper = EncryptedPageTable {
+        <span class="kw">let </span>mapper = EncryptedPageTable {
             encryption: MemoryEncryption::NoEncryption,
             offset: VirtAddr::new(<span class="number">0x1234000</span>),
-            inner: FakeMapper {
+            inner: Spinlock::new(FakeMapper {
                 expected_phys_frame: PhysFrame::from_start_address(PhysAddr::new(<span class="number">0x12341000</span>))
                     .unwrap(),
-            },
+            }),
         };
 
         <span class="kw">unsafe </span>{
@@ -1414,15 +1294,15 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>mapper_encrypted() {
-        <span class="kw">let </span><span class="kw-2">mut </span>mapper = EncryptedPageTable {
+        <span class="kw">let </span>mapper = EncryptedPageTable {
             encryption: MemoryEncryption::Encrypted(<span class="number">51</span>),
             offset: VirtAddr::new(<span class="number">0x1234000</span>),
-            inner: FakeMapper {
+            inner: Spinlock::new(FakeMapper {
                 expected_phys_frame: PhysFrame::from_start_address(PhysAddr::new(
                     <span class="number">0x12341000 </span>+ (<span class="number">1u64 </span>&lt;&lt; <span class="number">51</span>),
                 ))
                 .unwrap(),
-            },
+            }),
         };
 
         <span class="kw">unsafe </span>{
@@ -1445,15 +1325,15 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>remap_encrypted() {
-        <span class="kw">let </span><span class="kw-2">mut </span>mapper = EncryptedPageTable {
+        <span class="kw">let </span>mapper = EncryptedPageTable {
             encryption: MemoryEncryption::Encrypted(<span class="number">51</span>),
             offset: VirtAddr::new(<span class="number">0x1234000</span>),
-            inner: FakeMapper {
+            inner: Spinlock::new(FakeMapper {
                 expected_phys_frame: PhysFrame::from_start_address(PhysAddr::new(
                     <span class="number">0x12341000 </span>+ (<span class="number">1u64 </span>&lt;&lt; <span class="number">51</span>),
                 ))
                 .unwrap(),
-            },
+            }),
         };
 
         <span class="kw">unsafe </span>{
@@ -1466,13 +1346,13 @@
                 .ignore();
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>mapper = EncryptedPageTable {
+        <span class="kw">let </span>mapper = EncryptedPageTable {
             encryption: MemoryEncryption::Encrypted(<span class="number">51</span>),
             offset: VirtAddr::new(<span class="number">0x1234000</span>),
-            inner: FakeMapper {
+            inner: Spinlock::new(FakeMapper {
                 expected_phys_frame: PhysFrame::from_start_address(PhysAddr::new(<span class="number">0x12341000</span>))
                     .unwrap(),
-            },
+            }),
         };
 
         <span class="kw">unsafe </span>{
@@ -1488,13 +1368,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>remap_unencrypted() {
-        <span class="kw">let </span><span class="kw-2">mut </span>mapper = EncryptedPageTable {
+        <span class="kw">let </span>mapper = EncryptedPageTable {
             encryption: MemoryEncryption::NoEncryption,
             offset: VirtAddr::new(<span class="number">0x1234000</span>),
-            inner: FakeMapper {
+            inner: Spinlock::new(FakeMapper {
                 expected_phys_frame: PhysFrame::from_start_address(PhysAddr::new(<span class="number">0x12341000</span>))
                     .unwrap(),
-            },
+            }),
         };
 
         <span class="kw">unsafe </span>{
@@ -1516,5 +1396,4 @@
         }
     }
 }
-</code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="oak_restricted_kernel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (5b8f28453 2023-02-12)" data-search-js="search-28136cea55c34037.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</code></pre></div></section></main></body></html>

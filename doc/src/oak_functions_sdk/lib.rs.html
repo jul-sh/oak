@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_functions_sdk/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-0ef3deca4ed45ad8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-f501212b8b071243.css"><link rel="stylesheet" disabled href="../../static.files/dark-e92fc12c34ff89d3.css"><link rel="stylesheet" disabled href="../../static.files/ayu-a0090c8b1ced384f.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-bfa4087bf2db080e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../oak_functions_sdk/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_functions_sdk/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-a23c9d150ad85d8b.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_functions_sdk" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0-nightly (839e9a6e1 2023-07-02)" data-channel="nightly" data-search-js="search-f6292fe389d70017.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ><script src="../../static.files/storage-59fd9b8ccb335783.js"></script><script defer src="../../static.files/source-script-106908c7a7964ba4.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../oak_functions_sdk/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -148,7 +148,15 @@
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
-</pre><pre class="rust"><code><span class="comment">//
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+</pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2021 The Project Oak Authors
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -164,92 +172,99 @@
 // limitations under the License.
 //
 
-</span><span class="doccomment">//! SDK functionality that provides idiomatic Rust wrappers around the underlying Oak Functions
-//! platform functionality.
+</span><span class="attr">#![no_std]
+#![feature(never_type)]
+#![feature(result_flattening)]
+#![doc = <span class="macro">core::include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
-</span><span class="kw">use </span>oak_functions_abi::{proto::OakStatus, StorageGetItemResponse};
-<span class="kw">use </span>std::convert::AsRef;
+</span><span class="kw">extern crate </span>alloc;
 
-<span class="doccomment">/// Reads and returns the user request.
-///
-/// This function is idempotent. Multiple calls to this function all return the same value.
-///
-/// See [`read_request`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#read_request).
-</span><span class="kw">pub fn </span>read_request() -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, OakStatus&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>buf_ptr: <span class="kw-2">*mut </span>u8 = std::ptr::null_mut();
-    <span class="kw">let </span><span class="kw-2">mut </span>buf_len: usize = <span class="number">0</span>;
-    <span class="kw">let </span>status_code = <span class="kw">unsafe </span>{ oak_functions_abi::read_request(<span class="kw-2">&amp;mut </span>buf_ptr, <span class="kw-2">&amp;mut </span>buf_len) };
-    <span class="kw">let </span>status = OakStatus::from_i32(status_code <span class="kw">as </span>i32).ok_or(OakStatus::ErrInternal)<span class="question-mark">?</span>;
-    <span class="kw">match </span>status {
-        OakStatus::Ok =&gt; {
-            <span class="kw">let </span>buf = from_alloc_buffer(buf_ptr, buf_len);
-            <span class="prelude-val">Ok</span>(buf)
+<span class="kw">pub mod </span>proto {
+    <span class="kw">pub mod </span>oak {
+        <span class="kw">pub mod </span>functions {
+            <span class="kw">pub mod </span>wasm {
+                <span class="kw">pub mod </span>v1 {
+
+                    <span class="kw">use </span>prost::Message;
+                    <span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/oak.functions.wasm.v1.rs&quot;</span>));
+                }
+            }
         }
-        status =&gt; <span class="prelude-val">Err</span>(status),
     }
 }
 
-<span class="doccomment">/// Write the response.
-///
-/// Multiple calls to this function will replace the earlier responses. Only the last response that
-/// is written will be kept and returned to the user.
-///
-/// See [`write_response`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#write_response).
-</span><span class="kw">pub fn </span>write_response(buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), OakStatus&gt; {
-    <span class="kw">let </span>status = <span class="kw">unsafe </span>{ oak_functions_abi::write_response(buf.as_ptr(), buf.len()) };
-    result_from_status(status <span class="kw">as </span>i32, ())
+<span class="kw">use </span>alloc::{string::ToString, vec::Vec};
+<span class="kw">use </span>micro_rpc::{Status, StatusCode};
+<span class="kw">use </span>proto::oak::functions::wasm::v1::{
+    LogRequest, LogResponse, LookupDataRequest, LookupDataResponse, ReadRequestRequest,
+    ReadRequestResponse, StdWasmApiClient, TestRequest, TestResponse, WriteResponseRequest,
+    WriteResponseResponse,
+};
+
+<span class="doccomment">/// See [`StdWasmApiClient::read_request`].
+</span><span class="kw">pub fn </span>read_request() -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, Status&gt; {
+    client()
+        .read_request(<span class="kw-2">&amp;</span>ReadRequestRequest {})
+        .flatten()
+        .map(|ReadRequestResponse { body }| body)
 }
 
-<span class="doccomment">/// Looks up an item from the in-memory lookup store.
-</span><span class="kw">pub fn </span>storage_get_item(key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, OakStatus&gt; {
-    <span class="kw">let </span>response = invoke(oak_functions_abi::ExtensionHandle::LookupHandle, key)<span class="question-mark">?</span>;
-    <span class="kw">let </span>result: StorageGetItemResponse = (<span class="kw-2">&amp;</span>response[..]).try_into().map_err(|err| {
-        <span class="macro">log!</span>(<span class="string">&quot;Failed to deserialize response: {}&quot;</span>, err);
-        OakStatus::ErrSerializing
-    })<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(result.value)
+<span class="doccomment">/// See [`StdWasmApiClient::write_response`].
+</span><span class="kw">pub fn </span>write_response(buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), Status&gt; {
+    client()
+        .write_response(<span class="kw-2">&amp;</span>WriteResponseRequest { body: buf.to_vec() })
+        .flatten()
+        .map(|WriteResponseResponse {}| ())
 }
 
-<span class="doccomment">/// Writes a debug log message.
-///
-/// These log messages are considered sensitive, so will only be logged by the runtime if the
-/// `oak_unsafe` feature is enabled.
-</span><span class="kw">pub fn </span>write_log_message&lt;T: AsRef&lt;str&gt;&gt;(message: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), OakStatus&gt; {
-    <span class="kw">let </span>buf = message.as_ref().as_bytes();
-    invoke(oak_functions_abi::ExtensionHandle::LoggingHandle, buf)<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(())
+<span class="doccomment">/// See [`StdWasmApiClient::lookup_data`].
+</span><span class="kw">pub fn </span>storage_get_item(key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, Status&gt; {
+    client()
+        .lookup_data(<span class="kw-2">&amp;</span>LookupDataRequest { key: key.to_vec() })
+        .flatten()
+        .map(|LookupDataResponse { value }| value)
 }
 
-<span class="doccomment">/// Calls the testing extension with the given request. The response is directly passed on, as it is
-/// decoded by the caller.
-</span><span class="kw">pub fn </span>testing(request: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, OakStatus&gt; {
-    invoke(oak_functions_abi::ExtensionHandle::TestingHandle, request)
+<span class="doccomment">/// See [`StdWasmApiClient::log`].
+</span><span class="kw">pub fn </span>write_log_message&lt;T: AsRef&lt;str&gt;&gt;(message: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), Status&gt; {
+    client()
+        .log(<span class="kw-2">&amp;</span>LogRequest {
+            message: message.as_ref().to_string(),
+        })
+        .flatten()
+        .map(|LogResponse {}| ())
 }
 
-<span class="comment">// Passes the given request to the extension behind the extension handle and returns the extension&#39;s
-// response.
-</span><span class="kw">fn </span>invoke(
-    handle: oak_functions_abi::ExtensionHandle,
-    request: <span class="kw-2">&amp;</span>[u8],
-) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, OakStatus&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>response_ptr: <span class="kw-2">*mut </span>u8 = std::ptr::null_mut();
+<span class="doccomment">/// See [`StdWasmApiClient::test`].
+</span><span class="kw">pub fn </span>testing(request: <span class="kw-2">&amp;</span>[u8], echo: bool) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, Status&gt; {
+    client()
+        .test(<span class="kw-2">&amp;</span>TestRequest {
+            body: request.to_vec(),
+            echo,
+        })
+        .flatten()
+        .map(|TestResponse { body }| body)
+}
+
+<span class="doccomment">/// See [`invoke`](https://github.com/project-oak/oak/blob/main/docs/oak_functions_abi.md#invoke).
+</span><span class="kw">fn </span>invoke(request: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, Status&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>response_ptr: <span class="kw-2">*mut </span>u8 = core::ptr::null_mut();
     <span class="kw">let </span><span class="kw-2">mut </span>response_len: usize = <span class="number">0</span>;
     <span class="kw">let </span>status_code = <span class="kw">unsafe </span>{
         oak_functions_abi::invoke(
-            handle,
             request.as_ptr(),
             request.len(),
             <span class="kw-2">&amp;mut </span>response_ptr,
             <span class="kw-2">&amp;mut </span>response_len,
         )
     };
-    <span class="kw">let </span>status = OakStatus::from_i32(status_code <span class="kw">as </span>i32).ok_or(OakStatus::ErrInternal)<span class="question-mark">?</span>;
-    <span class="kw">match </span>status {
-        OakStatus::Ok =&gt; {
+    <span class="kw">let </span>status_code: StatusCode = status_code.into();
+    <span class="kw">match </span>status_code {
+        StatusCode::Ok =&gt; {
             <span class="kw">let </span>response = from_alloc_buffer(response_ptr, response_len);
             <span class="prelude-val">Ok</span>(response)
         }
-        status =&gt; <span class="prelude-val">Err</span>(status),
+        status_code =&gt; <span class="prelude-val">Err</span>(Status::new(status_code)),
     }
 }
 
@@ -264,21 +279,22 @@
     }
 }
 
-<span class="doccomment">/// Convert a status returned from a host function call to a `Result`.
+<span class="doccomment">/// A wrapper around the `invoke` function that implements the [`micro_rpc::Transport`] trait.
 ///
-/// The status is interpreted as an int representing an `OakStatus` enum value.
-///
-/// If the status is [`OakStatus::Ok`] then returns the provided value as [`Result::Ok`], otherwise
-/// returns the status as [`Result::Err`].
-///
-/// Note that host function calls usually return an `u32` because of limitations of the Wasm type
-/// system, so these values would usually be converted (via a cast) to `i32` by callers.
-</span><span class="kw">pub fn </span>result_from_status&lt;T&gt;(status: i32, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;T, OakStatus&gt; {
-    <span class="kw">match </span>OakStatus::from_i32(status) {
-        <span class="prelude-val">Some</span>(OakStatus::Ok) =&gt; <span class="prelude-val">Ok</span>(val),
-        <span class="prelude-val">Some</span>(status) =&gt; <span class="prelude-val">Err</span>(status),
-        <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(OakStatus::Unspecified),
+/// This object is stateless, so it can be created and discarded for each invocation.
+</span><span class="kw">struct </span>Transport;
+
+<span class="kw">impl </span>micro_rpc::Transport <span class="kw">for </span>Transport {
+    <span class="kw">type </span>Error = Status;
+
+    <span class="kw">fn </span>invoke(<span class="kw-2">&amp;mut </span><span class="self">self</span>, request_bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
+        invoke(request_bytes)
     }
+}
+
+<span class="doccomment">/// Creates a new client for the Oak Functions ABI.
+</span><span class="kw">fn </span>client() -&gt; StdWasmApiClient&lt;Transport&gt; {
+    StdWasmApiClient::new(Transport)
 }
 
 <span class="attr">#[no_mangle]
@@ -287,7 +303,7 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::with_capacity(len <span class="kw">as </span>usize);
     <span class="kw">let </span>ptr = buf.as_mut_ptr();
     <span class="comment">// Take ownership of the buffer and ensure that it is not freed at the end of this function.
-    </span>std::mem::forget(buf);
+    </span>core::mem::forget(buf);
     <span class="comment">// Return the pointer so the runtime can write data at this address.
     </span>ptr
 }
@@ -298,5 +314,4 @@
 </span><span class="kw">fn </span>from_alloc_buffer(buf_ptr: <span class="kw-2">*mut </span>u8, buf_len: usize) -&gt; Vec&lt;u8&gt; {
     <span class="kw">unsafe </span>{ Vec::from_raw_parts(buf_ptr, buf_len, buf_len) }
 }
-</code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_functions_sdk" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (5b8f28453 2023-02-12)" data-search-js="search-28136cea55c34037.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</code></pre></div></section></main></body></html>

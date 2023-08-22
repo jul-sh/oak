@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["get_sha256","unmarshal_pem_to_p256_public_key","verify_rekor_body","verify_rekor_log_entry","verify_rekor_signature","verify_signature"],"struct":["Body","Data","GenericSignature","Hash","LogEntry","LogEntryVerification","PublicKey","RekorSignatureBundle","Spec"]};
