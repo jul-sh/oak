@@ -488,7 +488,14 @@
 // limitations under the License.
 //
 
-</span><span class="kw">use </span>bitflags::bitflags;
+</span><span class="kw">use </span>core::{
+    alloc::{AllocError, Allocator, Layout},
+    ops::{Deref, DerefMut},
+    ptr::NonNull,
+};
+
+<span class="kw">use crate</span>::{sev_status, BootAllocator};
+<span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>oak_core::sync::OnceCell;
 <span class="kw">use </span>oak_linux_boot_params::{BootE820Entry, E820EntryType};
 <span class="kw">pub use </span>oak_sev_guest::ghcb::Ghcb;
@@ -497,14 +504,12 @@
     instructions::{pvalidate, InstructionError, PageSize <span class="kw">as </span>SevPageSize, Validation},
     msr::{
         change_snp_page_state, register_ghcb_location, PageAssignment, RegisterGhcbGpaRequest,
-        SnpPageStateChangeRequest,
+        SevStatus, SnpPageStateChangeRequest,
     },
 };
 <span class="kw">use </span>spinning_top::Spinlock;
-<span class="kw">use </span>strum::FromRepr;
 <span class="kw">use </span>x86_64::{
     instructions::tlb,
-    registers::model_specific::Msr,
     structures::paging::{
         frame::PhysFrameRange, page::AddressNotAligned, Page, PageSize, PageTable, PageTableFlags,
         PhysFrame, Size1GiB, Size2MiB, Size4KiB,
@@ -512,113 +517,107 @@
     PhysAddr, VirtAddr,
 };
 
-<span class="doccomment">/// The cache memory type used with MTRR.  We only use Write-Protect mode which the Linux kernel
-/// expects to be enabled by the firmware in order to enable SEV.
-</span><span class="attr">#[repr(u8)]
-#[allow(dead_code)] </span><span class="comment">// Remove if this is ever ported to a public crate.
-</span><span class="attr">#[derive(FromRepr)]
-</span><span class="kw">pub enum </span>MemoryType {
-    UC = <span class="number">0</span>, <span class="comment">// Uncacheable.
-    </span>WC = <span class="number">1</span>, <span class="comment">// Write-Combining.
-    </span>WT = <span class="number">4</span>, <span class="comment">// Writethrough	Reads.
-    </span>WP = <span class="number">5</span>, <span class="comment">// Write-Protect.
-    </span>WB = <span class="number">6</span>, <span class="comment">// Writeback.
-</span>}
+<span class="kw">pub static </span>GHCB_WRAPPER: OnceCell&lt;Spinlock&lt;GhcbProtocol&lt;<span class="lifetime">&#39;static</span>, Ghcb&gt;&gt;&gt; = OnceCell::new();
 
-<span class="kw">impl </span>TryFrom&lt;u8&gt; <span class="kw">for </span>MemoryType {
-    <span class="kw">type </span>Error = <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
-    <span class="kw">fn </span>try_from(value: u8) -&gt; <span class="prelude-ty">Result</span>&lt;MemoryType, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
-        MemoryType::from_repr(value).ok_or(<span class="string">&quot;invalid value for MemoryType&quot;</span>)
+<span class="doccomment">/// Allocator that forces allocations to be 4K-aligned (and sized) and marks the pages as shared.
+///
+/// This allocator is inefficient as it will only allocate 4K chunks, potentially wasting memory.
+/// For example, if you allocate two u32-s, although they could well fit on one page, currently
+/// that&#39;d use 8K of memory.
+/// That, however, is an implementation detail, and may change in the future.
+</span><span class="attr">#[repr(transparent)]
+</span><span class="kw">struct </span>SharedAllocator&lt;A: Allocator&gt; {
+    inner: A,
+}
+
+<span class="kw">impl</span>&lt;A: Allocator&gt; SharedAllocator&lt;A&gt; {
+    <span class="kw">fn </span>new(allocator: A) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ inner: allocator }
     }
 }
 
-<span class="doccomment">/// IA32_MTRR_DefType base model specific register.
-/// See &lt;https://wiki.osdev.org/MTRR&gt; for documentation.
-</span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>MTRRDefType;
+<span class="kw">unsafe impl</span>&lt;A: Allocator&gt; Allocator <span class="kw">for </span>SharedAllocator&lt;A&gt; {
+    <span class="kw">fn </span>allocate(<span class="kw-2">&amp;</span><span class="self">self</span>, layout: Layout) -&gt; <span class="prelude-ty">Result</span>&lt;NonNull&lt;[u8]&gt;, AllocError&gt; {
+        <span class="kw">let </span>layout = layout
+            .align_to(Size4KiB::SIZE <span class="kw">as </span>usize)
+            .map_err(|<span class="kw">_</span>| AllocError)<span class="question-mark">?
+            </span>.pad_to_align();
+        <span class="kw">let </span>allocation = <span class="self">self</span>.inner.allocate(layout)<span class="question-mark">?</span>;
+        <span class="kw">if </span>sev_status().contains(SevStatus::SEV_ENABLED) {
+            <span class="kw">for </span>offset <span class="kw">in </span>(<span class="number">0</span>..allocation.len()).step_by(Size4KiB::SIZE <span class="kw">as </span>usize) {
+                <span class="comment">// Safety: the allocation has succeeded and the offset won&#39;t exceed the size of the
+                // allocation.
+                </span>share_page(Page::containing_address(VirtAddr::from_ptr(<span class="kw">unsafe </span>{
+                    allocation.as_non_null_ptr().as_ptr().add(offset)
+                })))
+            }
+        }
+        <span class="prelude-val">Ok</span>(allocation)
+    }
 
-<span class="macro">bitflags! </span>{
-    <span class="doccomment">/// Flags of the MTRRDefType Register.
-    </span><span class="kw">pub struct </span>MTRRDefTypeFlags: u64 {
-        <span class="doccomment">/// Set this to enable MTRR.
-        </span><span class="kw">const </span>MTRR_ENABLE = <span class="number">1 </span>&lt;&lt; <span class="number">11</span>;
-        <span class="doccomment">/// Set to enable fixed-range support.
-        </span><span class="kw">const </span>FIXED_RANGE_ENABLE = <span class="number">1 </span>&lt;&lt; <span class="number">10</span>;
+    <span class="kw">unsafe fn </span>deallocate(<span class="kw-2">&amp;</span><span class="self">self</span>, ptr: NonNull&lt;u8&gt;, layout: Layout) {
+        <span class="kw">let </span>layout = layout
+            .align_to(Size4KiB::SIZE <span class="kw">as </span>usize)
+            .map_err(|<span class="kw">_</span>| AllocError)
+            .unwrap()
+            .pad_to_align();
+        <span class="kw">if </span>sev_status().contains(SevStatus::SEV_ENABLED) {
+            <span class="kw">for </span>offset <span class="kw">in </span>(<span class="number">0</span>..layout.size()).step_by(Size4KiB::SIZE <span class="kw">as </span>usize) {
+                <span class="comment">// Safety: the allocation has succeeded and the offset won&#39;t exceed the size of the
+                // allocation.
+                </span>unshare_page(Page::containing_address(VirtAddr::from_ptr(<span class="kw">unsafe </span>{
+                    ptr.as_ptr().add(offset)
+                })))
+            }
+        }
+        <span class="self">self</span>.inner.deallocate(ptr, layout)
     }
 }
 
-<span class="kw">impl </span>MTRRDefType {
-    <span class="comment">// The numeric ID of the model specific register.
-    </span><span class="kw">const </span>MSR_ID: u32 = <span class="number">0x2ff</span>;
-    <span class="comment">// The underlying model specific register.
-    </span><span class="kw">const </span>MSR: Msr = Msr::new(<span class="self">Self</span>::MSR_ID);
+<span class="doccomment">/// Stores a data structure on a shared page.
+</span><span class="kw">pub struct </span>Shared&lt;T: <span class="lifetime">&#39;static</span>, A: Allocator&gt; {
+    inner: Box&lt;T, SharedAllocator&lt;A&gt;&gt;,
+}
 
-    <span class="kw">pub fn </span>read() -&gt; (MTRRDefTypeFlags, MemoryType) {
-        <span class="comment">// If the GHCB is available we are running on SEV-ES or SEV-SNP, so we use the GHCB protocol
-        // to read the MSR, otherwise we read the MSR directly.
-        </span><span class="kw">let </span>msr_value = <span class="kw">if let </span><span class="prelude-val">Some</span>(ghcb) = GHCB_WRAPPER.get() {
-            ghcb.lock()
-                .msr_read(<span class="self">Self</span>::MSR_ID)
-                .expect(<span class="string">&quot;couldn&#39;t read the MSR using the GHCB protocol&quot;</span>)
-        } <span class="kw">else </span>{
-            <span class="comment">// Safety: This is safe because this MSR has been supported since the P6 family of
-            // Pentium processors (see https://en.wikipedia.org/wiki/Memory_type_range_register).
-            </span><span class="kw">unsafe </span>{ <span class="self">Self</span>::MSR.read() }
-        };
-        <span class="kw">let </span>memory_type: MemoryType = (msr_value <span class="kw">as </span>u8)
-            .try_into()
-            .expect(<span class="string">&quot;invalid MemoryType value&quot;</span>);
-        (MTRRDefTypeFlags::from_bits_truncate(msr_value), memory_type)
-    }
-
-    <span class="doccomment">/// Write the MTRRDefType flags and caching mode, preserving reserved values.
-    /// The Linux kernel requires the mode be set to `MemoryType::WP` since
-    /// July, 2022, with this requirement back-ported to 5.15.X, or it will silently crash when
-    /// SEV is enabled.
-    ///
-    /// The Linux kernel gives a warning that MTRR is not setup properly, which we can igore:
-    /// [    0.120763] mtrr: your CPUs had inconsistent MTRRdefType settings
-    /// [    0.121529] mtrr: probably your BIOS does not setup all CPUs.
-    /// [    0.122245] mtrr: corrected configuration.
-    ///
-    /// ## Safety
-    ///
-    /// Unsafe in rare cases such as when ROM is memory mapped, and we write to ROM, in a mode that
-    /// caches the write, although this would require unsafe code to do.
-    ///
-    /// When called with MTRRDefType::MTRR_ENABLE and MemoryType::WP, this operation is safe because
-    /// this specific MSR and mode has been supported since the P6 family of Pentium processors
-    /// (see &lt;https://en.wikipedia.org/wiki/Memory_type_range_register&gt;).
-    </span><span class="kw">pub unsafe fn </span>write(flags: MTRRDefTypeFlags, default_type: MemoryType) {
-        <span class="comment">// Preserve values of reserved bits.
-        </span><span class="kw">let </span>(old_flags, _old_memory_type) = <span class="self">Self</span>::read();
-        <span class="kw">let </span>reserved = old_flags.bits() &amp; !MTRRDefTypeFlags::all().bits();
-        <span class="kw">let </span>new_value = reserved | flags.bits() | (default_type <span class="kw">as </span>u64);
-        <span class="kw">let </span><span class="kw-2">mut </span>msr = <span class="self">Self</span>::MSR;
-        <span class="comment">// If the GHCB is available we are running on SEV-ES or SEV-SNP, so we use the GHCB protocol
-        // to write the MSR, otherwise we write the MSR directly.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(ghcb) = GHCB_WRAPPER.get() {
-            ghcb.lock()
-                .msr_write(<span class="self">Self</span>::MSR_ID, new_value)
-                .expect(<span class="string">&quot;couldn&#39;t write the MSR using the GHCB protocol&quot;</span>);
-        } <span class="kw">else </span>{
-            msr.write(new_value);
+<span class="kw">impl</span>&lt;T, A: Allocator&gt; Shared&lt;T, A&gt; {
+    <span class="kw">pub fn </span>new_in(t: T, alloc: A) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>A: <span class="lifetime">&#39;static</span>,
+    {
+        <span class="self">Self </span>{
+            inner: Box::new_in(t, SharedAllocator::new(alloc)),
         }
     }
 }
 
-<span class="kw">static </span>GHCB_WRAPPER: OnceCell&lt;Spinlock&lt;GhcbProtocol&lt;<span class="lifetime">&#39;static</span>, Ghcb&gt;&gt;&gt; = OnceCell::new();
+<span class="kw">impl</span>&lt;T, A: Allocator&gt; Deref <span class="kw">for </span>Shared&lt;T, A&gt; {
+    <span class="kw">type </span>Target = T;
 
-<span class="kw">pub fn </span>init_ghcb(
-    ghcb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Ghcb,
-    snp: bool,
-) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Spinlock&lt;GhcbProtocol&lt;<span class="lifetime">&#39;static</span>, Ghcb&gt;&gt; {
-    <span class="kw">let </span>ghcb_addr = VirtAddr::from_ptr(ghcb <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.inner
+    }
+}
 
-    share_page(Page::containing_address(ghcb_addr), snp);
+<span class="kw">impl</span>&lt;T, A: Allocator&gt; DerefMut <span class="kw">for </span>Shared&lt;T, A&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.inner
+    }
+}
+
+<span class="kw">impl</span>&lt;T, A: Allocator&gt; AsRef&lt;T&gt; <span class="kw">for </span>Shared&lt;T, A&gt; {
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.inner
+    }
+}
+
+<span class="kw">pub fn </span>init_ghcb(alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>BootAllocator) {
+    <span class="kw">let </span>ghcb = Box::leak(Box::new_in(Ghcb::default(), alloc));
+    <span class="kw">let </span>ghcb_addr = VirtAddr::from_ptr(ghcb);
+
+    share_page(Page::containing_address(ghcb_addr));
 
     <span class="comment">// SNP requires that the GHCB is registered with the hypervisor.
-    </span><span class="kw">if </span>snp {
+    </span><span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
         <span class="kw">let </span>ghcb_location_request = RegisterGhcbGpaRequest::new(ghcb_addr.as_u64() <span class="kw">as </span>usize)
             .expect(<span class="string">&quot;invalid address for GHCB location&quot;</span>);
         register_ghcb_location(ghcb_location_request)
@@ -636,7 +635,6 @@
     {
         <span class="macro">panic!</span>(<span class="string">&quot;couldn&#39;t initialize GHCB wrapper&quot;</span>);
     }
-    GHCB_WRAPPER.get().unwrap()
 }
 
 <span class="doccomment">/// Stops sharing the GHCB with the hypervisor when running with AMD SEV-SNP enabled.
@@ -646,7 +644,7 @@
 }
 
 <span class="doccomment">/// Shares a single 4KiB page with the hypervisor.
-</span><span class="kw">pub fn </span>share_page(page: Page&lt;Size4KiB&gt;, snp: bool) {
+</span><span class="kw">pub fn </span>share_page(page: Page&lt;Size4KiB&gt;) {
     <span class="kw">let </span>page_start = page.start_address().as_u64();
     <span class="comment">// Only the first 2MiB is mapped as 4KiB pages, so make sure we fall in that range.
     </span><span class="macro">assert!</span>(page_start &lt; Size2MiB::SIZE);
@@ -663,7 +661,7 @@
     tlb::flush_all();
 
     <span class="comment">// SNP requires extra handling beyond just removing the encrypted bit.
-    </span><span class="kw">if </span>snp {
+    </span><span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
         <span class="kw">let </span>request = SnpPageStateChangeRequest::new(page_start <span class="kw">as </span>usize, PageAssignment::Shared)
             .expect(<span class="string">&quot;invalid address for page location&quot;</span>);
         change_snp_page_state(request).expect(<span class="string">&quot;couldn&#39;t change SNP state for page&quot;</span>);
@@ -672,10 +670,12 @@
 
 <span class="doccomment">/// Stops sharing a single 4KiB page with the hypervisor when running with AMD SEV-SNP enabled.
 </span><span class="kw">pub fn </span>unshare_page(page: Page&lt;Size4KiB&gt;) {
-    <span class="kw">let </span>page_start = page.start_address().as_u64();
-    <span class="kw">let </span>request = SnpPageStateChangeRequest::new(page_start <span class="kw">as </span>usize, PageAssignment::Private)
-        .expect(<span class="string">&quot;invalid address for page location&quot;</span>);
-    change_snp_page_state(request).expect(<span class="string">&quot;couldn&#39;t change SNP state for page&quot;</span>);
+    <span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
+        <span class="kw">let </span>page_start = page.start_address().as_u64();
+        <span class="kw">let </span>request = SnpPageStateChangeRequest::new(page_start <span class="kw">as </span>usize, PageAssignment::Private)
+            .expect(<span class="string">&quot;invalid address for page location&quot;</span>);
+        change_snp_page_state(request).expect(<span class="string">&quot;couldn&#39;t change SNP state for page&quot;</span>);
+    }
 }
 
 <span class="comment">// Page tables come in three sizes: for 1 GiB, 2 MiB and 4 KiB pages. However, `PVALIDATE` can only

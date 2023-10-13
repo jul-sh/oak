@@ -272,7 +272,6 @@
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2022 The Project Oak Authors
 //
@@ -325,6 +324,8 @@
     <span class="kw">let </span><span class="kw-2">mut </span>config = prost_build::Config::new();
     config.service_generator(Box::new(ServiceGenerator {}));
     config
+        <span class="comment">// Use BTreeMap to allow using this function in no-std crates.
+        </span>.btree_map([<span class="string">&quot;.&quot;</span>])
         .compile_protos(protos, includes)
         .expect(<span class="string">&quot;couldn&#39;t compile protobuffer schema&quot;</span>);
 }
@@ -356,13 +357,10 @@
         <span class="macro">format!</span>(<span class="string">&quot;&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;impl &lt;S: {service_name}&gt; ::micro_rpc::Transport for {server_name}&lt;S&gt; {{&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;    fn invoke(&amp;mut self, request_bytes: &amp;[u8]) -&gt; Result&lt;::prost::alloc::vec::Vec&lt;u8&gt;, !&gt; {{&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;        let response_bytes = self&quot;</span>),
+        <span class="macro">format!</span>(<span class="string">&quot;        let response: ::micro_rpc::ResponseWrapper = self&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;            .invoke_inner(request_bytes)&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;            .map_or_else(&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;                ::micro_rpc::error_response,&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;                ::micro_rpc::success_response,&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;            )&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;            .encode_to_vec();&quot;</span>),
+        <span class="macro">format!</span>(<span class="string">&quot;            .into();&quot;</span>),
+        <span class="macro">format!</span>(<span class="string">&quot;        let response_bytes = response.encode_to_vec();&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;        Ok(response_bytes)&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;    }}&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;}}&quot;</span>),
@@ -373,7 +371,7 @@
         <span class="macro">format!</span>(<span class="string">&quot;    }}&quot;</span>),
         <span class="comment">// invoke_inner returns either a successful response body, or an error represented as Status.
         </span><span class="macro">format!</span>(<span class="string">&quot;    fn invoke_inner(&amp;mut self, request_bytes: &amp;[u8]) -&gt; Result&lt;::prost::alloc::vec::Vec&lt;u8&gt;, ::micro_rpc::Status&gt; {{&quot;</span>),
-        <span class="macro">format!</span>(<span class="string">&quot;        let request = ::micro_rpc::Request::decode(request_bytes).map_err(|err| {{&quot;</span>),
+        <span class="macro">format!</span>(<span class="string">&quot;        let request = ::micro_rpc::RequestWrapper::decode(request_bytes).map_err(|err| {{&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;            ::micro_rpc::Status::new_with_message(&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;                ::micro_rpc::StatusCode::Internal,&quot;</span>),
         <span class="macro">format!</span>(<span class="string">&quot;                ::micro_rpc::format!(\&quot;Client failed to deserialize the response: {{:?}}\&quot;, err),&quot;</span>),

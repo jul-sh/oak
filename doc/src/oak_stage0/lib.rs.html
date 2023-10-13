@@ -345,6 +345,20 @@
 <a href="#345" id="345">345</a>
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
 </pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2022 The Project Oak Authors
 //
@@ -363,9 +377,16 @@
 
 </span><span class="attr">#![no_std]
 #![feature(int_roundings)]
+#![feature(allocator_api)]
+#![feature(slice_ptr_get)]
 
-</span><span class="kw">use </span>core::{arch::asm, ffi::c_void, mem::MaybeUninit, panic::PanicInfo};
-<span class="kw">use </span>oak_sev_guest::io::PortFactoryWrapper;
+</span><span class="kw">extern crate </span>alloc;
+
+<span class="kw">use crate</span>::{sev::GHCB_WRAPPER, smp::AP_JUMP_TABLE};
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>core::{arch::asm, ffi::c_void, mem::MaybeUninit, panic::PanicInfo};
+<span class="kw">use </span>linked_list_allocator::LockedHeap;
+<span class="kw">use </span>oak_sev_guest::{io::PortFactoryWrapper, msr::SevStatus};
 <span class="kw">use </span>sha2::{Digest, Sha256};
 <span class="kw">use </span>x86_64::{
     instructions::{hlt, interrupts::int3, segmentation::Segment},
@@ -373,7 +394,7 @@
     structures::{
         gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector},
         idt::InterruptDescriptorTable,
-        paging::{Page, PageSize, Size1GiB},
+        paging::{PageSize, Size1GiB},
     },
     PhysAddr, VirtAddr,
 };
@@ -381,13 +402,15 @@
 
 <span class="kw">mod </span>acpi;
 <span class="kw">mod </span>acpi_tables;
-<span class="kw">mod </span>alloc;
+<span class="kw">mod </span>allocator;
 <span class="kw">mod </span>apic;
 <span class="kw">mod </span>cmos;
+<span class="kw">mod </span>dice_attestation;
 <span class="kw">mod </span>fw_cfg;
 <span class="kw">mod </span>initramfs;
 <span class="kw">mod </span>kernel;
 <span class="kw">mod </span>logging;
+<span class="kw">mod </span>msr;
 <span class="kw">pub mod </span>paging;
 <span class="kw">mod </span>pic;
 <span class="kw">mod </span>sev;
@@ -396,12 +419,17 @@
 
 <span class="kw">type </span>Measurement = [u8; <span class="number">32</span>];
 
-<span class="comment">// Reserve 128K for boot data structures.
-</span><span class="kw">static </span>BOOT_ALLOC: alloc::Allocator&lt;<span class="number">0x20000</span>&gt; = alloc::Allocator::uninit();
+<span class="comment">// Reserve 128K for boot data structures that will outlive Stage 0.
+</span><span class="kw">type </span>BootAllocator = allocator::BumpAllocator&lt;<span class="number">0x20000</span>&gt;;
+<span class="kw">static </span>BOOT_ALLOC: BootAllocator = BootAllocator::uninit();
+
+<span class="comment">// Heap for short-term allocations. These allocations are not expected to outlive Stage 0.
+</span><span class="attr">#[cfg_attr(not(test), global_allocator)]
+</span><span class="kw">static </span>SHORT_TERM_ALLOC: LockedHeap = LockedHeap::empty();
 
 <span class="attr">#[link_section = <span class="string">&quot;.boot&quot;</span>]
 #[no_mangle]
-</span><span class="kw">static </span>SEV_SECRETS: MaybeUninit&lt;oak_sev_guest::secrets::SecretsPage&gt; = MaybeUninit::uninit();
+</span><span class="kw">static </span><span class="kw-2">mut </span>SEV_SECRETS: MaybeUninit&lt;oak_sev_guest::secrets::SecretsPage&gt; = MaybeUninit::uninit();
 <span class="attr">#[link_section = <span class="string">&quot;.boot&quot;</span>]
 #[no_mangle]
 </span><span class="kw">static </span>SEV_CPUID: MaybeUninit&lt;oak_sev_guest::cpuid::CpuidPage&gt; = MaybeUninit::uninit();
@@ -427,7 +455,10 @@
 /// # Safety
 ///
 /// This assumes that the kernel entry point is valid.
-</span><span class="kw">pub unsafe fn </span>jump_to_kernel(entry_point: VirtAddr, zero_page: usize) -&gt; ! {
+</span><span class="kw">pub unsafe fn </span>jump_to_kernel&lt;A: core::alloc::Allocator&gt;(
+    entry_point: VirtAddr,
+    zero_page: Box&lt;zero_page::ZeroPage, <span class="kw-2">&amp;</span>A&gt;,
+) -&gt; ! {
     <span class="macro">asm!</span>(
         <span class="comment">// Boot stack pointer
         </span><span class="string">&quot;mov {1}, %rsp&quot;</span>,
@@ -437,9 +468,21 @@
         </span><span class="string">&quot;jmp *{0}&quot;</span>,
         <span class="kw">in</span>(reg) entry_point.as_u64(),
         <span class="kw">in</span>(reg) <span class="kw-2">&amp;</span>BOOT_STACK_POINTER <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>u64,
-        <span class="kw">in</span>(reg) zero_page <span class="kw">as </span>u64,
+        <span class="kw">in</span>(reg) Box::leak(zero_page),
         options(noreturn, att_syntax)
     );
+}
+
+<span class="doccomment">/// Returns the value of the SEV_STATUS MSR that&#39;s safe to read even if the CPU doesn&#39;t support it.
+///
+/// Initialized in the bootstrap assembly code.
+</span><span class="kw">pub fn </span>sev_status() -&gt; SevStatus {
+    <span class="comment">// Will be set in the bootstrap assembly code where we have to read the MSR anyway.
+    </span><span class="attr">#[no_mangle]
+    </span><span class="kw">static </span><span class="kw-2">mut </span>SEV_STATUS: SevStatus = SevStatus::empty();
+
+    <span class="comment">// Safety: we don&#39;t allow mutation and this is initialized in the bootstrap assembly.
+    </span><span class="kw">unsafe </span>{ SEV_STATUS }
 }
 
 <span class="doccomment">/// Entry point for the Rust code in the stage0 BIOS.
@@ -448,86 +491,39 @@
 ///
 /// * `encrypted` - If not zero, the `encrypted`-th bit will be set in the page tables.
 </span><span class="kw">pub fn </span>rust64_start(encrypted: u64) -&gt; ! {
-    <span class="kw">let </span>(es, snp) = <span class="kw">if </span>encrypted &gt; <span class="number">0 </span>{
-        <span class="comment">// We&#39;re under some form of memory encryption, thus it&#39;s safe to access the SEV_STATUS MSR.
-        </span><span class="kw">let </span>status =
-            oak_sev_guest::msr::get_sev_status().unwrap_or(oak_sev_guest::msr::SevStatus::empty());
-        (
-            status.contains(oak_sev_guest::msr::SevStatus::SEV_ES_ENABLED),
-            status.contains(oak_sev_guest::msr::SevStatus::SNP_ACTIVE),
-        )
-    } <span class="kw">else </span>{
-        (<span class="bool-val">false</span>, <span class="bool-val">false</span>)
-    };
-
     <span class="comment">// We assume 0-th bit is never the encrypted bit.
     </span><span class="kw">let </span>encrypted = <span class="kw">if </span>encrypted &gt; <span class="number">0 </span>{ <span class="number">1 </span>&lt;&lt; encrypted } <span class="kw">else </span>{ <span class="number">0 </span>};
 
     paging::init_page_table_refs(encrypted);
 
     <span class="comment">// If we&#39;re under SEV-ES or SNP, we need a GHCB block for communication (SNP implies SEV-ES).
-    </span><span class="kw">let </span>ghcb_protocol = <span class="kw">if </span>es {
-        <span class="comment">// No point in calling expect() here, the logging isn&#39;t set up yet.
-        // In any case, this allocation should not fail. This is the first thing we allocate, the
-        // GHCB is 4K in size, and the allocator should be far bigger than that (as we have more
-        // data structures we need to allocate in there).
-        // If the allocation does fail, something is horribly broken and we have no hope of
-        // continuing.
-        </span><span class="kw">let </span>ghcb = BOOT_ALLOC.leak(sev::Ghcb::new()).unwrap();
-        <span class="prelude-val">Some</span>(sev::init_ghcb(ghcb, snp))
-    } <span class="kw">else </span>{
-        <span class="prelude-val">None
-    </span>};
+    </span><span class="kw">if </span>sev_status().contains(SevStatus::SEV_ES_ENABLED) {
+        sev::init_ghcb(<span class="kw-2">&amp;</span>BOOT_ALLOC);
+    }
 
-    logging::init_logging(<span class="kw">match </span>ghcb_protocol {
-        <span class="prelude-val">Some</span>(protocol) =&gt; PortFactoryWrapper::new_ghcb(protocol),
-        <span class="prelude-val">None </span>=&gt; PortFactoryWrapper::new_raw(),
-    });
+    logging::init_logging();
     <span class="macro">log::info!</span>(<span class="string">&quot;starting...&quot;</span>);
+    <span class="macro">log::info!</span>(<span class="string">&quot;Enabled SEV features: {:?}&quot;</span>, sev_status());
 
-    <span class="kw">let </span>dma_buf = BOOT_ALLOC.leak(fw_cfg::DmaBuffer::default()).unwrap();
-    <span class="kw">let </span>dma_buf_address = VirtAddr::from_ptr(dma_buf <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
-    <span class="kw">let </span>dma_access = BOOT_ALLOC.leak(fw_cfg::FwCfgDmaAccess::default()).unwrap();
-    <span class="kw">let </span>dma_access_address = VirtAddr::from_ptr(dma_access <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
-    <span class="kw">if </span>encrypted &gt; <span class="number">0 </span>{
+    <span class="kw">if </span>sev_status().contains(SevStatus::SEV_ENABLED) {
         <span class="comment">// Safety: This is safe for SEV-ES and SNP because we&#39;re using an originally supported mode
         // of the Pentium 6: Write-protect, with MTRR enabled.  If we get CPUID reads
         // working, we may want to check that MTRR is supported, but only if we want to
         // support very old processors. However, note that, this branch is only executed if
         // we have encryption, and this wouldn&#39;t be true for very old processors.
         </span><span class="kw">unsafe </span>{
-            sev::MTRRDefType::write(sev::MTRRDefTypeFlags::MTRR_ENABLE, sev::MemoryType::WP);
+            msr::MTRRDefType::write(msr::MTRRDefTypeFlags::MTRR_ENABLE, msr::MemoryType::WP);
         }
-        sev::share_page(Page::containing_address(dma_buf_address), snp);
-        sev::share_page(Page::containing_address(dma_access_address), snp);
     }
 
     <span class="comment">// Safety: we assume there won&#39;t be any other hardware devices using the fw_cfg IO ports.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>fwcfg = <span class="kw">unsafe </span>{
-        fw_cfg::FwCfg::new(
-            <span class="kw">match </span>ghcb_protocol {
-                <span class="prelude-val">Some</span>(protocol) =&gt; PortFactoryWrapper::new_ghcb(protocol),
-                <span class="prelude-val">None </span>=&gt; PortFactoryWrapper::new_raw(),
-            },
-            dma_buf,
-            dma_access,
-        )
-    }
-    .expect(<span class="string">&quot;fw_cfg device not found!&quot;</span>);
+    </span><span class="kw">let </span><span class="kw-2">mut </span>fwcfg = <span class="kw">unsafe </span>{ fw_cfg::FwCfg::new(<span class="kw-2">&amp;</span>BOOT_ALLOC) }.expect(<span class="string">&quot;fw_cfg device not found!&quot;</span>);
 
-    <span class="kw">let </span>zero_page = BOOT_ALLOC
-        .leak(zero_page::ZeroPage::new())
-        .expect(<span class="string">&quot;failed to allocate memory for zero page&quot;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>zero_page = Box::new_in(zero_page::ZeroPage::new(), <span class="kw-2">&amp;</span>BOOT_ALLOC);
 
-    zero_page.fill_e820_table(
-        <span class="kw-2">&amp;mut </span>fwcfg,
-        <span class="kw">match </span>ghcb_protocol {
-            <span class="prelude-val">Some</span>(protocol) =&gt; PortFactoryWrapper::new_ghcb(protocol),
-            <span class="prelude-val">None </span>=&gt; PortFactoryWrapper::new_raw(),
-        },
-    );
+    zero_page.fill_e820_table(<span class="kw-2">&amp;mut </span>fwcfg);
 
-    <span class="kw">if </span>snp {
+    <span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
         sev::validate_memory(zero_page.e820_table(), encrypted);
     }
 
@@ -535,9 +531,7 @@
      * See https://www.kernel.org/doc/html/latest/x86/boot.html#id1 for the particular requirements.
      */
 
-    </span><span class="kw">let </span>gdt = BOOT_ALLOC
-        .leak(GlobalDescriptorTable::new())
-        .expect(<span class="string">&quot;Failed to allocate memory for GDT&quot;</span>);
+    </span><span class="kw">let </span>gdt = Box::leak(Box::new_in(GlobalDescriptorTable::new(), <span class="kw-2">&amp;</span>BOOT_ALLOC));
 
     <span class="kw">let </span>(cs, ds) = create_gdt(gdt);
     gdt.load();
@@ -551,29 +545,34 @@
         SS::set_reg(ds);
     }
 
-    <span class="kw">let </span>idt = BOOT_ALLOC
-        .leak(InterruptDescriptorTable::new())
-        .expect(<span class="string">&quot;Failed to allocate memory for IDT&quot;</span>);
+    <span class="kw">let </span>idt = Box::leak(Box::new_in(InterruptDescriptorTable::new(), <span class="kw-2">&amp;</span>BOOT_ALLOC));
 
     create_idt(idt);
     idt.load();
 
     paging::map_additional_memory(encrypted);
 
+    <span class="comment">// Initialize the short-term heap. Any allocations that rely on a global allocator before this
+    // point will fail.
+    </span>allocator::init_global_allocator(zero_page.e820_table());
+
     <span class="kw">let </span>setup_data_measurement = zero_page
         .try_fill_hdr_from_setup_data(<span class="kw-2">&amp;mut </span>fwcfg)
         .unwrap_or_default();
 
-    <span class="kw">if </span>snp {
-        <span class="kw">let </span>cc_blob = BOOT_ALLOC
-            .leak(oak_linux_boot_params::CCBlobSevInfo::new(
-                SEV_SECRETS.as_ptr(),
+    <span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
+        <span class="comment">// Safety: we&#39;re only interested in the pointer value of SEV_SECRETS, not its contents.
+        </span><span class="kw">let </span>cc_blob = Box::leak(Box::new_in(
+            oak_linux_boot_params::CCBlobSevInfo::new(
+                <span class="kw">unsafe </span>{ SEV_SECRETS.as_ptr() },
                 SEV_CPUID.as_ptr(),
-            ))
-            .expect(<span class="string">&quot;Failed to allocate memory for CCBlobSevInfo&quot;</span>);
-        <span class="kw">let </span>setup_data = BOOT_ALLOC
-            .leak(oak_linux_boot_params::CCSetupData::new(cc_blob))
-            .expect(<span class="string">&quot;Failed to allocate memory for CCSetupData&quot;</span>);
+            ),
+            <span class="kw-2">&amp;</span>BOOT_ALLOC,
+        ));
+        <span class="kw">let </span>setup_data = Box::leak(Box::new_in(
+            oak_linux_boot_params::CCSetupData::new(cc_blob),
+            <span class="kw-2">&amp;</span>BOOT_ALLOC,
+        ));
 
         zero_page.add_setup_data(setup_data);
     }
@@ -614,18 +613,30 @@
     <span class="kw">let </span><span class="kw-2">mut </span>acpi_measurement = Measurement::default();
     acpi_measurement[..].copy_from_slice(<span class="kw-2">&amp;</span>acpi_digest[..]);
 
-    <span class="kw">if </span>!es {
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = smp::bootstrap_aps(
-            rsdp,
-            <span class="kw-2">&amp;</span><span class="kw">match </span>ghcb_protocol {
-                <span class="prelude-val">Some</span>(protocol) =&gt; PortFactoryWrapper::new_ghcb(protocol),
-                <span class="prelude-val">None </span>=&gt; PortFactoryWrapper::new_raw(),
-            },
-        ) {
-            <span class="macro">log::warn!</span>(
-                <span class="string">&quot;Failed to bootstrap APs: {}. APs may not be properly initialized.&quot;</span>,
-                err
-            );
+    <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = smp::bootstrap_aps(rsdp) {
+        <span class="macro">log::warn!</span>(
+            <span class="string">&quot;Failed to bootstrap APs: {}. APs may not be properly initialized.&quot;</span>,
+            err
+        );
+    }
+
+    <span class="comment">// Register the AP Jump Table, if required.
+    </span><span class="kw">if </span>sev_status().contains(SevStatus::SEV_ES_ENABLED) {
+        <span class="comment">// This assumes identity mapping. Which we have in stage0.
+        </span><span class="kw">let </span>jump_table_pa = AP_JUMP_TABLE.as_ptr() <span class="kw">as </span>u64;
+        <span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) {
+            <span class="comment">// Under SNP we need to place the jump table address in the secrets page.
+            // Safety: we don&#39;t care about the contents of the secrets page beyond writing our jump
+            // table address into it.
+            </span><span class="kw">let </span>secrets = <span class="kw">unsafe </span>{ SEV_SECRETS.assume_init_mut() };
+            secrets.guest_area_0.ap_jump_table_pa = jump_table_pa;
+        } <span class="kw">else </span>{
+            <span class="comment">// Plain old SEV-ES, use the GHCB protocol.
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(ghcb) = GHCB_WRAPPER.get() {
+                ghcb.lock()
+                    .set_ap_jump_table(PhysAddr::new(jump_table_pa))
+                    .expect(<span class="string">&quot;failed to set AP Jump Table&quot;</span>);
+            }
         }
     }
 
@@ -646,21 +657,29 @@
     <span class="macro">log::debug!</span>(<span class="string">&quot;ACPI table generation digest: {:?}&quot;</span>, acpi_measurement);
     <span class="macro">log::debug!</span>(<span class="string">&quot;E820 table digest: {:?}&quot;</span>, memory_map_measurement);
 
+    <span class="kw">let </span>measurements = dice_attestation::Measurements {
+        acpi_measurement,
+        kernel_measurement: kernel_info.measurement,
+        cmdline_measurement,
+        ram_disk_measurement,
+        setup_data_measurement,
+        memory_map_measurement,
+    };
+
+    dice_attestation::generate_stage1_attestation(<span class="kw-2">&amp;</span>measurements);
+
     <span class="macro">log::info!</span>(<span class="string">&quot;jumping to kernel at {:#018x}&quot;</span>, entry.as_u64());
 
     <span class="comment">// Clean-ups we need to do just before we jump to the kernel proper: clean up the early GHCB and
     // FW_CFG DMA buffers we used, and switch back to a hugepage for the first 2M of memory.
-    </span><span class="kw">if </span>snp {
-        sev::unshare_page(Page::containing_address(dma_buf_address));
-        sev::unshare_page(Page::containing_address(dma_access_address));
-        <span class="kw">if </span>ghcb_protocol.is_some() {
-            sev::deinit_ghcb();
-        }
+    </span>drop(fwcfg);
+    <span class="kw">if </span>sev_status().contains(SevStatus::SNP_ACTIVE) &amp;&amp; GHCB_WRAPPER.get().is_some() {
+        sev::deinit_ghcb();
     }
     paging::remap_first_huge_page(encrypted);
 
     <span class="kw">unsafe </span>{
-        jump_to_kernel(entry, zero_page <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize);
+        jump_to_kernel(entry, zero_page);
     }
 }
 
@@ -691,5 +710,14 @@
     <span class="kw">let </span>digest = digest.finalize();
     measurement[..].copy_from_slice(<span class="kw-2">&amp;</span>digest[..]);
     measurement
+}
+
+<span class="doccomment">/// Creates a factory for accessing raw I/O ports.
+</span><span class="kw">fn </span>io_port_factory() -&gt; PortFactoryWrapper {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ghcb) = GHCB_WRAPPER.get() {
+        PortFactoryWrapper::new_ghcb(ghcb)
+    } <span class="kw">else </span>{
+        PortFactoryWrapper::new_raw()
+    }
 }
 </code></pre></div></section></main></body></html>
