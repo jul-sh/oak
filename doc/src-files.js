@@ -13,13 +13,13 @@ var srcIndex = JSON.parse('{\
 "oak_containers_hello_world_trusted_app":["",[],["app_service.rs","lib.rs","orchestrator_client.rs"]],\
 "oak_containers_hello_world_untrusted_app":["",[],["app_client.rs","lib.rs"]],\
 "oak_containers_launcher":["",[],["lib.rs","qemu.rs","server.rs"]],\
-"oak_containers_orchestrator":["",[],["container_runtime.rs","ipc_server.rs","key_provisioning.rs","lib.rs","logging.rs","metrics.rs"]],\
+"oak_containers_orchestrator":["",[],["container_runtime.rs","dice.rs","ipc_server.rs","key_provisioning.rs","lib.rs","logging.rs","metrics.rs"]],\
 "oak_containers_orchestrator_client":["",[],["lib.rs"]],\
 "oak_containers_stage1":["",[],["client.rs","dice.rs","image.rs","main.rs"]],\
 "oak_containers_syslogd":["",[],["log_relay.rs","main.rs","systemd_journal.rs"]],\
 "oak_core":["",[],["lib.rs","samplestore.rs","sync.rs","timer.rs"]],\
 "oak_crypto":["",[["hpke",[],["aead.rs","mod.rs"]]],["encryptor.rs","lib.rs","signer.rs","util.rs"]],\
-"oak_dice":["",[],["cert.rs","evidence.rs","lib.rs"]],\
+"oak_dice":["",[],["cert.rs","evidence.rs","lib.rs","utils.rs"]],\
 "oak_docker_linux_init":["",[],["init.rs","main.rs"]],\
 "oak_echo_linux_init":["",[],["init.rs","main.rs"]],\
 "oak_echo_service":["",[],["lib.rs"]],\
@@ -40,8 +40,8 @@ var srcIndex = JSON.parse('{\
 "oak_launcher_utils":["",[],["channel.rs","launcher.rs","lib.rs"]],\
 "oak_linux_boot_params":["",[],["lib.rs"]],\
 "oak_remote_attestation":["",[],["attester.rs","dice.rs","handler.rs","lib.rs"]],\
-"oak_remote_attestation_verification":["",[],["lib.rs","rekor.rs","verifier.rs"]],\
-"oak_restricted_kernel":["",[["boot",[],["mod.rs"]],["mm",[],["bitmap_frame_allocator.rs","encrypted_mapper.rs","frame_allocator.rs","mod.rs","page_tables.rs","virtual_address_allocator.rs"]],["syscall",[],["channel.rs","dice_data.rs","fd.rs","key.rs","mmap.rs","mod.rs","process.rs","stdio.rs"]]],["acpi.rs","args.rs","avx.rs","descriptors.rs","elf.rs","ghcb.rs","interrupts.rs","lib.rs","libm.rs","logging.rs","memory.rs","payload.rs","shutdown.rs","snp.rs","snp_guest.rs","virtio.rs"]],\
+"oak_remote_attestation_verification":["",[],["endorsement.rs","lib.rs","rekor.rs","util.rs","verifier.rs"]],\
+"oak_restricted_kernel":["",[["boot",[],["mod.rs"]],["mm",[],["bitmap_frame_allocator.rs","encrypted_mapper.rs","frame_allocator.rs","mod.rs","page_tables.rs","virtual_address_allocator.rs"]],["syscall",[],["channel.rs","dice_data.rs","fd.rs","key.rs","mmap.rs","mod.rs","process.rs","stdio.rs"]]],["acpi.rs","args.rs","avx.rs","descriptors.rs","dice_attestation.rs","elf.rs","ghcb.rs","interrupts.rs","lib.rs","libm.rs","logging.rs","memory.rs","payload.rs","shutdown.rs","snp.rs","snp_guest.rs","virtio.rs"]],\
 "oak_restricted_kernel_api":["",[],["channel.rs","lib.rs","logging.rs","raw_syscall.rs","syscall.rs"]],\
 "oak_restricted_kernel_interface":["",[],["errno.rs","lib.rs","syscalls.rs"]],\
 "oak_sev_guest":["",[],["ap_jump_table.rs","cpuid.rs","crypto.rs","ghcb.rs","guest.rs","instructions.rs","interrupts.rs","io.rs","lib.rs","msr.rs","secrets.rs","vmsa.rs"]],\
