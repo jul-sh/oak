@@ -35,11 +35,17 @@ use x86_64::{
     VirtAddr,
 };
 
-#[cfg(not(test))]
+#[cfg(all(
+    not(test),
+    not(feature = "expose_dice_logic_allowing_other_crates_to_create_mock_attestations_in_tests")
+))]
 #[global_allocator]
 static ALLOCATOR: LockedGrowableHeap = LockedGrowableHeap::empty();
 
-#[cfg(test)]
+#[cfg(any(
+    test,
+    feature = "expose_dice_logic_allowing_other_crates_to_create_mock_attestations_in_tests"
+))]
 static ALLOCATOR: LockedGrowableHeap = LockedGrowableHeap::empty();
 
 /// Heap allocator that requests more physical memory as required.

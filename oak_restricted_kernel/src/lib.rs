@@ -41,6 +41,11 @@ mod args;
 mod avx;
 mod boot;
 mod descriptors;
+#[cfg(feature = "expose_dice_logic_allowing_other_crates_to_create_mock_attestations_in_tests")]
+pub mod dice_attestation;
+#[cfg(not(
+    feature = "expose_dice_logic_allowing_other_crates_to_create_mock_attestations_in_tests"
+))]
 mod dice_attestation;
 mod elf;
 mod ghcb;

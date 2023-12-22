@@ -7,6 +7,8 @@ license = "Apache-2.0"
 
 [features]
 default = ["vsock_channel"]
+expose_dice_logic_allowing_other_crates_to_create_mock_attestations_in_tests = [
+]
 virtio_console_channel = ["virtio-drivers"]
 vsock_channel = ["oak_virtio"]
 serial_channel = ["uart_16550"]
