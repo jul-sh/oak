@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `stage0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_stage0" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (df871fbf0 2023-10-24)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `stage0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_stage0" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (dd430bc8c 2023-11-14)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-f06f02fd918e3bb3.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -374,6 +374,20 @@
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
 </pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2022 The Project Oak Authors
 //
@@ -397,10 +411,11 @@
 
 </span><span class="kw">extern crate </span>alloc;
 
-<span class="kw">use crate</span>::{sev::GHCB_WRAPPER, smp::AP_JUMP_TABLE};
+<span class="kw">use crate</span>::{kernel::KernelType, sev::GHCB_WRAPPER, smp::AP_JUMP_TABLE};
 <span class="kw">use </span>alloc::{boxed::Box, format};
 <span class="kw">use </span>core::{arch::asm, ffi::c_void, mem::MaybeUninit, panic::PanicInfo};
 <span class="kw">use </span>linked_list_allocator::LockedHeap;
+<span class="kw">use </span>oak_core::sync::OnceCell;
 <span class="kw">use </span>oak_dice::evidence::DICE_DATA_CMDLINE_PARAM;
 <span class="kw">use </span>oak_linux_boot_params::{BootE820Entry, E820EntryType};
 <span class="kw">use </span>oak_sev_guest::{io::PortFactoryWrapper, msr::SevStatus};
@@ -453,6 +468,8 @@
 
 <span class="doccomment">/// We create an identity map for the first 1GiB of memory.
 </span><span class="kw">const </span>TOP_OF_VIRTUAL_MEMORY: u64 = Size1GiB::SIZE;
+
+<span class="kw">static </span>ENCRYPTED: OnceCell&lt;u64&gt; = OnceCell::new();
 
 <span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
     <span class="attr">#[link_name = <span class="string">&quot;stack_start&quot;</span>]
@@ -521,6 +538,10 @@
     logging::init_logging();
     <span class="macro">log::info!</span>(<span class="string">&quot;starting...&quot;</span>);
     <span class="macro">log::info!</span>(<span class="string">&quot;Enabled SEV features: {:?}&quot;</span>, sev_status());
+
+    ENCRYPTED
+        .set(encrypted)
+        .expect(<span class="string">&quot;encrypted bit already initialized&quot;</span>);
 
     <span class="kw">if </span>sev_status().contains(SevStatus::SEV_ENABLED) {
         <span class="comment">// Safety: This is safe for SEV-ES and SNP because we&#39;re using an originally supported mode
@@ -670,7 +691,7 @@
     <span class="macro">log::debug!</span>(<span class="string">&quot;ACPI table generation digest: {:?}&quot;</span>, acpi_measurement);
     <span class="macro">log::debug!</span>(<span class="string">&quot;E820 table digest: {:?}&quot;</span>, memory_map_measurement);
 
-    <span class="kw">let </span>measurements = dice_attestation::Measurements {
+    <span class="kw">let </span>measurements = oak_stage0_dice::Measurements {
         acpi_measurement,
         kernel_measurement: kernel_info.measurement,
         cmdline_measurement,
@@ -679,7 +700,10 @@
         memory_map_measurement,
     };
 
-    <span class="kw">let </span>dice_data = dice_attestation::generate_dice_data(<span class="kw-2">&amp;</span>measurements);
+    <span class="kw">let </span>dice_data = Box::leak(Box::new_in(
+        oak_stage0_dice::generate_dice_data(<span class="kw-2">&amp;</span>measurements, dice_attestation::get_attestation),
+        <span class="kw-2">&amp;</span><span class="kw">crate</span>::BOOT_ALLOC,
+    ));
     <span class="comment">// Reserve the memory containing the DICE data.
     </span>zero_page.insert_e820_entry(BootE820Entry::new(
         dice_data.as_bytes().as_ptr() <span class="kw">as </span>usize,
@@ -689,7 +713,11 @@
 
     <span class="comment">// Append the DICE data address to the kernel command-line.
     </span><span class="kw">let </span>extra = <span class="macro">format!</span>(<span class="string">&quot;--{DICE_DATA_CMDLINE_PARAM}={dice_data:p}&quot;</span>);
-    <span class="kw">let </span>cmdline = <span class="kw">if </span>cmdline.is_empty() {
+    <span class="kw">let </span>cmdline = <span class="kw">if </span>kernel_info.kernel_type == KernelType::Elf {
+        <span class="comment">// Current systems that use the ELF kernel does not support DICE data, so don&#39;t append the
+        // extra parameter.
+        </span>cmdline
+    } <span class="kw">else if </span>cmdline.is_empty() {
         extra
     } <span class="kw">else if </span>cmdline.contains(<span class="string">&quot;--&quot;</span>) {
         <span class="macro">format!</span>(<span class="string">&quot;{} {}&quot;</span>, cmdline, extra)

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_restricted_kernel/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_restricted_kernel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (df871fbf0 2023-10-24)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `oak_restricted_kernel/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="oak_restricted_kernel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (dd430bc8c 2023-11-14)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-f06f02fd918e3bb3.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -399,6 +399,13 @@
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
 </pre></div><pre class="rust"><code><span class="comment">//
 // Copyright 2022 The Project Oak Authors
 //
@@ -442,7 +449,6 @@
 <span class="kw">mod </span>avx;
 <span class="kw">mod </span>boot;
 <span class="kw">mod </span>descriptors;
-<span class="kw">mod </span>dice_attestation;
 <span class="kw">mod </span>elf;
 <span class="kw">mod </span>ghcb;
 <span class="kw">mod </span>interrupts;
@@ -585,47 +591,6 @@
             .unwrap()
     };
 
-    <span class="kw">let </span>stage0_dice_data = {
-        <span class="kw">let </span>dice_memory_slice = {
-            <span class="kw">let </span>e820_dice_data_entry = info
-                .e820_table()
-                .iter()
-                .find(|e| e.entry_type() == <span class="prelude-val">Some</span>(oak_linux_boot_params::E820EntryType::DiceData))
-                .expect(<span class="string">&quot;failed to find dice data&quot;</span>);
-
-            <span class="kw">let </span>start_addr = {
-                <span class="kw">let </span>phys_addr = PhysAddr::new_truncate(
-                    e820_dice_data_entry
-                        .addr()
-                        .try_into()
-                        .expect(<span class="string">&quot;couldn&#39;t convert usize to u64&quot;</span>),
-                );
-                <span class="kw">let </span>pt = PAGE_TABLES.get().expect(<span class="string">&quot;failed to get page tables&quot;</span>);
-                pt.translate_physical(phys_addr)
-                    .expect(<span class="string">&quot;failed to translate physical dice address&quot;</span>)
-            };
-
-            <span class="comment">// Safety: the E820 table indicated that this is the corrct memory segment.
-            </span><span class="kw">unsafe </span>{
-                core::slice::from_raw_parts_mut::&lt;u8&gt;(
-                    start_addr.as_mut_ptr(),
-                    e820_dice_data_entry.size(),
-                )
-            }
-        };
-
-        <span class="kw">let </span>dice_data = oak_dice::evidence::Stage0DiceData::read_from(dice_memory_slice)
-            .expect(<span class="string">&quot;failed to read dice data&quot;</span>);
-
-        <span class="comment">// Overwrite the dice data provided by stage0 after reading.
-        </span>dice_memory_slice.fill(<span class="number">0</span>);
-
-        <span class="kw">if </span>dice_data.magic != oak_dice::evidence::STAGE0_MAGIC {
-            <span class="macro">panic!</span>(<span class="string">&quot;dice data loaded from stage0 failed validation&quot;</span>);
-        }
-        dice_data
-    };
-
     <span class="kw">if </span>sev_es_enabled {
         <span class="kw">let </span>mapper = PAGE_TABLES.get().unwrap();
         <span class="comment">// Now that the page tables have been updated, we have to re-share the GHCB with the
@@ -684,6 +649,64 @@
     </span><span class="kw">let </span>heap_page_range = VMA_ALLOCATOR.lock().allocate(<span class="number">1 </span>&lt;&lt; <span class="number">19</span>).unwrap();
     memory::init_kernel_heap(heap_page_range).unwrap();
 
+    <span class="kw">let </span>stage0_dice_data = {
+        <span class="kw">let </span>dice_memory_slice = {
+            <span class="kw">let </span>e820_dice_data_entry = info
+                .e820_table()
+                .iter()
+                .find(|e| e.entry_type() == <span class="prelude-val">Some</span>(oak_linux_boot_params::E820EntryType::DiceData))
+                .expect(<span class="string">&quot;failed to find dice data&quot;</span>);
+
+            <span class="kw">let </span>phys_start_addr = PhysAddr::new_truncate(
+                e820_dice_data_entry
+                    .addr()
+                    .try_into()
+                    .expect(<span class="string">&quot;couldn&#39;t convert usize to u64&quot;</span>),
+            );
+
+            <span class="comment">// Validate that the dice data mem address matches the kernel args if present
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(arg) = kernel_args.get(<span class="kw-2">&amp;</span><span class="macro">alloc::format!</span>(
+                <span class="string">&quot;--{}&quot;</span>,
+                oak_dice::evidence::DICE_DATA_CMDLINE_PARAM
+            )) {
+                <span class="kw">let </span>parsed_arg = u64::from_str_radix(
+                    arg.strip_prefix(<span class="string">&quot;0x&quot;</span>)
+                        .expect(<span class="string">&quot;failed stripping the hex prefix&quot;</span>),
+                    <span class="number">16</span>,
+                )
+                .expect(<span class="string">&quot;couldn&#39;t parse address as a hex number&quot;</span>);
+                <span class="kw">if </span>parsed_arg != phys_start_addr.as_u64() {
+                    <span class="macro">panic!</span>(<span class="string">&quot;inconsistent dice data addresses supplied in the E820 table and kernel args&quot;</span>)
+                }
+            }
+
+            <span class="kw">let </span>virt_start_addr = {
+                <span class="kw">let </span>pt = PAGE_TABLES.get().expect(<span class="string">&quot;failed to get page tables&quot;</span>);
+                pt.translate_physical(phys_start_addr)
+                    .expect(<span class="string">&quot;failed to translate physical dice address&quot;</span>)
+            };
+
+            <span class="comment">// Safety: the E820 table indicated that this is the corrct memory segment.
+            </span><span class="kw">unsafe </span>{
+                core::slice::from_raw_parts_mut::&lt;u8&gt;(
+                    virt_start_addr.as_mut_ptr(),
+                    e820_dice_data_entry.size(),
+                )
+            }
+        };
+
+        <span class="kw">let </span>dice_data = oak_dice::evidence::Stage0DiceData::read_from(dice_memory_slice)
+            .expect(<span class="string">&quot;failed to read dice data&quot;</span>);
+
+        <span class="comment">// Overwrite the dice data provided by stage0 after reading.
+        </span>dice_memory_slice.fill(<span class="number">0</span>);
+
+        <span class="kw">if </span>dice_data.magic != oak_dice::evidence::STAGE0_MAGIC {
+            <span class="macro">panic!</span>(<span class="string">&quot;dice data loaded from stage0 failed validation&quot;</span>);
+        }
+        dice_data
+    };
+
     <span class="comment">// Okay. We&#39;ve got page tables and a heap. Set up the &quot;late&quot; IDT, this time with descriptors for
     // user mode.
     </span><span class="kw">let </span>double_fault_stack = mm::allocate_stack();
@@ -707,15 +730,6 @@
         }
     };
 
-    <span class="kw">if </span>sev_snp_enabled {
-        <span class="comment">// For now we just generate a sample attestation report and log the value.
-        // TODO(#2842): Use attestation report in attestation behaviour.
-        </span><span class="kw">let </span>report =
-            snp_guest::get_attestation([<span class="number">42</span>; <span class="number">64</span>]).expect(<span class="string">&quot;couldn&#39;t generate attestation report&quot;</span>);
-        <span class="macro">info!</span>(<span class="string">&quot;Attestation: {:?}&quot;</span>, report);
-        report.validate().expect(<span class="string">&quot;attestation report is invalid&quot;</span>);
-    }
-
     <span class="kw">let </span><span class="kw-2">mut </span>channel = get_channel(
         <span class="kw-2">&amp;</span>kernel_args,
         GUEST_HOST_HEAP.get().unwrap(),
@@ -730,7 +744,7 @@
         .expect(<span class="string">&quot;failed to load application binary from channel&quot;</span>);
 
     <span class="kw">let </span>restricted_kernel_dice_data =
-        dice_attestation::generate_dice_data(stage0_dice_data, application.digest());
+        oak_restricted_kernel_dice::generate_dice_data(stage0_dice_data, application.digest());
 
     <span class="kw">let </span>derived_key = <span class="kw">if </span>sev_snp_enabled {
         snp_guest::get_derived_key().expect(<span class="string">&quot;couldn&#39;t derive key&quot;</span>)
