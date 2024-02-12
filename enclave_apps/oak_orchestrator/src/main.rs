@@ -48,5 +48,5 @@ fn start() -> ! {
         .expect("failed to write dice data");
 
     log::info!("Exiting and launching application.");
-    unimplemented!("launch app");
+    syscall::unstable_switch_proccess(attested_app.elf_binary.as_slice())
 }

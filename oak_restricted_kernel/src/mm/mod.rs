@@ -45,7 +45,7 @@ pub mod virtual_address_allocator;
 pub const KERNEL_OFFSET: u64 = 0xFFFF_FFFF_8000_0000;
 
 /// The offset used for the direct mapping of all physical memory.
-const DIRECT_MAPPING_OFFSET: VirtAddr = VirtAddr::new_truncate(0xFFFF_8800_0000_0000);
+pub(crate) const DIRECT_MAPPING_OFFSET: VirtAddr = VirtAddr::new_truncate(0xFFFF_8800_0000_0000);
 
 /// For now we use a fixed position for the encrypted bit. For now we assume that we will be running
 /// on AMD Arcadia-Milan CPUs, which use bit 51.
