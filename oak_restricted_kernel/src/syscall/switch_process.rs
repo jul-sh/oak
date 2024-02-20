@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use alloc::boxed::Box;
 use core::{
     ffi::{c_size_t, c_void},
     slice,
@@ -35,10 +34,11 @@ pub fn syscall_unstable_switch_proccess(buf: *mut c_void, count: c_size_t) -> ! 
         .expect("failed to parse application");
 
     // Ensure the new process is not dropped.
-    let process = Box::leak(Box::new(
-        // Safety: application is assumed to be a valid ELF file.
-        unsafe { Process::from_application(&application).expect("failed to create process") },
-    ));
+    let pid = unsafe { Process::from_application(&application).expect("failed to create process") };
 
-    process.execute()
+    crate::PROCCESSES
+        .lock()
+        .get_mut(pid)
+        .expect("PID not mapped to a process")
+        .execute()
 }
