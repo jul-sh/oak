@@ -53,5 +53,7 @@ fn start() -> ! {
     let pid = syscall::unstable_create_proccess(attested_app.elf_binary.as_slice())
         .expect("failed to create app process");
 
+    log::info!("switching to process");
+
     syscall::unstable_switch_proccess(pid)
 }

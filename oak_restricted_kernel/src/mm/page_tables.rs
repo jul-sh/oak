@@ -139,6 +139,9 @@ impl RootPageTable {
             inner: EncryptedPageTable::new(pml4, offset, encryption),
         }
     }
+    pub fn inner(&mut self) -> &mut EncryptedPageTable<MappedPageTable<'static, PhysOffset>> {
+        &mut self.inner
+    }
     pub fn into_inner(self) -> EncryptedPageTable<MappedPageTable<'static, PhysOffset>> {
         self.inner
     }
