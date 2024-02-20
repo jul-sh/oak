@@ -29,7 +29,7 @@ use x86_64::{
     VirtAddr,
 };
 
-use crate::syscall::mmap::mmap;
+use crate::{syscall::mmap::mmap, PROCCESSES};
 
 // Set up the userspace stack at the end of the lower half of the virtual address space.
 // Well... almost. It's one page lower than the very end, as otherwise the initial stack
@@ -161,18 +161,20 @@ pub fn identify_pml4_frame(
 }
 
 pub struct Process {
+    pid: usize,
     pml4: x86_64::structures::paging::PageTable,
     entry: VirtAddr,
 }
 
 impl Process {
-    /// Creates a process from the application, without executing it.
+    /// Creates a process from the application, without executing it. Returns the PID of the new
+    /// process.
     ///
     /// # Safety
     ///
     /// The application must be built from a valid ELF file representing an Oak Restricted
     /// Application.
-    pub unsafe fn from_application(application: &Application) -> Result<Self, anyhow::Error> {
+    pub unsafe fn from_application(application: &Application) -> Result<usize, anyhow::Error> {
         let pml4 = crate::BASE_L4_PAGE_TABLE
             .get()
             .context("base l4 table should be set")?
@@ -187,11 +189,9 @@ impl Process {
                 .context("at this point there should be a previous root pt")?
                 .into_inner()
         };
-
         // Safety: caller ensured the application is a valid ELF file representing an Oak Restricted
         // Application.
         let entry = unsafe { application.map_into_memory() };
-
         // We've mapped the memory into the process page tables. Let's revert to the previous page
         // table.
         {
@@ -202,17 +202,26 @@ impl Process {
             // Safety: the new page table maintains the same mappings for kernel space.
             unsafe { crate::PAGE_TABLES.lock().replace(pml4_frame) };
         }
+        log::info!("hi4");
+        PROCCESSES.force_unlock();
+        let mut processes = PROCCESSES.lock();
+        log::info!("hi5");
+        let pid = processes.len();
+        log::info!(" new pid {:?}", pid);
 
-        Ok(Self { pml4, entry })
+        processes.push(Self { pml4, entry, pid });
+        log::info!(" pushed pid {:?}", pid);
+        Ok(pid)
     }
     /// Executes the process.
     pub fn execute(&self) -> ! {
+        log::info!("executing");
         let pml4_frame = identify_pml4_frame(&self.pml4).expect("could not get pml4 frame");
         // Safety: the new page table maintains the same mappings for kernel space.
         unsafe { crate::PAGE_TABLES.lock().replace(pml4_frame) };
 
         let entry = self.entry;
-        log::info!("Running application");
+        log::info!("Running process with pid: {}", self.pid);
         // Enter Ring 3 and jump to user code.
         // Safety: by now, if we're here, we've loaded a valid ELF file. It's up to the user to
         // guarantee that the file made sense.
