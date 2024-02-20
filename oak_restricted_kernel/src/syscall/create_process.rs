@@ -40,12 +40,17 @@ fn unstable_create_proccess(buf: &[u8]) -> Result<usize, Errno> {
     // Copy the ELF file into kernel space.
     let copied_elf_binary: alloc::vec::Vec<u8> = buf.to_vec();
 
-    let application = crate::payload::Application::new(copied_elf_binary.into_boxed_slice())
-        .inspect_err(|err| log::error!("failed to create application: {:?}", err))
-        .map_err(|_| Errno::EINVAL)?;
+    let application =
+        crate::payload::Application::new(copied_elf_binary.clone().into_boxed_slice())
+            .inspect_err(|err| log::error!("failed to create application: {:?}", err))
+            .map_err(|_| Errno::EINVAL)?;
 
-    Ok(
-        // Safety: application is assumed to be a valid ELF file.
-        unsafe { Process::from_application(&application).expect("failed to create process") },
-    )
+    // Safety: application is assumed to be a valid ELF file.
+    let pid = unsafe { Process::from_application(&application).expect("failed to create process") };
+
+    for (a, b) in buf.iter().zip(copied_elf_binary.iter()) {
+        assert!(a == b)
+    }
+
+    Ok(pid)
 }

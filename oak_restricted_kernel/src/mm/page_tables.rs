@@ -286,11 +286,20 @@ impl CurrentRootPageTable {
     /// pagetable if there was one. Updates the page table on the CPU level.
     /// Safety: The new page tables must keep the identity mapping at -2GB (kernel space) intact.
     pub unsafe fn replace(&mut self, pml4_frame: PhysFrame) -> Option<RootPageTable> {
+        {
+            let (cr3_frame, _) = unsafe { Cr3::read() };
+            log::info!("old cr3 addr: {:?}", cr3_frame.start_address());
+        }
+
         // This validates any references that expect boot page tables to be valid!
         // Safety: Caller must ensure that the new page tables are safe.
         unsafe {
             Cr3::write(pml4_frame, Cr3Flags::empty());
         };
+        {
+            let (cr3_frame, _) = unsafe { Cr3::read() };
+            log::info!("new cr3 addr: {:?}", cr3_frame.start_address());
+        }
 
         // Safety: we've reloaded page tables that place the direct mapping region at that offset,
         // so the memory location is safe to access now.
