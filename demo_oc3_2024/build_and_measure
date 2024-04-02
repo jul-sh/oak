@@ -36,10 +36,10 @@ readonly KERNEL_SETUP_DATA_MEASUREMENT=$(extract_hash "Kernel Setup Data Measure
 
 readonly APPLICATION_MEASUREMENT="sha2-256:$(sha256sum ./enclave_apps/target/x86_64-unknown-none/release/oak_functions_enclave_app | cut -d ' ' -f 1)"
 
-echo "Firmware Measurent: ${FIRMWARE_MEASUREMENT}"
-echo "Kernel Image Measurent: ${KERNEL_IMAGE_MEASUREMENT}"
-echo "Kernel Setup Data Measurent: ${KERNEL_SETUP_DATA_MEASUREMENT}"
-echo "Application Measurent: ${APPLICATION_MEASUREMENT}"
+echo "Firmware Measurement: ${FIRMWARE_MEASUREMENT}"
+echo "Kernel Image Measurement: ${KERNEL_IMAGE_MEASUREMENT}"
+echo "Kernel Setup Data Measurement: ${KERNEL_SETUP_DATA_MEASUREMENT}"
+echo "Application Measurement: ${APPLICATION_MEASUREMENT}"
 
 echo
 read -p "Verify measurements against the DICE evidence? " -n 1 -r
