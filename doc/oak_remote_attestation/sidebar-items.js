@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["attester","dice","handler","proto"]};

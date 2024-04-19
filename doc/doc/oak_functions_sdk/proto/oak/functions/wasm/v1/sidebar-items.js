@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["BytesValue","LogRequest","LogResponse","LookupDataMultiRequest","LookupDataMultiResponse","LookupDataRequest","LookupDataResponse","ReadRequestRequest","ReadRequestResponse","StdWasmApiAsyncClient","StdWasmApiClient","StdWasmApiServer","TestRequest","TestResponse","WriteResponseRequest","WriteResponseResponse"],"trait":["StdWasmApi"]};

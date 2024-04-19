@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["extract_encryption_public_key"],"struct":["InsecureAttestationVerifier"],"trait":["AttestationVerifier"]};

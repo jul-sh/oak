@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["AmdSevSnpVerifier","Evidence","ReferenceValue"],"trait":["EvidenceProvider","Verifier"]};

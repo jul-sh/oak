@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["instance","logger","lookup","proto","wasm"],"struct":["OakFunctionsService"],"trait":["Observer"]};
