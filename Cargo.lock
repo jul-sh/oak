@@ -1229,6 +1229,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "explain_oak_attestation"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "hex",
+ "oak_attestation_explain",
+ "oak_attestation_verification",
+ "oak_proto_rust",
+ "prost",
+ "sha2",
+ "zerocopy",
+]
+
+[[package]]
 name = "fallible-iterator"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

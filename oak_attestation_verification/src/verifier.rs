@@ -796,7 +796,7 @@ fn get_container_layer_expected_values(
     let config = Some(get_expected_measurement_digest(
         now_utc_millis,
         endorsements.and_then(|value| value.binary.as_ref()),
-        reference_values.configuration.as_ref().context("container config reference value")?,
+        reference_values.binary.as_ref().context("container bundle reference value")?,
     )?);
     Ok(ContainerLayerExpectedValues { bundle, config })
 }
@@ -1044,8 +1044,10 @@ struct ApplicationKeyValues {
 }
 
 /// Extracts measurements, public keys and other attestation-related values from
-/// the evidence.
-fn extract_evidence(evidence: &Evidence) -> anyhow::Result<ExtractedEvidence> {
+/// the evidence without verifying it. For most usecases, this function should
+/// not be used. Instead use the [`verify`] function, which verifies the
+/// attestation and only returns evidence upon successful verification.
+pub fn extract_evidence(evidence: &Evidence) -> anyhow::Result<ExtractedEvidence> {
     let evidence_values =
         Some(extract_evidence_values(evidence).context("couldn't extract evidence values")?);
     let ApplicationKeyValues { encryption_public_key, signing_public_key } =
