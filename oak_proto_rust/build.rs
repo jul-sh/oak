@@ -30,7 +30,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
     let mut config = prost_build::Config::new();
     config
-        .btree_map(["."]) // Support no-std proto maps
+        // Support no-std proto maps
+        .btree_map(["."])
+        // A few messages use prost's the one_of directive. The rust struct
+        // resulting rust struct structure is a little hard to read. Since we
+        // want to print the debug message for these messages as part of human
+        // readable attestation explaination, we implement a simpler debug
+        // output ourselves. This debug implementation direclty prints the
+        // relevant value.
+        .skip_debug(
+            ["oak.attestation.v1.BinaryReferenceValue","oak.attestation.v1.KernelBinaryReferenceValue","oak.attestation.v1.TextReferenceValue","oak.attestation.v1.ReferenceValues"])
         .compile_protos(
             &proto_paths,
             &[
