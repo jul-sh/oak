@@ -68,13 +68,13 @@ impl HumanReadableTitle for OakRestrictedKernelData {
             .as_ref()
             .context("unexpectedly unset report proto field")?;
         let tee_name = get_tee_name(tee_report);
-        Ok(format!("Evidence of the Oak Restricted Kernel Stack in a {} TEE", tee_name))
+        Ok(format!("Oak Restricted Kernel Stack in a {} TEE", tee_name))
     }
 }
 
 impl HumanReadableTitle for OakRestrictedKernelReferenceValues {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("Reference values for the Oak Restricted Kernel Stack".to_owned())
+        Ok("Oak Restricted Kernel Stack".to_owned())
     }
 }
 
@@ -94,13 +94,13 @@ impl HumanReadableTitle for OakContainersData {
 
 impl HumanReadableTitle for OakContainersReferenceValues {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("Reference values for the Oak Conatiners Stack".to_owned())
+        Ok("Oak Conatiners Stack".to_owned())
     }
 }
 
 impl HumanReadableTitle for RootLayerData {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("Root Layer [Evidence]".to_string())
+        Ok("Root Layer".to_string())
     }
 }
 
@@ -111,9 +111,9 @@ impl HumanReadableExplanation for RootLayerData {
                 let initial_memory_sha256_digest =
                     SNPInitialMemoryMeasurement::try_from(report.initial_measurement.as_slice())?;
                 Ok(format!(
-                    "Initial Memory [Digest]: {}
+                    "Firmware [Digest]: {}
 {}
-Initial Memory [Provenance]: {}",
+Firmware [Provenances]: {}",
                     initial_memory_sha256_digest.display_hash(),
                     initial_memory_sha256_digest.display_hash_explaination(),
                     initial_memory_sha256_digest.provenance_link()
@@ -140,7 +140,7 @@ impl HumanReadableExplanation for RootLayerReferenceValues {
 
 impl HumanReadableTitle for KernelLayerData {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("Kernel Layer [Evidence]".to_string())
+        Ok("Kernel Layer".to_string())
     }
 }
 
@@ -166,7 +166,7 @@ Kernel Setup Data [Digest]: {}",
             .display_hash(),
         );
         let kernel_commandline = format!(
-            "Kernel Command Line: {}",
+            "Kernel Command Line [String]: {}",
             self.kernel_raw_cmd_line
                 .as_ref()
                 .context("unexpectedly unset kernel_raw_cmd_line proto field")?,
@@ -183,10 +183,10 @@ Kernel Setup Data [Digest]: {}",
 
         Ok(format!(
             "{}
-Kernel Image/Setup-Data [Provenance]: {}
+Kernel Image/Setup-Data [Provenances]: {}
 {}
 {}
-Inital RAM Disk [Provenance]: {}",
+Inital RAM Disk [Provenances]: {}",
             bz_image_description,
             kernel_image_digest.provenance_link(),
             kernel_commandline,
@@ -210,7 +210,7 @@ impl HumanReadableExplanation for KernelLayerReferenceValues {
 
 impl HumanReadableTitle for SystemLayerData {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("System Layer [Evidence]".to_string())
+        Ok("System Layer".to_string())
     }
 }
 
@@ -225,7 +225,7 @@ impl HumanReadableExplanation for SystemLayerData {
             })?;
         Ok(format!(
             "System Image [Digest]: {}
-System Image [Provenance]: {}",
+System Image [Provenances]: {}",
             system_image_digest.display_hash(),
             system_image_digest.provenance_link(),
         ))
@@ -246,7 +246,7 @@ impl HumanReadableExplanation for SystemLayerReferenceValues {
 
 impl HumanReadableTitle for ApplicationLayerData {
     fn title(&self) -> Result<String, anyhow::Error> {
-        Ok("Application Layer [Evidence]".to_string())
+        Ok("Application Layer".to_string())
     }
 }
 
@@ -259,7 +259,7 @@ impl HumanReadableExplanation for ApplicationLayerData {
                 )?;
 
             // Restricted Kernel Applications do not use a config, no digest is included in
-            // the evidence.
+            // the.
             if let Ok(config_digest) =
                 self.config.as_ref().context("unexpectedly unset config proto field").and_then(
                     |digest| ArtifactDigestSha2_256::try_from(digest).map_err(anyhow::Error::from),
@@ -267,9 +267,9 @@ impl HumanReadableExplanation for ApplicationLayerData {
             {
                 format!(
                     "Binary [Digest]: {}
-Binary [Provenance]: {}
+Binary [Provenances]: {}
 Config [Digest]: {}
-Config [Provenance]: {}",
+Config [Provenances]: {}",
                     binary_digest.display_hash(),
                     binary_digest.provenance_link(),
                     config_digest.display_hash(),
@@ -278,7 +278,7 @@ Config [Provenance]: {}",
             } else {
                 format!(
                     "Binary [Digest]: {}
-Binary [Provenance]: {}",
+Binary [Provenances]: {}",
                     binary_digest.display_hash(),
                     binary_digest.provenance_link(),
                 )
