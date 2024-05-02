@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#![no_std]
-
 extern crate alloc;
 
 #[cfg(test)]
@@ -134,7 +132,7 @@ impl HumanReadableTitle for RootLayerReferenceValues {
 
 impl HumanReadableExplanation for RootLayerReferenceValues {
     fn description(&self) -> Result<String, anyhow::Error> {
-        Ok(format!("{:?}", self))
+        serde_json::to_string(self).map_err(anyhow::Error::msg)
     }
 }
 
@@ -204,7 +202,7 @@ impl HumanReadableTitle for KernelLayerReferenceValues {
 
 impl HumanReadableExplanation for KernelLayerReferenceValues {
     fn description(&self) -> Result<String, anyhow::Error> {
-        Ok(format!("{:?}", self))
+        serde_json::to_string(self).map_err(anyhow::Error::msg)
     }
 }
 
@@ -240,7 +238,7 @@ impl HumanReadableTitle for SystemLayerReferenceValues {
 
 impl HumanReadableExplanation for SystemLayerReferenceValues {
     fn description(&self) -> Result<String, anyhow::Error> {
-        Ok(format!("{:?}", self))
+        serde_json::to_string(self).map_err(anyhow::Error::msg)
     }
 }
 
@@ -297,7 +295,7 @@ impl HumanReadableTitle for ApplicationLayerReferenceValues {
 
 impl HumanReadableExplanation for ApplicationLayerReferenceValues {
     fn description(&self) -> Result<String, anyhow::Error> {
-        Ok(format!("{:?}", self))
+        serde_json::to_string(self).map_err(anyhow::Error::msg)
     }
 }
 

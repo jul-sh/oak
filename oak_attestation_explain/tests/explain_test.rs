@@ -18,8 +18,9 @@
 use std::fs;
 
 use oak_attestation_explain::{HumanReadableExplanation, HumanReadableTitle};
+use oak_attestation_verification_test_utils::reference_values_from_evidence;
 use oak_proto_rust::oak::attestation::v1::{
-    extracted_evidence::EvidenceValues, ExtractedEvidence, OakRestrictedKernelData,
+    extracted_evidence::EvidenceValues, ExtractedEvidence, OakRestrictedKernelData, ReferenceValues,
 };
 use prost::Message;
 
@@ -73,4 +74,114 @@ Binary [Provenance]: https://search.sigstore.dev/?hash=b5cae5b9b92104f7ebc08b7cd
         }
         _ => panic!("not restricted kernel evidence"),
     }
+}
+
+#[test]
+fn produces_expected_reference_values_explaination() {
+    let reference_values: ReferenceValues = {
+        let extracted_evidence = {
+            let serialized =
+                fs::read(RK_EXTRACTED_EVIDENCE_PATH).expect("could not read extracted evidence");
+            ExtractedEvidence::decode(serialized.as_slice()).expect("could not decode evidence")
+        };
+        reference_values_from_evidence(extracted_evidence)
+    };
+
+    assert_eq!(
+        serde_json::to_string_pretty(&reference_values)
+            .expect("could not print reference values")
+            .replace(' ', ""),
+        r#"{
+"oak_restricted_kernel": {
+    "root_layer": {
+    "amd_sev": {
+        "min_tcb_version": {
+        "boot_loader": 3,
+        "snp": 20,
+        "microcode": 209
+        },
+        "stage0": {
+        "digests": {
+            "digests": [
+            {
+                "sha2_384": "WlzXZYDdPw6cxp3f56YSCRnALD43Yxe7PMbeQKZuYGg9OA2WZmTYP80ST4P4eNLs"
+            }
+            ]
+        }
+        }
+    }
+    },
+    "kernel_layer": {
+    "kernel": {
+        "digests": {
+        "image": {
+            "digests": [
+            {
+                "sha2_256": "uxSeWB7YWNQmms+ETKnOsAFi8uKqLiBhByRioF4Mh0M="
+            }
+            ]
+        },
+        "setup_data": {
+            "digests": [
+            {
+                "sha2_256": "TNAggg2mYwY/QYXKFKfoA818nKFIPGToNtuEBgS2+sE="
+            }
+            ]
+        }
+        }
+    },
+    "kernel_cmd_line_text": {
+        "string_literals": {
+        "value": [
+            "console=ttyS0"
+        ]
+        }
+    },
+    "init_ram_fs": {
+        "digests": {
+        "digests": [
+            {
+            "sha2_256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            }
+        ]
+        }
+    },
+    "memory_map": {
+        "digests": {
+        "digests": [
+            {
+            "sha2_256": "cAqg0Tr/efw3oFOlcrFYxtRiAmkgafiDUEk4jxAZofc="
+            }
+        ]
+        }
+    },
+    "acpi": {
+        "digests": {
+        "digests": [
+            {
+            "sha2_256": "ZPVVMnKHohQUdmgeTk3YDV91q5wnb2247/xVI226mVM="
+            }
+        ]
+        }
+    }
+    },
+    "application_layer": {
+    "binary": {
+        "digests": {
+        "digests": [
+            {
+            "sha2_256": "tcrlubkhBPfrwIt819yfL7GR69XbcEFCHy+IW3d9UEA="
+            }
+        ]
+        }
+    },
+    "configuration": {
+        "skip": {}
+    }
+    }
+}
+}"#
+        .to_owned()
+        .replace(' ', "")
+    );
 }
