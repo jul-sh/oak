@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#![feature(let_chains)]
+
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
@@ -40,6 +42,80 @@ fn path_exists(s: &str) -> Result<PathBuf, String> {
     }
 }
 
+fn is_object_of_strings(value: &serde_json::Value) -> bool {
+    match value {
+        serde_json::Value::Object(object) => {
+            object.iter().all(|(_key, value)| matches!(value, serde_json::Value::String(_)))
+        }
+        _ => false,
+    }
+}
+
+fn is_array_of_strings(value: &serde_json::Value) -> bool {
+    match value {
+        serde_json::Value::Array(array) => {
+            array.iter().all(|value| matches!(value, serde_json::Value::String(_)))
+        }
+        _ => false,
+    }
+}
+
+fn simplify_value(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(map) => {
+            // Strings and regexes are nested under a value key. Remove
+            // for human readability.
+            if map.len() == 1
+                && let Some(inner_value) = map.get_mut("value")
+                && is_array_of_strings(inner_value)
+            {
+                *value = inner_value.clone();
+                return simplify_value(value);
+            }
+            // Some reference values nest digests under a key. Remove
+            // for human readability.
+            if map.len() == 1
+                && let Some(digests) = map.get_mut("digests")
+                && matches!(digests, serde_json::Value::Object(_))
+            {
+                *value = digests.clone();
+                return simplify_value(value);
+            }
+
+            // Reformat digests to be hex encoded.
+            if let Some(digests) = map.get_mut("digests")
+                && let serde_json::Value::Array(digests_vec) = digests
+                && digests_vec.iter().all(is_object_of_strings)
+            {
+                digests_vec.iter_mut().for_each(|digest| {
+                    let digest =
+                        digest.as_object_mut().expect("validated as object in prior conditional");
+
+                    digest.iter_mut().for_each(|(_key, hash_value)| {
+                        let base64_encoded_hash =
+                            hash_value.as_str().expect("validated as string in prior conditional");
+                        let hash = base64::decode(base64_encoded_hash)
+                            .expect("invalid base64 digest hash");
+                        *hash_value = serde_json::Value::String(hex::encode(hash));
+                    });
+                });
+            }
+
+            // Recursively simplify nested objects
+            for (_, v) in map.iter_mut() {
+                simplify_value(v);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            // Recursively simplify values within the array
+            for v in arr.iter_mut() {
+                simplify_value(v);
+            }
+        }
+        _ => {} // No simplification needed for other types
+    }
+}
+
 fn main() {
     let mut extracted_evidence = {
         let Params { evidence } = Params::parse();
@@ -51,56 +127,13 @@ fn main() {
         oak_attestation_verification::verifier::extract_evidence(&evidence).unwrap()
     };
 
-    match extracted_evidence.evidence_values.take() {
-        Some(EvidenceValues::OakRestrictedKernel(restricted_kernel_evidence)) => {
-            assert_eq!(
-                restricted_kernel_evidence.title().unwrap(),
-                format!("Oak Restricted Kernel Stack in a {} TEE", "AMD SEV-SNP")
-            );
-            match restricted_kernel_evidence {
-                OakRestrictedKernelData {
-                    root_layer: Some(root_layer),
-                    kernel_layer: Some(kernel_layer),
-                    application_layer: Some(application_layer),
-                } => {
-                    print!(
-                        "
+    let reference_values =
+        oak_attestation_verification_test_utils::reference_values_from_evidence(extracted_evidence);
 
+    let mut v = serde_json::to_value(reference_values).unwrap();
 
-####################
-{}
+    print!("{}", serde_json::to_string_pretty(&v).expect("could not print reference values"));
 
-{}",
-                        root_layer.title().unwrap(),
-                        root_layer.description().unwrap()
-                    );
-                    print!(
-                        "
-
-
-####################
-{}
-
-{}",
-                        kernel_layer.title().unwrap(),
-                        kernel_layer.description().unwrap()
-                    );
-                    print!(
-                        "
-
-
-####################
-{}
-
-{}",
-                        application_layer.title().unwrap(),
-                        application_layer.description().unwrap()
-                    );
-                    println!();
-                }
-                _ => panic!("evidence values unexpectedly unset"),
-            }
-        }
-        _ => panic!("not restricted kernel evidence"),
-    }
+    simplify_value(&mut v);
+    print!("{}", serde_json::to_string_pretty(&v).expect("could not print reference values"));
 }

@@ -2337,12 +2337,15 @@ name = "oak_attestation_explain_cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64 0.13.1",
  "clap",
  "hex",
  "oak_attestation_explain",
  "oak_attestation_verification",
+ "oak_attestation_verification_test_utils",
  "oak_proto_rust",
  "prost",
+ "serde_json",
  "sha2",
  "zerocopy",
 ]
