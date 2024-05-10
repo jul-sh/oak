@@ -1,0 +1,438 @@
+{
+  "checksum": "a1b783897dde651588edfdb2d6453c91654232b97551a44a413abd5334874d90",
+  "crates": {
+    "anyhow 1.0.83": {
+      "name": "anyhow",
+      "version": "1.0.83",
+      "package_url": "https://github.com/dtolnay/anyhow",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/anyhow/1.0.83/download",
+          "sha256": "25bdb32cbbdce2b519a9cd7df3a678443100e265d5e25ca763b7572a5104f5f3"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "anyhow",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "anyhow",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "anyhow 1.0.83",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.83"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "bit_field 0.10.2": {
+      "name": "bit_field",
+      "version": "0.10.2",
+      "package_url": "https://github.com/phil-opp/rust-bit-field",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/bit_field/0.10.2/download",
+          "sha256": "dc827186963e592360843fb5ba4b973e145841266c1357f7180c43526f2e5b61"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bit_field",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "bit_field",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.10.2"
+      },
+      "license": "Apache-2.0/MIT",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "bitflags 2.5.0": {
+      "name": "bitflags",
+      "version": "2.5.0",
+      "package_url": "https://github.com/bitflags/bitflags",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/bitflags/2.5.0/download",
+          "sha256": "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bitflags",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "bitflags",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "2.5.0"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "bytes 1.6.0": {
+      "name": "bytes",
+      "version": "1.6.0",
+      "package_url": "https://github.com/tokio-rs/bytes",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/bytes/1.6.0/download",
+          "sha256": "514de17de45fdb8dc022b1a7975556c53c86f9f0aa5f534b98977b171857c2c9"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bytes",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "bytes",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "1.6.0"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
+    "direct-cargo-bazel-deps 0.0.1": {
+      "name": "direct-cargo-bazel-deps",
+      "version": "0.0.1",
+      "package_url": null,
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "direct_cargo_bazel_deps",
+            "crate_root": ".direct_cargo_bazel_deps.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "direct_cargo_bazel_deps",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "anyhow 1.0.83",
+              "target": "anyhow"
+            },
+            {
+              "id": "bitflags 2.5.0",
+              "target": "bitflags"
+            },
+            {
+              "id": "bytes 1.6.0",
+              "target": "bytes"
+            },
+            {
+              "id": "x86_64 0.15.1",
+              "target": "x86_64"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.0.1"
+      },
+      "license": null,
+      "license_ids": [],
+      "license_file": null
+    },
+    "rustversion 1.0.16": {
+      "name": "rustversion",
+      "version": "1.0.16",
+      "package_url": "https://github.com/dtolnay/rustversion",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/rustversion/1.0.16/download",
+          "sha256": "092474d1a01ea8278f69e6a358998405fae5b8b963ddaeb2b0b04a128bf1dfb0"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "rustversion",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build/build.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "rustversion",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustversion 1.0.16",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.16"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "volatile 0.4.6": {
+      "name": "volatile",
+      "version": "0.4.6",
+      "package_url": "https://github.com/rust-osdev/volatile",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/volatile/0.4.6/download",
+          "sha256": "442887c63f2c839b346c192d047a7c87e73d0689c9157b00b53dcc27dd5ea793"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "volatile",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "volatile",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.4.6"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "x86_64 0.15.1": {
+      "name": "x86_64",
+      "version": "0.15.1",
+      "package_url": "https://github.com/rust-osdev/x86_64",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/x86_64/0.15.1/download",
+          "sha256": "4bc79523af8abf92fb1a970c3e086c5a343f6bcc1a0eb890f575cbb3b45743df"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "x86_64",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "x86_64",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "abi_x86_interrupt",
+            "asm_const",
+            "const_fn",
+            "default",
+            "instructions",
+            "nightly",
+            "step_trait"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "bit_field 0.10.2",
+              "target": "bit_field"
+            },
+            {
+              "id": "bitflags 2.5.0",
+              "target": "bitflags"
+            },
+            {
+              "id": "volatile 0.4.6",
+              "target": "volatile"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "rustversion 1.0.16",
+              "target": "rustversion"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.15.1"
+      },
+      "license": "MIT/Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    }
+  },
+  "binary_crates": [],
+  "workspace_members": {
+    "direct-cargo-bazel-deps 0.0.1": ""
+  },
+  "conditions": {
+    "x86_64-unknown-linux-gnu": [
+      "x86_64-unknown-linux-gnu"
+    ],
+    "x86_64-unknown-none": [
+      "x86_64-unknown-none"
+    ]
+  },
+  "direct_deps": [
+    "anyhow 1.0.83",
+    "bitflags 2.5.0",
+    "bytes 1.6.0",
+    "x86_64 0.15.1"
+  ],
+  "direct_dev_deps": []
+}
