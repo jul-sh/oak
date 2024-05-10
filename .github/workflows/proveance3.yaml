@@ -1,0 +1,96 @@
+name: Minimal Provenances
+
+on:
+  push:
+    branches:
+      - 'stage0verify'
+  workflow_dispatch:
+    inputs:
+      build-config-path:
+        required: true
+        type: string
+
+jobs:
+  get_inputs:
+    outputs:
+      # Resolves to a single file which is passed to the SLSA provenance
+      # generator.
+      artifact-path: ${{ steps.parse-build-config.outputs.artifact-path }}
+      # The name of the internal TR package. This must coincide with the
+      # basename of the buildconfig.
+      package-name: ${{ steps.parse-build-config.outputs.package-name }}
+      builder-digest: ${{ steps.builder-digest.outputs.builder-digest }}
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Mount main branch
+        uses: actions/checkout@v4
+
+      - name: Parse build config
+        id: parse-build-config
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o xtrace
+          set -o pipefail
+          artifact_path="$(tail -1 ${{ inputs.build-config-path }} | grep -oP 'artifact_path = \K(.*)')"
+          package_name="$(basename ${{ inputs.build-config-path }} .toml)"
+          echo "artifact-path=${artifact_path}" >> $GITHUB_OUTPUT
+          echo "package-name=${package_name}" >> $GITHUB_OUTPUT
+
+      - name: Get builder image info
+        id: builder-digest
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o xtrace
+          set -o pipefail
+          source ./scripts/common
+          digest="$(echo "${DOCKER_IMAGE_REPO_DIGEST}" | cut -d'@' -f2)"
+          echo "builder-digest=${digest}" >> $GITHUB_OUTPUT
+
+      - name: Print values
+        run: |
+          echo "${{ steps.parse-build-config.outputs.artifact-path }}"
+          echo "${{ steps.parse-build-config.outputs.package-name }}"
+          echo "${{ steps.builder-digest.outputs.builder-digest }}"
+
+  generate_provenance:
+    needs: [get_inputs]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Pretend build
+        id: pretend
+        run: |
+          set -o errexit
+          set -o nounset
+          set -o xtrace
+          set -o pipefail
+          dir="$(dirname ${{ needs.get_inputs.outputs.artifact-path }})"
+          mkdir -p $dir
+          echo whatever > ${{ needs.get_inputs.outputs.artifact-path }}
+
+      - name: Debug subject path
+        run: |
+          echo "${{ needs.get_inputs.outputs.artifact-path }}"
+          ls -la "${{ needs.get_inputs.outputs.artifact-path }}"
+
+      - name: Attest Build Provenance
+        id: provenance
+        uses: actions/attest-build-provenance@v1.1.0
+        with:
+          subject-name: not-a-real-build
+          subject-digest: sha256:cd293be6cea034bd45a0352775a219ef5dc7825ce55d1f7dae9762d80ce64411
+          push-to-registry: true
+
+      - name: Show Bundle
+        run: |
+          echo "${{ steps.provenance.outputs.bundle-path }}"
+          ls -la "${{ steps.provenance.outputs.bundle-path }}"
