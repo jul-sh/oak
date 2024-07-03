@@ -7,4 +7,7 @@ def load_rust_repositories():
         name = "rules_rust",
         sha256 = "17c53bf800b932f32d3ca19d2cb9e8ad533ce1c0d729f0d183077bfddab7ad46",
         urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.46.0/rules_rust-v0.46.0.tar.gz"],
+        # Simple patch to permit us to compile WASM binaries.
+        patches = ["//bazel/rust:rules_rust.patch"],
+        patch_args = ["-p1"],
     )
