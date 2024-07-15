@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+// TODO: b/353311175 - Auto generate these bindings.
 //! Code to serialize attestation proto messages to JSON, in order to make them
 //! human readable. This code is manually maintained for each struct, for two
 //! reasons:
