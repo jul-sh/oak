@@ -23,7 +23,9 @@ extern crate alloc;
 use alloc::{alloc::Layout, vec::Vec};
 use core::{alloc::GlobalAlloc, cell::UnsafeCell};
 
-const ARENA_SIZE: usize = 128 * 1024;
+use oak_attestation_explain::{HumanReadableExplanation, HumanReadableTitle};
+
+const ARENA_SIZE: usize = 16 * 1024 * 1024;
 
 #[repr(C, align(32))]
 struct SimpleAllocator {

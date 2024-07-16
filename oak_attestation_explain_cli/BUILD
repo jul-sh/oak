@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -22,17 +22,26 @@ package(
 )
 
 rust_binary(
+    name = "oak_attestation_explain_cli_binary",
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        ":oak_attestation_explain_cli",
+        "//oak_proto_rust",
+        "@oak_crates_index//:clap",
+        "@oak_crates_index//:prost",
+    ],
+)
+
+rust_library(
     name = "oak_attestation_explain_cli",
-    srcs = glob(["src/**"]),
+    srcs = glob(["src/**/*.rs"]),
     deps = [
         "//oak_attestation_explain",
         "//oak_attestation_verification",
         "//oak_attestation_verification_test_utils",
         "//oak_proto_rust",
         "@oak_crates_index//:anyhow",
-        "@oak_crates_index//:clap",
         "@oak_crates_index//:hex",
-        "@oak_crates_index//:prost",
         "@oak_crates_index//:sha2",
         "@oak_crates_index//:zerocopy",
     ],
