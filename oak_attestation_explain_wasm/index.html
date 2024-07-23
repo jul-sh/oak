@@ -1,20 +1,64 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>WASM Test</title>
-  </head>
 
-  <body>
-    <script>
-      const importObj = {};
-      (async () => {
-        const response = await fetch('./oak_attestation_explain_wasm.wasm');
-        const { instance } = await WebAssembly.instantiateStreaming(
-          response,
-          importObj,
-        );
-        console.log(instance.exports.nth_prime(10));
-      })();
-    </script>
-  </body>
+<head>
+  <title>Oak Attestation Explanation</title>
+  <meta charset="UTF-8" />
+  <script type="module">
+    // Function to load the WASM module
+    async function loadWasmModule() {
+      // Fetch the WASM file
+      const wasmResponse = await fetch('oak_attestation_explain_wasm.wasm');
+      // Get the binary data
+      const wasmBytes = await wasmResponse.arrayBuffer();
+      // Instantiate the WASM module
+      const wasmModule = await WebAssembly.instantiate(wasmBytes, {});
+      // Return the instance
+      return wasmModule.instance.exports;
+    }
+
+    async function main() {
+      const wasm = await loadWasmModule();
+
+      // Prepare input data
+      const inputData = new Uint8Array([1, 2, 3]);
+
+      // Allocate memory in WASM for input
+      const inputPtr = wasm.alloc(inputData.length);
+
+      // Copy input data to WASM memory
+      const inputMemory = new Uint8Array(wasm.memory.buffer, inputPtr, inputData.length);
+      inputMemory.set(inputData);
+
+      // Call the WASM function
+      const resultPtr = wasm.double_bytes(inputPtr, inputData.length);
+
+      // Read the length of the output (first 4 bytes)
+      const outputLen = new Uint32Array(wasm.memory.buffer, resultPtr, 1)[0];
+
+      // Read the actual output data
+      const outputData = new Uint8Array(wasm.memory.buffer, resultPtr + 4, outputLen);
+
+      // Copy the output data to a JavaScript array
+      const result = Array.from(outputData);
+
+      console.log("Input:", Array.from(inputData));
+      console.log("Output:", result);
+
+      // Deallocate input memory
+      wasm.dealloc(inputPtr, inputData.length);
+
+      // Deallocate result memory
+      wasm.dealloc(resultPtr, outputLen + 4);
+    }
+
+    window.onload = async () => {
+      main().catch(console.error);
+    };
+  </script>
+</head>
+
+<body>
+</body>
+
 </html>
