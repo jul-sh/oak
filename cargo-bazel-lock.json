@@ -1,5 +1,5 @@
 {
-  "checksum": "3953a8111504d2020a4d628e0acf91dfe2714eaf10dcb4e8498ecc9cf1af1bcf",
+  "checksum": "06939b1e95c1ca03c31f66451a78edb1ec99bed086d32c2a8ce0371e0083ff15",
   "crates": {
     "acpi 5.0.0": {
       "name": "acpi",
@@ -2998,6 +2998,16 @@
             }
           ],
           "selects": {
+            "wasm32-unknown-unknown": [
+              {
+                "id": "js-sys 0.3.69",
+                "target": "js_sys"
+              },
+              {
+                "id": "wasm-bindgen 0.2.92",
+                "target": "wasm_bindgen"
+              }
+            ],
             "x86_64-unknown-linux-gnu": [
               {
                 "id": "iana-time-zone 0.1.60",
@@ -8972,6 +8982,7 @@
         ],
         "crate_features": {
           "common": [
+            "custom",
             "std"
           ],
           "selects": {}
@@ -19214,6 +19225,17 @@
                 "target": "windows_sys"
               }
             ],
+            "wasm32-unknown-unknown": [
+              {
+                "id": "errno 0.3.8",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.153",
+                "target": "libc"
+              }
+            ],
             "x86_64-unknown-none": [
               {
                 "id": "errno 0.3.8",
@@ -23189,10 +23211,6 @@
             {
               "id": "pin-project-lite 0.2.14",
               "target": "pin_project_lite"
-            },
-            {
-              "id": "socket2 0.5.7",
-              "target": "socket2"
             }
           ],
           "selects": {
@@ -23210,6 +23228,16 @@
               {
                 "id": "signal-hook-registry 1.4.2",
                 "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
               }
             ]
           }
@@ -25411,6 +25439,14 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "default",
+            "spans",
+            "std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -25477,6 +25513,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -25549,6 +25591,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -25601,6 +25649,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -27090,6 +27144,21 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "CanvasRenderingContext2d",
+            "Document",
+            "DomRect",
+            "DomRectReadOnly",
+            "Element",
+            "EventTarget",
+            "HtmlCanvasElement",
+            "HtmlElement",
+            "Node",
+            "Window"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -29691,13 +29760,16 @@
       "x86_64-unknown-linux-gnu"
     ],
     "cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = \"linux\", target_endian = \"little\", any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-none"
     ],
     "cfg(all(target_arch = \"aarch64\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [],
     "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [],
     "cfg(all(target_arch = \"loongarch64\", target_os = \"linux\"))": [],
-    "cfg(all(target_arch = \"wasm32\", not(target_os = \"wasi\")))": [],
+    "cfg(all(target_arch = \"wasm32\", not(target_os = \"wasi\")))": [
+      "wasm32-unknown-unknown"
+    ],
     "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"x86\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"x86_64\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": [
@@ -29734,24 +29806,30 @@
     ],
     "cfg(curve25519_dalek_backend = \"fiat\")": [],
     "cfg(not(all(target_arch = \"arm\", target_os = \"none\")))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(all(windows, target_env = \"msvc\", not(target_vendor = \"uwp\"))))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(target_os = \"windows\"))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(windows))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(target_arch = \"s390x\")": [],
     "cfg(target_arch = \"spirv\")": [],
-    "cfg(target_arch = \"wasm32\")": [],
+    "cfg(target_arch = \"wasm32\")": [
+      "wasm32-unknown-unknown"
+    ],
     "cfg(target_arch = \"x86_64\")": [
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
@@ -29772,6 +29850,9 @@
     ],
     "cfg(windows)": [],
     "i686-pc-windows-gnu": [],
+    "wasm32-unknown-unknown": [
+      "wasm32-unknown-unknown"
+    ],
     "x86_64-pc-windows-gnu": [],
     "x86_64-pc-windows-gnullvm": [],
     "x86_64-unknown-linux-gnu": [

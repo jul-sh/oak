@@ -23,6 +23,7 @@ rust_shared_library(
     name = "oak_attestation_explain_wasm",
     srcs = glob(["src/*.rs"]),
     platform = "//:wasm32-unknown-unknown",
+    deps = ["@oak_crates_index//:getrandom"],
 )
 
 exports_files(["index.html"])

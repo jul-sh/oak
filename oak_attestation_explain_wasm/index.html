@@ -37,11 +37,10 @@
 
         // Call the Wasm function
         // This calls `process_bytes_with_random` in Rust, which returns a pointer to the result
-        const resultPtr = wasm.double_bytes(inputPtr, inputData.length);
-
-        // Read the length of the output (first 4 bytes)
-        // The Rust function prepends the length as a u32 (4 bytes)
-        const outputLen = new Uint32Array(wasm.memory.buffer, resultPtr, 1)[0];
+        const resultPtr = wasm.process_bytes_with_random(
+          inputPtr,
+          inputData.length,
+        );
 
         // Read the actual output data
         // We skip the first 4 bytes (length) and read `outputLen` bytes

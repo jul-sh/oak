@@ -20,15 +20,19 @@
 
 #[no_mangle]
 // Safety: arguments must be a valid pointer that is safe to deference.
-pub unsafe extern "C" fn double_bytes(ptr: *const u8, len: usize) -> *mut u8 {
+pub unsafe extern "C" fn process_bytes_with_random(ptr: *const u8, len: usize) -> *mut u8 {
     let input = std::slice::from_raw_parts(ptr, len);
 
     // Create a new vector with the same length as the input
     let mut output = Vec::with_capacity(input.len());
 
-    // Process each byte (for this example, we'll simply double each byte value)
-    for &byte in input {
-        output.push(byte.saturating_mul(2));
+    // Get some random bytes
+    let mut random_bytes = vec![0u8; input.len()];
+    get_random_values(&mut random_bytes);
+
+    // Process each byte (XOR with random bytes for this example)
+    for (i, &byte) in input.iter().enumerate() {
+        output.push(byte ^ random_bytes[i]);
     }
 
     // Prepare to return a pointer to the allocated memory
@@ -70,3 +74,26 @@ pub extern "C" fn dealloc(ptr: *mut u8, len: usize) {
         let _ = Vec::from_raw_parts(ptr, len, len); // Reconstruct and drop the Vec, freeing the memory
     }
 }
+
+// Declaration of the external function imported from JavaScript
+// This allows the WASM module to call the `webcrypto_get_random_values`
+// function defined in JavaScript
+#[link(wasm_import_module = "env")]
+extern "C" {
+    fn webcrypto_get_random_values(ptr: *mut u8, len: usize);
+}
+
+// A safe wrapper for the imported JavaScript function
+// This function is used as a custom random number generator for the `getrandom`
+// crate
+fn get_random_values(dest: &mut [u8]) -> Result<(), getrandom::Error> {
+    // Safety: webcrypto_get_random_values is assumed to be correctly linked to the
+    // browser's crypto.getRandomValues method
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
+    unsafe {
+        webcrypto_get_random_values(dest.as_mut_ptr(), dest.len());
+    };
+    Ok(())
+}
+
+getrandom::register_custom_getrandom!(get_random_values);
