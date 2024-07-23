@@ -157,7 +157,12 @@ def oak_crates_index(cargo_lockfile, lockfile):
             "env_logger": crate.spec(version = "*"),
             "futures": crate.spec(version = "*"),
             "futures-util": crate.spec(version = "*"),
-            "getrandom": crate.spec(version = "*"),
+            "getrandom": crate.spec(
+                # js is required to support wasm*-unknown-none.
+                # Ref: https://docs.rs/getrandom/#webassembly-support
+                features = ["js"],
+                version = "*",
+            ),
             "goblin": crate.spec(
                 default_features = False,
                 features = [
@@ -470,5 +475,6 @@ def oak_crates_index(cargo_lockfile, lockfile):
         supported_platform_triples = [
             "x86_64-unknown-linux-gnu",
             "x86_64-unknown-none",
+            "wasm32-unknown-unknown",
         ],
     )
