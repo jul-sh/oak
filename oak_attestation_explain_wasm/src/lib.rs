@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The Project Oak Authors
+// Copyright 2024 The Project Oak Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,65 +15,58 @@
 //
 
 // TODO: b/351012006 - Load the attestation library.
-// Right now this is just a placeholder for WASM logic without generated
+// Right now this is just a placeholder for Wasm logic without generated
 // bindings. From: https://surma.dev/things/rust-to-webassembly/
 
-#![no_std]
-extern crate alloc;
-use alloc::{alloc::Layout, vec::Vec};
-use core::{alloc::GlobalAlloc, cell::UnsafeCell};
-
-const ARENA_SIZE: usize = 128 * 1024;
-
-#[repr(C, align(32))]
-struct SimpleAllocator {
-    arena: UnsafeCell<[u8; ARENA_SIZE]>,
-    head: UnsafeCell<usize>,
-}
-
-impl SimpleAllocator {
-    const fn new() -> Self {
-        SimpleAllocator { arena: UnsafeCell::new([0; ARENA_SIZE]), head: UnsafeCell::new(0) }
-    }
-}
-
-unsafe impl Sync for SimpleAllocator {}
-
-#[global_allocator]
-static ALLOCATOR: SimpleAllocator = SimpleAllocator::new();
-
-unsafe impl GlobalAlloc for SimpleAllocator {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let size = layout.size();
-        let align = layout.align();
-        let idx = (*self.head.get()).next_multiple_of(align);
-        *self.head.get() = idx + size;
-        let arena: &mut [u8; ARENA_SIZE] = &mut (*self.arena.get());
-        match arena.get_mut(idx) {
-            Some(item) => item as *mut u8,
-            _ => core::ptr::null_mut(),
-        }
-    }
-
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        /* lol */
-    }
-}
-
-#[panic_handler]
-fn panic(_panic: &core::panic::PanicInfo<'_>) -> ! {
-    core::arch::wasm32::unreachable()
-}
-
 #[no_mangle]
-pub extern "C" fn nth_prime(n: usize) -> usize {
-    let mut primes: Vec<usize> = Vec::new();
-    let mut current = 2;
-    while primes.len() < n {
-        if !primes.iter().any(|prime| current % prime == 0) {
-            primes.push(current);
-        }
-        current += 1;
+// Safety: arguments must be a valid pointer that is safe to deference.
+pub unsafe extern "C" fn double_bytes(ptr: *const u8, len: usize) -> *mut u8 {
+    let input = std::slice::from_raw_parts(ptr, len);
+
+    // Create a new vector with the same length as the input
+    let mut output = Vec::with_capacity(input.len());
+
+    // Process each byte (for this example, we'll simply double each byte value)
+    for &byte in input {
+        output.push(byte.saturating_mul(2));
     }
-    primes.into_iter().last().unwrap_or(0)
+
+    // Prepare to return a pointer to the allocated memory
+    let output_len = output.len();
+
+    // Create a new vector that includes the length and the data
+    let mut result = Vec::with_capacity(4 + output_len);
+    result.extend_from_slice(&(output_len as u32).to_le_bytes());
+    result.extend_from_slice(&output);
+
+    // Get the pointer to the result
+    let result_ptr = result.as_mut_ptr();
+
+    // Prevent the vector from being deallocated
+    std::mem::forget(result);
+
+    // Return the pointer
+    result_ptr
+}
+
+// Allocates memory in the Wasm module and returns a pointer to it
+// This function is called from JavaScript (see `wasm.alloc(inputData.length)`
+// in the JS code)
+#[no_mangle]
+pub extern "C" fn alloc(len: usize) -> *mut u8 {
+    let mut buf = Vec::with_capacity(len);
+    buf.extend((0..len).map(|_| 0));
+    let ptr = buf.as_mut_ptr();
+    std::mem::forget(buf); // Prevent Rust from deallocating the memory
+    ptr
+}
+
+// Deallocates memory in the Wasm module that was previously allocated by
+// `alloc` This function is called from JavaScript (see `wasm.dealloc(inputPtr,
+// inputData.length)` in the JS code)
+#[no_mangle]
+pub extern "C" fn dealloc(ptr: *mut u8, len: usize) {
+    unsafe {
+        let _ = Vec::from_raw_parts(ptr, len, len); // Reconstruct and drop the Vec, freeing the memory
+    }
 }
