@@ -14,26 +14,25 @@
 // limitations under the License.
 //
 
-// TODO: b/351012006 - Load the attestation library.
-// Right now this is just a placeholder for Wasm logic without generated
-// bindings. From: https://surma.dev/things/rust-to-webassembly/
+use oak_attestation_explain::HumanReadableExplanation;
+use oak_proto_rust::oak::attestation::v1::Evidence;
+use prost::Message;
 
 #[no_mangle]
 // Safety: arguments must be a valid pointer that is safe to deference.
 pub unsafe extern "C" fn process_bytes_with_random(ptr: *const u8, len: usize) -> *mut u8 {
     let input = std::slice::from_raw_parts(ptr, len);
 
-    // Create a new vector with the same length as the input
-    let mut output = Vec::with_capacity(input.len());
+    let extracted_evidence = {
+        let evidence = Evidence::decode(input).expect("could not decode evidence");
+        oak_attestation_verification::verifier::extract_evidence(&evidence)
+            .expect("could not extract evidence")
+    };
 
-    // Get some random bytes
-    let mut random_bytes = vec![0u8; input.len()];
-    get_random_values(&mut random_bytes);
+    let explaination =
+        extracted_evidence.description().expect("failed to generate description for the evidence");
 
-    // Process each byte (XOR with random bytes for this example)
-    for (i, &byte) in input.iter().enumerate() {
-        output.push(byte ^ random_bytes[i]);
-    }
+    let output = explaination.into_bytes();
 
     // Prepare to return a pointer to the allocated memory
     let output_len = output.len();
