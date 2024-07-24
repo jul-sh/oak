@@ -35,6 +35,7 @@ rust_library(
     target_compatible_with = either_platform([
         "//:x86_64-linux-setting",
         "//:x86_64-none-setting",
+        "//:wasm32-none-setting",
     ]),
     deps = [
         "//oak_proto_rust",

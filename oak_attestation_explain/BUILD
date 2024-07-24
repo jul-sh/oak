@@ -26,13 +26,13 @@ rust_library(
     srcs = glob(["src/**"]),
     deps = [
         "//oak_proto_rust",
-        "@oak_crates_index//:anyhow",
         "@oak_crates_index//:hex",
         "@oak_crates_index//:serde",
         "@oak_crates_index//:serde_json",
         "@oak_crates_index//:serde_yaml",
         "@oak_crates_index//:sha2",
         "@oak_crates_index//:zerocopy",
+        "@oak_no_std_crates_index//:anyhow",
     ],
 )
 
