@@ -29,11 +29,13 @@ use oak_proto_rust::oak::{
 
 /// A [Transport] implementation that uses a single gRPC streaming session to
 /// get the evidence and then invokve the desired request.
+#[cfg(feature = "grpc-streaming-transport-implementation")]
 pub struct GrpcStreamingTransport {
     response_stream: tonic::Streaming<ResponseWrapper>,
     request_tx_channel: mpsc::Sender<RequestWrapper>,
 }
 
+#[cfg(feature = "grpc-streaming-transport-implementation")]
 impl GrpcStreamingTransport {
     /// Create a new [GrpcStreamingTransport].
     ///
@@ -87,7 +89,7 @@ impl GrpcStreamingTransport {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 pub trait Transport {
     async fn invoke(
         &mut self,
@@ -95,7 +97,8 @@ pub trait Transport {
     ) -> anyhow::Result<EncryptedResponse>;
 }
 
-#[async_trait::async_trait]
+#[cfg(feature = "grpc-streaming-transport-implementation")]
+#[async_trait::async_trait(?Send)]
 impl Transport for GrpcStreamingTransport {
     async fn invoke(
         &mut self,
@@ -119,12 +122,13 @@ impl Transport for GrpcStreamingTransport {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 pub trait EvidenceProvider {
     async fn get_endorsed_evidence(&mut self) -> anyhow::Result<EndorsedEvidence>;
 }
 
-#[async_trait::async_trait]
+#[cfg(feature = "grpc-streaming-transport-implementation")]
+#[async_trait::async_trait(?Send)]
 impl EvidenceProvider for GrpcStreamingTransport {
     async fn get_endorsed_evidence(&mut self) -> anyhow::Result<EndorsedEvidence> {
         let response_wrapper = self

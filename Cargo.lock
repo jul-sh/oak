@@ -1389,8 +1389,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "190092ea657667030ac6a35e305e62fc4dd69fd98ac98631e5d3a2b1575a12b5"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -2435,6 +2437,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "oak_containers_hello_world_web_client"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64 0.21.7",
+ "getrandom",
+ "js-sys",
+ "oak_attestation_explain",
+ "oak_attestation_verification",
+ "oak_client",
+ "oak_proto_rust",
+ "prost",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "oak_containers_launcher"
 version = "0.1.0"
 dependencies = [
@@ -2446,7 +2467,7 @@ dependencies = [
  "env_logger",
  "futures",
  "log",
- "nix 0.27.1",
+ "nix 0.28.0",
  "oak_grpc",
  "oak_grpc_utils",
  "oak_proto_rust",
@@ -2470,7 +2491,7 @@ dependencies = [
  "coset",
  "hpke",
  "log",
- "nix 0.27.1",
+ "nix 0.28.0",
  "oak_attestation",
  "oak_attestation_verification",
  "oak_containers_agent",
@@ -2529,7 +2550,7 @@ dependencies = [
  "clap",
  "coset",
  "futures-util",
- "nix 0.27.1",
+ "nix 0.28.0",
  "oak_attestation",
  "oak_crypto",
  "oak_dice",
@@ -2560,7 +2581,7 @@ dependencies = [
  "anyhow",
  "bitflags 2.4.1",
  "clap",
- "nix 0.27.1",
+ "nix 0.28.0",
  "oak_containers_orchestrator",
  "oak_grpc_utils",
  "opentelemetry",
@@ -2645,7 +2666,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "nix 0.27.1",
+ "nix 0.28.0",
  "simple_logger",
 ]
 
@@ -2909,7 +2930,7 @@ dependencies = [
  "http",
  "hyper",
  "log",
- "nix 0.27.1",
+ "nix 0.28.0",
  "oak_client",
  "oak_functions_abi",
  "oak_functions_client",
@@ -2949,7 +2970,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "nix 0.27.1",
+ "nix 0.28.0",
  "simple_logger",
 ]
 
@@ -5202,6 +5223,18 @@ dependencies = [
  "quote",
  "syn 2.0.48",
  "wasm-bindgen-shared",
+]
+
+[[package]]
+name = "wasm-bindgen-futures"
+version = "0.4.40"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bde2032aeb86bdfaecc8b261eef3cba735cc426c1f3a3416d1e0791be95fc461"
+dependencies = [
+ "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
