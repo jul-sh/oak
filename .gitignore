@@ -127,3 +127,6 @@ toolchain/toolchain.tar.bz2
 # Nix outputs
 /result
 /dev-profile*
+
+# Trunk/leptos builder outputs
+oak_containers_examples/hello_world/web_client/dist

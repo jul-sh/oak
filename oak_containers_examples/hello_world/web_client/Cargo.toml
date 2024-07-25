@@ -5,9 +5,6 @@ authors = ["Juliette Pretot <julsh@google.com>"]
 edition = "2021"
 license = "Apache-2.0"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 anyhow = "*"
 async-trait = "*"
@@ -19,6 +16,7 @@ oak_attestation_verification = { workspace = true }
 oak_client = { default-features = false, path = "../../../oak_client" }
 oak_proto_rust = { workspace = true }
 prost = "*"
+leptos = { version = "*", features = ["csr"] }
 wasm-bindgen = "*"
 wasm-bindgen-futures = "*"
 web-sys = { version = "*", features = [

@@ -147,12 +147,3 @@ impl GreeterClient {
         String::from_utf8(response).context("Failed to decode response as UTF-8")
     }
 }
-
-#[wasm_bindgen]
-pub async fn greet(port: u16, name: String) -> Result<String, JsValue> {
-    let mut client = GreeterClient::new(port)
-        .await
-        .map_err(|e| JsValue::from_str(&format!("Failed to create client: {:?}", e)))?;
-
-    client.greet(&name).await.map_err(|e| JsValue::from_str(&format!("Failed to greet: {:?}", e)))
-}

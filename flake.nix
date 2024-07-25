@@ -122,7 +122,8 @@
                 systemd
                 qemu_kvm
                 python312
-                wasm-pack
+                trunk # Used to create wasm bundles and serve web ui
+                leptosfmt # Used to create wasm bundles and serve web ui
               ];
             };
             # For some reason node does not know how to find the prettier plugin, so we need to
