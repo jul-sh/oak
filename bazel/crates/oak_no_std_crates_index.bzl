@@ -87,7 +87,9 @@ def oak_no_std_crates_index(cargo_lockfile, lockfile):
             "getrandom": crate.spec(
                 default_features = False,
                 # rdrand is required to support x64_64-unknown-none.
-                features = ["rdrand"],
+                # js is required to support wasm*-unknown-none.
+                # Ref: https://docs.rs/getrandom/#webassembly-support
+                features = ["rdrand", "js"],
                 version = "0.2.12",
             ),
             "goblin": crate.spec(

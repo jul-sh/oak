@@ -35,12 +35,13 @@ rust_library(
     target_compatible_with = either_platform([
         "//:x86_64-linux-setting",
         "//:x86_64-none-setting",
+        "//:wasm32-none-setting",
     ]),
     deps = [
         "//oak_proto_rust",
         "@oak_crates_index//:static_assertions",
     ] + select({
-        "@platforms//os:none": [
+        "//:x86_64-none-setting": [
             "@oak_no_std_crates_index//:aead",
             "@oak_no_std_crates_index//:aes-gcm",
             "@oak_no_std_crates_index//:anyhow",

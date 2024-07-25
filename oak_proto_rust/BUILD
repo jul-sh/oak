@@ -39,7 +39,7 @@ rust_library(
         ":build",
         "//micro_rpc",
     ] + select({
-        "@platforms//os:none": [
+        "//:x86_64-none-setting": [
             "//third_party/prost-types",
             "@oak_no_std_crates_index//:prost",
         ],

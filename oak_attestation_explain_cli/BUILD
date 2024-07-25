@@ -40,9 +40,9 @@ rust_library(
         "//oak_attestation_verification",
         "//oak_attestation_verification_test_utils",
         "//oak_proto_rust",
-        "@oak_crates_index//:anyhow",
-        "@oak_crates_index//:hex",
-        "@oak_crates_index//:sha2",
         "@oak_crates_index//:zerocopy",
+        "@oak_no_std_crates_index//:anyhow",
+        "@oak_no_std_crates_index//:hex",
+        "@oak_no_std_crates_index//:sha2",
     ],
 )

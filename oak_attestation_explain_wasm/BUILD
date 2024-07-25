@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_rust//rust:defs.bzl", "rust_shared_library")
+load("@rules_rust//wasm_bindgen:defs.bzl", "rust_wasm_bindgen")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -23,7 +24,20 @@ rust_shared_library(
     name = "oak_attestation_explain_wasm",
     srcs = glob(["src/*.rs"]),
     platform = "//:wasm32-unknown-unknown",
-    deps = ["//oak_attestation_explain_cli"],
+    deps = [
+        "//oak_attestation_explain",
+        "//oak_attestation_verification",
+        "//oak_proto_rust",
+        "@oak_crates_index//:prost",
+        "@oak_crates_index//:wasm-bindgen",
+    ],
 )
 
 exports_files(["index.html"])
+
+rust_wasm_bindgen(
+    name = "oak_attestation_explain_lib_wasm_bindgen",
+    bindgen_flags = ["--browser"],
+    target = "web",
+    wasm_file = ":oak_attestation_explain_wasm",
+)

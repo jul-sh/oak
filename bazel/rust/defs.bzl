@@ -2,6 +2,7 @@
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains", "rust_repository_set")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_dependencies", "rust_wasm_bindgen_register_toolchains")
 load("//bazel:defs.bzl", "RUST_EDITION", "RUST_VERSIONS")
 
 def setup_rust_dependencies():
@@ -55,3 +56,7 @@ def setup_rust_dependencies():
     # VSCode users: There's a task included in .vscode/tasks.json that should
     # automatically do this for you when needed.
     rust_analyzer_dependencies()
+
+    rust_wasm_bindgen_dependencies()
+
+    rust_wasm_bindgen_register_toolchains()

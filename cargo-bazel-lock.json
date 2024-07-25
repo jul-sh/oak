@@ -1,5 +1,5 @@
 {
-  "checksum": "d4d2e1d93bb189e8cbeb8e9d140fbb6358c27f1b7ebccc310bea41cdd4003452",
+  "checksum": "974eb88ccf9ad5ea07534b06746371dbd63a44a933f540b5e98c41b13ff8ee95",
   "crates": {
     "acpi 5.0.0": {
       "name": "acpi",
@@ -2951,6 +2951,16 @@
             }
           ],
           "selects": {
+            "wasm32-unknown-unknown": [
+              {
+                "id": "js-sys 0.3.69",
+                "target": "js_sys"
+              },
+              {
+                "id": "wasm-bindgen 0.2.92",
+                "target": "wasm_bindgen"
+              }
+            ],
             "x86_64-unknown-linux-gnu": [
               {
                 "id": "iana-time-zone 0.1.60",
@@ -6887,6 +6897,10 @@
               "target": "walkdir"
             },
             {
+              "id": "wasm-bindgen 0.2.92",
+              "target": "wasm_bindgen"
+            },
+            {
               "id": "wasmi 0.31.2",
               "target": "wasmi"
             },
@@ -9176,7 +9190,10 @@
         ],
         "crate_features": {
           "common": [
-            "std"
+            "js",
+            "js-sys",
+            "std",
+            "wasm-bindgen"
           ],
           "selects": {}
         },
@@ -9198,6 +9215,16 @@
               {
                 "id": "libc 0.2.153",
                 "target": "libc"
+              }
+            ],
+            "wasm32-unknown-unknown": [
+              {
+                "id": "js-sys 0.3.69",
+                "target": "js_sys"
+              },
+              {
+                "id": "wasm-bindgen 0.2.92",
+                "target": "wasm_bindgen"
               }
             ]
           }
@@ -19904,6 +19931,17 @@
                 "target": "windows_sys"
               }
             ],
+            "wasm32-unknown-unknown": [
+              {
+                "id": "errno 0.3.8",
+                "target": "errno",
+                "alias": "libc_errno"
+              },
+              {
+                "id": "libc 0.2.153",
+                "target": "libc"
+              }
+            ],
             "x86_64-unknown-none": [
               {
                 "id": "errno 0.3.8",
@@ -23888,10 +23926,6 @@
             {
               "id": "pin-project-lite 0.2.14",
               "target": "pin_project_lite"
-            },
-            {
-              "id": "socket2 0.5.7",
-              "target": "socket2"
             }
           ],
           "selects": {
@@ -23909,6 +23943,16 @@
               {
                 "id": "signal-hook-registry 1.4.2",
                 "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "socket2 0.5.7",
+                "target": "socket2"
               }
             ]
           }
@@ -26176,6 +26220,14 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "default",
+            "spans",
+            "std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -26242,6 +26294,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -26314,6 +26372,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -26366,6 +26430,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -27006,10 +27076,6 @@
               "target": "indexmap"
             },
             {
-              "id": "ittapi 0.4.0",
-              "target": "ittapi"
-            },
-            {
               "id": "libc 0.2.153",
               "target": "libc"
             },
@@ -27121,12 +27187,22 @@
           "selects": {
             "x86_64-unknown-linux-gnu": [
               {
+                "id": "ittapi 0.4.0",
+                "target": "ittapi"
+              },
+              {
                 "id": "memfd 0.6.4",
                 "target": "memfd"
               },
               {
                 "id": "rustix 0.38.32",
                 "target": "rustix"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "ittapi 0.4.0",
+                "target": "ittapi"
               }
             ]
           }
@@ -28455,6 +28531,21 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "CanvasRenderingContext2d",
+            "Document",
+            "DomRect",
+            "DomRectReadOnly",
+            "Element",
+            "EventTarget",
+            "HtmlCanvasElement",
+            "HtmlElement",
+            "Node",
+            "Window"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -31249,13 +31340,16 @@
       "x86_64-unknown-linux-gnu"
     ],
     "cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = \"linux\", target_endian = \"little\", any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-none"
     ],
     "cfg(all(target_arch = \"aarch64\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [],
     "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [],
     "cfg(all(target_arch = \"loongarch64\", target_os = \"linux\"))": [],
-    "cfg(all(target_arch = \"wasm32\", not(target_os = \"wasi\")))": [],
+    "cfg(all(target_arch = \"wasm32\", not(target_os = \"wasi\")))": [
+      "wasm32-unknown-unknown"
+    ],
     "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"x86\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
     "cfg(all(target_arch = \"x86_64\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": [
@@ -31292,23 +31386,29 @@
     ],
     "cfg(curve25519_dalek_backend = \"fiat\")": [],
     "cfg(not(all(target_arch = \"arm\", target_os = \"none\")))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(all(windows, target_env = \"msvc\", not(target_vendor = \"uwp\"))))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(target_os = \"windows\"))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(windows))": [
+      "wasm32-unknown-unknown",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(target_arch = \"spirv\")": [],
-    "cfg(target_arch = \"wasm32\")": [],
+    "cfg(target_arch = \"wasm32\")": [
+      "wasm32-unknown-unknown"
+    ],
     "cfg(target_arch = \"x86_64\")": [
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-none"
@@ -31328,6 +31428,9 @@
     ],
     "cfg(windows)": [],
     "i686-pc-windows-gnu": [],
+    "wasm32-unknown-unknown": [
+      "wasm32-unknown-unknown"
+    ],
     "x86_64-pc-windows-gnu": [],
     "x86_64-pc-windows-gnullvm": [],
     "x86_64-unknown-linux-gnu": [
@@ -31454,6 +31557,7 @@
     "uart_16550 0.3.0",
     "ubyte 0.10.4",
     "walkdir 2.5.0",
+    "wasm-bindgen 0.2.92",
     "wasmi 0.31.2",
     "wasmtime 22.0.0",
     "which 4.4.2",

@@ -31,6 +31,7 @@ rust_library(
     target_compatible_with = either_platform([
         "//:x86_64-linux-setting",
         "//:x86_64-none-setting",
+        "//:wasm32-none-setting",
     ]),
     deps = [
         "@oak_crates_index//:static_assertions",
@@ -38,7 +39,7 @@ rust_library(
         "@oak_crates_index//:zerocopy",
     ] + select({
         # TODO: b/347706173 - Try to reduce / remove items in this select by moving all to no_std.
-        "@platforms//os:none": [
+        "//:x86_64-none-setting": [
             "@oak_no_std_crates_index//:bitflags",
             "@oak_no_std_crates_index//:ciborium",
             "@oak_no_std_crates_index//:coset",

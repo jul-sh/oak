@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use std::io::Write;
+#![no_std]
+
+extern crate alloc;
+use alloc::{fmt::Write, format, string::String};
 
 use oak_attestation_explain::{HumanReadableExplanation, HumanReadableTitle};
 use oak_attestation_verification_test_utils::reference_values_from_evidence;
@@ -45,11 +48,12 @@ fn segment_title(title: &str, description: &str) -> String {
     )
 }
 
-pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(), anyhow::Error> {
+pub fn explain_evidence(evidence: Evidence) -> Result<String, anyhow::Error> {
+    let mut output = String::new();
     let extracted_evidence =
         oak_attestation_verification::verifier::extract_evidence(&evidence).unwrap();
 
-    writeln!(writer, "{}", title("Evidence:")).map_err(anyhow::Error::msg)?;
+    writeln!(output, "{}", title("Evidence:")).map_err(anyhow::Error::msg)?;
 
     match extracted_evidence.evidence_values.clone().take() {
         Some(EvidenceValues::OakRestrictedKernel(restricted_kernel_evidence)) => {
@@ -60,7 +64,7 @@ pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(
                     application_layer: Some(application_layer),
                 } => {
                     writeln!(
-                        writer,
+                        output,
                         "{}",
                         segment_title(
                             &root_layer.title().unwrap(),
@@ -69,7 +73,7 @@ pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(
                     )
                     .map_err(anyhow::Error::msg)?;
                     writeln!(
-                        writer,
+                        output,
                         "{}",
                         segment_title(
                             &kernel_layer.title().unwrap(),
@@ -78,7 +82,7 @@ pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(
                     )
                     .map_err(anyhow::Error::msg)?;
                     writeln!(
-                        writer,
+                        output,
                         "{}",
                         segment_title(
                             &application_layer.title().unwrap(),
@@ -86,7 +90,7 @@ pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(
                         )
                     )
                     .map_err(anyhow::Error::msg)?;
-                    writeln!(writer).map_err(anyhow::Error::msg)?;
+                    writeln!(output).map_err(anyhow::Error::msg)?;
                 }
                 _ => panic!("evidence values unexpectedly unset"),
             }
@@ -96,14 +100,14 @@ pub fn explain_evidence(writer: &mut impl Write, evidence: Evidence) -> Result<(
 
     let reference_values = reference_values_from_evidence(extracted_evidence);
 
-    writeln!(writer, "{}", title("Reference values that describe this evidence:"))
+    writeln!(output, "{}", title("Reference values that describe this evidence:"))
         .map_err(anyhow::Error::msg)?;
 
     writeln!(
-        writer,
+        output,
         "{}",
         reference_values.description().expect("could not get reference values description")
     )
     .map_err(anyhow::Error::msg)?;
-    Ok(())
+    Ok(output)
 }

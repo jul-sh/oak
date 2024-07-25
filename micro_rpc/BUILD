@@ -38,7 +38,7 @@ rust_library(
     deps = [
         ":build",
     ] + select({
-        "@platforms//os:none": [
+        "//:x86_64-none-setting": [
             "@oak_no_std_crates_index//:prost",
         ],
         "//conditions:default": [

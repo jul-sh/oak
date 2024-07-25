@@ -43,6 +43,8 @@ fn main() {
         let serialized = fs::read(evidence).expect("could not read evidence");
         Evidence::decode(serialized.as_slice()).expect("could not decode evidence")
     };
-    oak_attestation_explain_cli::explain_evidence(&mut std::io::stdout(), evidence)
-        .expect("failed to write to stdout");
+    println!(
+        "{}",
+        oak_attestation_explain_cli::explain_evidence(evidence).expect("failed to write to stdout")
+    );
 }

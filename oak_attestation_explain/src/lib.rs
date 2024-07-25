@@ -63,6 +63,10 @@ pub trait HumanReadableExplanation {
     fn description(&self) -> Result<String, anyhow::Error>;
 }
 
+pub fn hi() -> String {
+    "hi from dep".to_string()
+}
+
 fn get_tee_name_from_root_layer_evidence(
     root_layer: &RootLayerData,
 ) -> Result<&'static str, anyhow::Error> {
