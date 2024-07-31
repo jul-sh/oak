@@ -47,6 +47,8 @@ message Stage0Measurements {
 // verify the Event against a Reference Value.
 // TODO: b/333748757 - Make other CB layers use this definition.
 message Event {
+  // This message will be replaced with the structs for the implementation of go/eventlog-spec-v1.
+  option deprecated = true;
   // Represents what is contained in the event. For example, the tag for
   // TaskConfig for the Layer 2 is "layer2".
   // TODO: b/333748757 - Consider making the tag a UUID instead of string.
@@ -56,7 +58,27 @@ message Event {
 
 // A sequence of Events intended for inclusion in attestation evidence.
 message EventLog {
+  // This message will be replaced with the structs for the implementation of go/eventlog-spec-v1.
+  option deprecated = true;
   // TODO: b/333748757 - Remove 'events' once 'encoded_events' is in google3.
   repeated Event events = 1;
   repeated bytes encoded_events = 2;
 }
+
+// go/eventlog-spec-v1 compliant implementation of the EventLog.
+message EventWrapper {
+  // Identifies the type of event (e.g. Stage0Measurements) and its encoding (e.g. protobuf).
+  // When verifying an attestation, the verifyer should only accept events of a known uuid.
+  string uuid = 1;
+  // Represents an event intended for inclusion in attestation.
+  // For example, in an attested measured boot, each event describes all the
+  // measurements of the boot layer being launched next.
+  bytes encoded_event = 2;
+}
+
+// go/eventlog-spec-v1 compliant implementation of the EventLog.
+message EventLogV1 {
+  // A sequence of Events intended for inclusion in attestation evidence.
+  repeated EventWrapper events = 1;
+}
+

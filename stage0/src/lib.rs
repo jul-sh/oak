@@ -306,6 +306,11 @@ pub fn rust64_start() -> ! {
         kernel_cmdline: cmdline.clone(),
     };
 
+    // Use depreacated logic to avoid breaking dependencies.
+    // TODO: b/356454287 - Remove once go/eventlog-spec-v1 has been implemented and
+    // once all existing dependencies on the initial version of the eventlog
+    // have been removed.
+    #[allow(deprecated)]
     let event_log_proto = generate_event_log(stage0event);
     let eventlog_sha2_256_digest = event_log_proto.encoded_events[0].measure();
 
@@ -319,6 +324,11 @@ pub fn rust64_start() -> ! {
 
     // TODO: b/331252282 - Remove temporary workaround for cmd line length.
     let cmdline_max_len = 256;
+    // Use depreacated logic to avoid breaking dependencies.
+    // TODO: b/356454287 - Remove the `eventlog_sha2_256_digest` field once
+    // go/eventlog-spec-v1 has been implemented and once all existing
+    // dependencies on the initial version of the eventlog have been removed.
+    #[allow(deprecated)]
     let measurements = oak_stage0_dice::Measurements {
         acpi_sha2_256_digest,
         kernel_sha2_256_digest: kernel_info.measurement,
@@ -356,22 +366,28 @@ pub fn rust64_start() -> ! {
         E820EntryType::RESERVED,
     ));
 
-    // Write Eventlog data to memory.
-    let mut event_log = Vec::with_capacity_in(PAGE_SIZE, &crate::BOOT_ALLOC);
-    // Ensure that Eventlog is not too big. The 8 bytes are reserved for the size of
-    // the encoded eventlog proto.
-    assert!(event_log_proto.encoded_len() < PAGE_SIZE - 8);
-    // First copy the size of the encoded proto in Little Endian format. Then copy
-    // the actual EventLog.
-    event_log.extend_from_slice(event_log_proto.encoded_len().to_le_bytes().as_slice());
-    event_log.extend_from_slice(event_log_proto.encode_to_vec().as_bytes());
-    let event_log_data = event_log.leak();
-    // Reserve memory containing Eventlog Data.
-    zero_page.insert_e820_entry(BootE820Entry::new(
-        event_log_data.as_bytes().as_ptr() as usize,
-        PAGE_SIZE,
-        E820EntryType::RESERVED,
-    ));
+    // TODO: b/356454287 - Remove once go/eventlog-spec-v1 has been implemented and
+    // once all existing dependencies on the initial version of the eventlog
+    // have been removed. go/eventlog-spec-v1 stores the entire event (not just its
+    // digest) as part of dice_data.
+    {
+        // Write Eventlog data to memory.
+        let mut event_log = Vec::with_capacity_in(PAGE_SIZE, &crate::BOOT_ALLOC);
+        // Ensure that Eventlog is not too big. The 8 bytes are reserved for the size of
+        // the encoded eventlog proto.
+        assert!(event_log_proto.encoded_len() < PAGE_SIZE - 8);
+        // First copy the size of the encoded proto in Little Endian format. Then copy
+        // the actual EventLog.
+        event_log.extend_from_slice(event_log_proto.encoded_len().to_le_bytes().as_slice());
+        event_log.extend_from_slice(event_log_proto.encode_to_vec().as_bytes());
+        let event_log_data = event_log.leak();
+        // Reserve memory containing Eventlog Data.
+        zero_page.insert_e820_entry(BootE820Entry::new(
+            event_log_data.as_bytes().as_ptr() as usize,
+            PAGE_SIZE,
+            E820EntryType::RESERVED,
+        ));
+    };
 
     // Append the DICE data address to the kernel command-line.
     let extra = format!("--{DICE_DATA_CMDLINE_PARAM}={dice_data:p}");
@@ -441,6 +457,11 @@ impl<T: zerocopy::AsBytes + ?Sized> Measured for T {
     }
 }
 
+// TODO: b/356454287 - Remove once all existing dependencies on the initial
+// version of the eventlog have been removed.
+#[deprecated(
+    note = "This function is part of the initial implementation of the eventlog, that is being replaced by an implementation of go/eventlog-spec-v1"
+)]
 fn generate_event_log(measurements: Stage0Measurements) -> EventLog {
     let tag = String::from("Stage0");
     let any = prost_types::Any::from_msg(&measurements);

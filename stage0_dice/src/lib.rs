@@ -63,6 +63,9 @@ pub struct Measurements {
     /// tables.
     pub acpi_sha2_256_digest: [u8; 32],
     /// Eventlog measurement containing the hashes of other components
+    #[deprecated(
+        note = "This field is part of the initial implementation of the eventlog, that is being replaced by an implementation of go/eventlog-spec-v1."
+    )]
     pub eventlog_sha2_256_digest: [u8; 32],
 }
 
@@ -130,6 +133,10 @@ fn generate_stage1_certificate(
             ClaimName::PrivateUse(EVENT_ID),
             Value::Map(alloc::vec![(
                 Value::Integer(SHA2_256_ID.into()),
+                // Use depreacated logic to avoid breaking dependencies.
+                // TODO: b/356454287 - Remove once all existing dependencies on the initial
+                // version of the eventlog have been removed.
+                #[allow(deprecated)]
                 Value::Bytes(measurements.eventlog_sha2_256_digest.into()),
             )]),
         ),
