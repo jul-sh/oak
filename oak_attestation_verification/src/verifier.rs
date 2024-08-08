@@ -21,14 +21,18 @@ use alloc::{format, string::String, vec::Vec};
 use anyhow::Context;
 use coset::{cbor::Value, cwt::ClaimsSet, CborSerializable, CoseKey, RegisteredLabelWithPrivate};
 use ecdsa::{signature::Verifier, Signature};
+// Use deprecated logic to avoid breaking dependencies.
+// TODO: b/356454287 - Remove once all existing dependencies on the initial
+// version of the eventlog have been removed.
+#[allow(deprecated)]
+use oak_dice::cert::EVENTLOG_DIGEST_ID;
 use oak_dice::cert::{
     cose_key_to_hpke_public_key, cose_key_to_verifying_key, get_public_key_from_claims_set,
     ACPI_MEASUREMENT_ID, APPLICATION_KEY_ID, CONTAINER_IMAGE_LAYER_ID,
-    ENCLAVE_APPLICATION_LAYER_ID, EVENT_ID, FINAL_LAYER_CONFIG_MEASUREMENT_ID,
-    INITRD_MEASUREMENT_ID, KERNEL_COMMANDLINE_ID, KERNEL_COMMANDLINE_MEASUREMENT_ID,
-    KERNEL_LAYER_ID, KERNEL_MEASUREMENT_ID, LAYER_2_CODE_MEASUREMENT_ID,
-    LAYER_3_CODE_MEASUREMENT_ID, MEMORY_MAP_MEASUREMENT_ID, SETUP_DATA_MEASUREMENT_ID, SHA2_256_ID,
-    SYSTEM_IMAGE_LAYER_ID,
+    ENCLAVE_APPLICATION_LAYER_ID, FINAL_LAYER_CONFIG_MEASUREMENT_ID, INITRD_MEASUREMENT_ID,
+    KERNEL_COMMANDLINE_ID, KERNEL_COMMANDLINE_MEASUREMENT_ID, KERNEL_LAYER_ID,
+    KERNEL_MEASUREMENT_ID, LAYER_2_CODE_MEASUREMENT_ID, LAYER_3_CODE_MEASUREMENT_ID,
+    MEMORY_MAP_MEASUREMENT_ID, SETUP_DATA_MEASUREMENT_ID, SHA2_256_ID, SYSTEM_IMAGE_LAYER_ID,
 };
 use oak_proto_rust::oak::{
     attestation::v1::{
@@ -1502,8 +1506,12 @@ fn extract_application_key_values(
 
 /// Extracts the measurement values for the event data.
 fn extract_event_data(claims: &ClaimsSet) -> anyhow::Result<EventData> {
-    let values =
-        extract_value_from_claims_set(claims, EVENT_ID).context("event data layer ID not found")?;
+    // Use deprecated EVENTLOG_DIGEST_ID to avoid breaking dependencies.
+    // TODO: b/356454287 - Remove once all existing dependencies on the initial
+    // version of the eventlog have been removed.
+    #[allow(deprecated)]
+    let values = extract_value_from_claims_set(claims, EVENTLOG_DIGEST_ID)
+        .context("event data layer ID not found")?;
     let event = Some(value_to_raw_digest(values)?);
     Ok(EventData { event })
 }

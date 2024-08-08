@@ -28,10 +28,15 @@ use alloc::{string::String, vec, vec::Vec};
 
 use coset::{cbor::value::Value, cwt::ClaimName, CborSerializable, CoseSign1};
 use hkdf::Hkdf;
+// Use depreacated logic to avoid breaking dependencies.
+// TODO: b/356454287 - Remove once all existing dependencies on the initial
+// version of the eventlog have been removed.
+#[allow(deprecated)]
+use oak_dice::cert::EVENTLOG_DIGEST_ID;
 use oak_dice::{
     cert::{
         derive_verifying_key_id, generate_ecdsa_key_pair, generate_signing_certificate,
-        verifying_key_to_cose_key, ACPI_MEASUREMENT_ID, EVENT_ID, INITRD_MEASUREMENT_ID,
+        verifying_key_to_cose_key, ACPI_MEASUREMENT_ID, INITRD_MEASUREMENT_ID,
         KERNEL_COMMANDLINE_ID, KERNEL_COMMANDLINE_MEASUREMENT_ID, KERNEL_LAYER_ID,
         KERNEL_MEASUREMENT_ID, MEMORY_MAP_MEASUREMENT_ID, SETUP_DATA_MEASUREMENT_ID, SHA2_256_ID,
     },
@@ -63,6 +68,9 @@ pub struct Measurements {
     /// tables.
     pub acpi_sha2_256_digest: [u8; 32],
     /// Eventlog measurement containing the hashes of other components
+    #[deprecated(
+        note = "This field is part of the initial implementation of the eventlog, that is being replaced by an implementation of go/eventlog-spec-v1."
+    )]
     pub eventlog_sha2_256_digest: [u8; 32],
 }
 
@@ -127,9 +135,17 @@ fn generate_stage1_certificate(
             ]),
         ),
         (
-            ClaimName::PrivateUse(EVENT_ID),
+            // Use depreacated logic to avoid breaking dependencies.
+            // TODO: b/356454287 - Remove once all existing dependencies on the initial
+            // version of the eventlog have been removed.
+            #[allow(deprecated)]
+            ClaimName::PrivateUse(EVENTLOG_DIGEST_ID),
             Value::Map(alloc::vec![(
                 Value::Integer(SHA2_256_ID.into()),
+                // Use depreacated logic to avoid breaking dependencies.
+                // TODO: b/356454287 - Remove once all existing dependencies on the initial
+                // version of the eventlog have been removed.
+                #[allow(deprecated)]
                 Value::Bytes(measurements.eventlog_sha2_256_digest.into()),
             )]),
         ),

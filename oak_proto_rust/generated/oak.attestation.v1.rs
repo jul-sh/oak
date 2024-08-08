@@ -677,21 +677,28 @@ pub struct Stage0Measurements {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost_derive::Message)]
 pub struct Event {
-    /// Represents what is contained in the event. For example, the tag for
-    /// TaskConfig for the Layer 2 is "layer2".
-    /// TODO: b/333748757 - Consider making the tag a UUID instead of string.
+    /// Deprecated: The identity of the event is captured in the typeURL of the
+    /// event field.
+    #[deprecated]
     #[prost(string, tag = "1")]
     pub tag: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub event: ::core::option::Option<::prost_types::Any>,
 }
 /// A sequence of Events intended for inclusion in attestation evidence.
+/// Deprecated: With go/eventlog-spec-v1 events will be held within the evidence.
+/// For DICE, this means being held within the context of CWT cert chain, for
+/// TDX being measured as part of a progressively extended hash. The platform
+/// maintains the order of events, so this proto isn't needed
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost_derive::Message)]
 pub struct EventLog {
     /// TODO: b/333748757 - Remove 'events' once 'encoded_events' is in google3.
+    /// Deprecated: Use encoded_events instead.
+    #[deprecated]
     #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<Event>,
+    /// Holds serialized instances of the the Event message.
     #[prost(bytes = "vec", repeated, tag = "2")]
     pub encoded_events: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }

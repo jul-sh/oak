@@ -229,7 +229,10 @@ pub fn rust64_start() -> ! {
         kernel_cmdline: cmdline.clone(),
     };
 
-    let event_log_proto = generate_event_log(stage0event);
+    let event_log_proto = {
+        let stage0event = generate_event(stage0event);
+        generate_event_log(stage0event)
+    };
     let eventlog_sha2_256_digest = event_log_proto.encoded_events[0].measure();
 
     log::debug!("Kernel image digest: sha2-256:{}", hex::encode(kernel_info.measurement));
@@ -242,6 +245,11 @@ pub fn rust64_start() -> ! {
 
     // TODO: b/331252282 - Remove temporary workaround for cmd line length.
     let cmdline_max_len = 256;
+    // Use deprecated eventlog_sha2_256_digest field to avoid breaking
+    // dependencies. TODO: b/356454287 - Remove the `eventlog_sha2_256_digest`
+    // field once go/eventlog-spec-v1 has been implemented and once all existing
+    // dependencies on the initial version of the eventlog have been removed.
+    #[allow(deprecated)]
     let measurements = oak_stage0_dice::Measurements {
         acpi_sha2_256_digest,
         kernel_sha2_256_digest: kernel_info.measurement,
@@ -359,12 +367,21 @@ impl<T: zerocopy::AsBytes + ?Sized> Measured for T {
     }
 }
 
-fn generate_event_log(measurements: Stage0Measurements) -> EventLog {
-    let tag = String::from("Stage0");
-    let any = prost_types::Any::from_msg(&measurements);
-    let event = Event { tag, event: Some(any.unwrap()) };
+fn generate_event_log(event: Event) -> EventLog {
     log::info!("Any:{:?}", event.event.clone().unwrap());
     let mut eventlog = EventLog::default();
     eventlog.encoded_events.push(event.encode_to_vec());
     eventlog
+}
+
+fn generate_event(measurements: Stage0Measurements) -> Event {
+    let tag = String::from("Stage0");
+    let any = prost_types::Any::from_msg(&measurements);
+    // Use deprecated tag field to avoid breaking dependencies.
+    // TODO: b/356454287 - Remove once go/eventlog-spec-v1 has been implemented and
+    // once all existing dependencies on the initial version of the eventlog
+    // have been removed.
+    #[allow(deprecated)]
+    let event = Event { tag, event: Some(any.unwrap()) };
+    event
 }

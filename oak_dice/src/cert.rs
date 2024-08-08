@@ -71,8 +71,11 @@ pub const LAYER_3_CODE_MEASUREMENT_ID: i64 = -4670569;
 pub const FINAL_LAYER_CONFIG_MEASUREMENT_ID: i64 = -4670570;
 /// The CWT private claim ID for SHA2_256 digests.
 pub const SHA2_256_ID: i64 = -4670572;
-/// The CWT private claim ID of the Event.
-pub const EVENT_ID: i64 = -4670573;
+/// The CWT private claim ID of the Eventlog digest.
+#[deprecated(
+    note = "This field is part of the initial implementation of the eventlog. It will be replaced by a another ID for holding the digets of only this events digest."
+)]
+pub const EVENTLOG_DIGEST_ID: i64 = -4670573;
 /// The CWT private claim ID of the application keys.
 pub const APPLICATION_KEY_ID: i64 = -4670574;
 
