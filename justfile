@@ -267,6 +267,9 @@ oak_attestation_explain_wasm:
     --release \
     --no-pack # prevents generating a package.json, we don't need it since we don't use a web bundler
 
+    env --chdir=oak_attestation_explain_wasm \
+    cp index.html pkg
+
 # Entry points for Kokoro CI.
 
 kokoro_build_binaries_rust: all_enclave_apps oak_restricted_kernel_bin_virtio_console_channel \
