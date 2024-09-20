@@ -39,9 +39,7 @@ async fn start_server() -> Result<(SocketAddr, tokio::task::JoinHandle<Result<()
 
     let application_config = vec![1, 2, 3, 4];
 
-    let endorsed_evidence = standalone_endorsed_evidence_containing_only_public_keys(
-        encryption_key_handle.public_key(),
-    );
+    let endorsed_evidence = standalone_endorsed_evidence_containing_only_public_keys();
 
     Ok((
         addr,
