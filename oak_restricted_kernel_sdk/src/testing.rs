@@ -49,22 +49,20 @@ lazy_static::lazy_static! {
 
 fn get_mock_dice_data_and_event_log() -> (RestrictedKernelDiceData, Vec<u8>) {
     let (mut mock_event_log, stage0_dice_data): (EventLog, Stage0DiceData) = {
-        let mut mock_stage0_measurements = oak_stage0_dice::Measurements::default();
-        let (mock_event_log, stage0_event_sha2_256_digest) = oak_stage0_dice::generate_event_log(
-            mock_stage0_measurements.kernel_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.acpi_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.memory_map_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.ram_disk_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.setup_data_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.cmdline.clone(),
-        );
-        mock_stage0_measurements.event_sha2_256_digest = stage0_event_sha2_256_digest;
+        let mock_stage0_measurements = oak_proto_rust::oak::attestation::v1::Stage0Measurements {
+            setup_data_digest: Vec::new(),
+            kernel_measurement: Vec::new(),
+            ram_disk_digest: Vec::new(),
+            memory_map_digest: Vec::new(),
+            acpi_digest: Vec::new(),
+            kernel_cmdline: alloc::string::String::new(),
+        };
+        let mock_event_log = oak_stage0_dice::generate_event_log(mock_stage0_measurements);
         let (stage0_dice_data, _) = oak_stage0_dice::generate_dice_data(
-            &mock_stage0_measurements,
             oak_stage0_dice::mock_attestation_report,
             oak_stage0_dice::mock_derived_key,
             TeePlatform::None,
-            EventLog::default(),
+            &mock_event_log,
         );
         (mock_event_log, stage0_dice_data)
     };

@@ -39,22 +39,20 @@ pub fn standalone_endorsed_evidence_containing_only_public_keys() -> EndorsedEvi
         oak_proto_rust::oak::attestation::v1::EventLog,
         oak_dice::evidence::Stage0DiceData,
     ) = {
-        let mut mock_stage0_measurements = oak_stage0_dice::Measurements::default();
-        let (mock_event_log, stage0_event_sha2_256_digest) = oak_stage0_dice::generate_event_log(
-            mock_stage0_measurements.kernel_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.acpi_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.memory_map_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.ram_disk_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.setup_data_sha2_256_digest.to_vec(),
-            mock_stage0_measurements.cmdline.clone(),
-        );
-        mock_stage0_measurements.event_sha2_256_digest = stage0_event_sha2_256_digest;
+        let mock_stage0_measurements = oak_proto_rust::oak::attestation::v1::Stage0Measurements {
+            setup_data_digest: vec![],
+            kernel_measurement: vec![],
+            ram_disk_digest: vec![],
+            memory_map_digest: vec![],
+            acpi_digest: vec![],
+            kernel_cmdline: String::new(),
+        };
+        let mock_event_log = oak_stage0_dice::generate_event_log(mock_stage0_measurements);
         let (stage0_dice_data, _) = oak_stage0_dice::generate_dice_data(
-            &mock_stage0_measurements,
             oak_stage0_dice::mock_attestation_report,
             oak_stage0_dice::mock_derived_key,
             oak_dice::evidence::TeePlatform::None,
-            oak_proto_rust::oak::attestation::v1::EventLog::default(),
+            &mock_event_log,
         );
         (mock_event_log, stage0_dice_data)
     };
