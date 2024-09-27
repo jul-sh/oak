@@ -25,6 +25,12 @@ rust_library(
     name = "oak_attestation_verification_test_utils",
     srcs = glob(["src/**"]),
     deps = [
+        "//oak_attestation",
+        "//oak_attestation_verification",
+        "//oak_containers_sdk",
         "//oak_proto_rust",
+        "@oak_crates_index//:prost",
+        "@oak_crates_index//:prost-types",
+        "@oak_crates_index//:sha2",
     ],
 )
